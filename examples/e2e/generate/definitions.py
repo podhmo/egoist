@@ -4,6 +4,12 @@ def hello(*, name: str) -> None:
 
 
 if __name__ == "__main__":
-    from gogen.cli import describe
+    from gogen.cmdutil import as_subcommand, Config
 
-    describe(__name__)
+    @as_subcommand
+    def describe():
+        from gogen.cli import describe
+
+        describe(__name__)
+
+    as_subcommand.run(config=Config(ignore_expose=True))

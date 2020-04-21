@@ -1,4 +1,5 @@
-from handofcats import as_subcommand, Config
+from .cmdutil import as_subcommand, Config
+from .cmdutil import is_marked_subcommand
 
 
 @as_subcommand
@@ -31,8 +32,10 @@ def describe(module_name: str) -> None:
             continue
         if getattr(v, "__module__", "") != m.__name__:
             continue
+        if is_marked_subcommand(v):
+            continue
 
-        defs[v.__name__] = inspect.getdoc(v).strip().split("\n", 1)[0]
+        defs[v.__name__] = (inspect.getdoc(v) or "").strip().split("\n", 1)[0]
 
     d = {"definitions": defs}
     print(json.dumps(d, indent=2, ensure_ascii=False))
