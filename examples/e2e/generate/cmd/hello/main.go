@@ -15,7 +15,7 @@ type Option struct {
 
 func main()  {
 	opt := &Option{}
-	cmd := flag.NewFlagSet("app", flag.ContinueOnError)
+	cmd := flag.NewFlagSet("hello", flag.ContinueOnError)
 
 	cmd.StringVar(&opt.Name, "name", "", "-")
 

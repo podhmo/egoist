@@ -35,7 +35,7 @@ def generate_all(fns: t.Dict[str, Command], *, root: str) -> None:
 
                 with m.func("main"):
                     m.stmt("opt := &Option{}")
-                    m.stmt('cmd := flag.NewFlagSet("app", flag.ContinueOnError)')
+                    m.stmt('cmd := flag.NewFlagSet("{}", flag.ContinueOnError)', fn.__name__)
                     m.sep()
 
                     # TODO:
