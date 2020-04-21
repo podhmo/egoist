@@ -3,6 +3,11 @@ def hello(*, name: str) -> None:
     pass
 
 
+def byebye(*, name: str) -> None:
+    """byebye message"""
+    pass
+
+
 if __name__ == "__main__":
     from gogen.cmdutil import as_subcommand, Config
 
