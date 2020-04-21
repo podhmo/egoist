@@ -1,8 +1,6 @@
 import typing as t
-from types import ModuleType
+from .types import ModuleType, Command
 from .cmdutil import is_marked_subcommand
-
-Command = t.Callable[..., t.Any]
 
 
 def scan_module(
