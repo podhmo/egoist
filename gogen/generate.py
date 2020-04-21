@@ -7,6 +7,11 @@ from .types import Command
 from .naming import get_path_from_function_name
 from ._fnspec import fnspec
 
+# todo: separate "parse, setup component, run action"
+# todo: support other types
+# todo: DI resolution
+# todo: support use stubs
+
 
 def generate_all(fns: t.Dict[str, Command], *, root: str) -> None:
     with output(root=root, opener=Module) as fs:
@@ -35,7 +40,10 @@ def generate_all(fns: t.Dict[str, Command], *, root: str) -> None:
 
                 with m.func("main"):
                     m.stmt("opt := &Option{}")
-                    m.stmt('cmd := flag.NewFlagSet("{}", flag.ContinueOnError)', fn.__name__)
+                    m.stmt(
+                        'cmd := flag.NewFlagSet("{}", flag.ContinueOnError)',
+                        fn.__name__,
+                    )
                     m.sep()
 
                     # TODO:
