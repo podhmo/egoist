@@ -1,5 +1,5 @@
 from .cmdutil import as_subcommand, Config
-from .cmdutil import is_marked_subcommand
+from .scan import scan_module
 
 
 @as_subcommand
@@ -24,19 +24,12 @@ def describe(module_name: str) -> None:
     from importlib import import_module
 
     m = import_module(module_name)
-    defs = {}
-    for name, v in m.__dict__.items():
-        if name.startswith("_"):
-            continue
-        if not callable(v):
-            continue
-        if getattr(v, "__module__", "") != m.__name__:
-            continue
-        if is_marked_subcommand(v):
-            continue
+    fns = scan_module(m)
 
-        defs[v.__name__] = (inspect.getdoc(v) or "").strip().split("\n", 1)[0]
-
+    defs = {
+        name: (inspect.getdoc(fn) or "").strip().split("\n", 1)[0]
+        for name, fn in fns.items()
+    }
     d = {"definitions": defs}
     print(json.dumps(d, indent=2, ensure_ascii=False))
 
