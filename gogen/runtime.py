@@ -1,3 +1,4 @@
+from __future__ import annotations
 import typing as t
 import dataclasses
 from prestring.go import Module
@@ -10,9 +11,17 @@ class RuntimeContext:
         self.stack = []
 
 
-class Attr:
-    def __init__(self, d: t.Dict[str, t.Any]) -> None:
-        self.__dict__.update(d)
+class ArgsAttr:
+    def __init__(self, names: t.List[str]):
+        for name in names:
+            setattr(self, name, Arg(name=name))
+
+
+@dataclasses.dataclass
+class Arg:
+    name: str
+    short_name: t.Optional[str] = None
+    help: t.Optional[str] = None
 
 
 @dataclasses.dataclass
@@ -25,6 +34,10 @@ class Env:
         from ._fnspec import fnspec
 
         return fnspec(self.fn)
+
+    @reify
+    def args(self) -> ArgsAttr:
+        return ArgsAttr([name for name, _, _ in self.fnspec.parameters])
 
 
 _context = None
@@ -47,7 +60,7 @@ def generate(generate_fn):
     return generate_fn(env)
 
 
-def get_args() -> Attr:
+def get_args() -> Args:
     return get_self().stack[-1].args
 
 

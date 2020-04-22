@@ -65,7 +65,8 @@ def cli(env: runtime.Env) -> None:
 
         # TODO:
         for name, v, kind in spec.keyword_arguments:
-            m.stmt('cmd.StringVar(&opt.{}, "{}", "", "-")', goname(name), name)
+            help_usage = getattr(env.args, name).help or "-"
+            m.stmt(f'cmd.StringVar(&opt.{goname(name)}, "{name}", "", "{help_usage}")')
 
         m.sep()
         m.stmt("if err := cmd.Parse(os.Args[1:]); err != nil {")

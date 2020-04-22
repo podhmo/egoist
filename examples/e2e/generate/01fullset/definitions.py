@@ -5,7 +5,8 @@ def hello(*, name: str) -> None:
     """hello message"""
     from gogen.generate import cli
 
-    runtime.add_info("name", help="name of person")
+    args = runtime.get_args()
+    args.name.help = "name of person"
 
     with runtime.generate(cli) as m:
         runtime.printf("hello %s\n", name)
