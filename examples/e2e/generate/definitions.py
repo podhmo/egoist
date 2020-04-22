@@ -3,12 +3,20 @@ from gogen import runtime
 
 def hello(*, name: str) -> None:
     """hello message"""
-    runtime.printf("hello %s\n", name)
+    from gogen.generate import cli
+
+    with runtime.generate(cli) as m:
+        runtime.printf("hello %s\n", name)
+        m.return_("nil")
 
 
 def byebye(*, name: str) -> None:
     """byebye message"""
-    runtime.printf("byebye %s\n", name)
+    from gogen.generate import cli
+
+    with runtime.generate(cli) as m:
+        runtime.printf("byebye %s\n", name)
+        m.return_("nil")
 
 
 if __name__ == "__main__":

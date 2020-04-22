@@ -1,5 +1,6 @@
 import typing as t
 import pathlib
+import contextlib
 from prestring.output import output
 from prestring.go import Module, goname
 from prestring.codeobject import Symbol
@@ -23,11 +24,16 @@ def generate_all(fns: t.Dict[str, Command], *, root: str) -> None:
             with fs.open(str(pathlib.Path(fpath) / "main.go"), "w") as m:
                 env = runtime.Env(m=m, fn=fn)
                 c.stack.append(env)
-                _generate(env)
+                kwargs = {
+                    name: Symbol(f"opt.{goname(name)}")  # xxx
+                    for name, _, _ in env.fnspec.parameters
+                }
+                fn(**kwargs)
                 c.stack.pop()
 
 
-def _generate(env: runtime.Env) -> None:
+@contextlib.contextmanager
+def cli(env: runtime.Env) -> None:
     m = env.m
     fn = env.fn
     spec = env.fnspec
@@ -76,12 +82,7 @@ def _generate(env: runtime.Env) -> None:
         m.stmt("}")
 
     with m.func("run", "opt *Option", return_="error"):
-        kwargs = {
-            name: Symbol(f"opt.{goname(name)}") for name, _, _ in env.fnspec.parameters
-        }
-        retval = fn(**kwargs)
-        if retval is None:
-            m.return_("nil")
+        yield m
 
 
 # def _extract_internal_code(fn: Command):

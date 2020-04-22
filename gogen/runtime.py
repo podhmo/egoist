@@ -41,6 +41,12 @@ def printf(fmt: str, *args: t.Any) -> None:
     m.stmt(")")
 
 
+def generate(generate_fn):
+    c = get_self()
+    env = c.stack[-1]
+    return generate_fn(env)
+
+
 def get_args() -> Attr:
     return get_self().stack[-1].args
 
