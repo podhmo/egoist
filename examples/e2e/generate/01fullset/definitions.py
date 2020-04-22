@@ -1,16 +1,11 @@
 from gogen import runtime
 
 
-# todo: command description
-# todo: args description
-# todo: support int, bool, ...
-# fixme: prefix (name -> opt.Name)
-# todo: provider (DI)
-
-
 def hello(*, name: str) -> None:
     """hello message"""
     from gogen.generate import cli
+
+    runtime.add_info("name", help="name of person")
 
     with runtime.generate(cli) as m:
         runtime.printf("hello %s\n", name)
