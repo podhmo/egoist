@@ -1,15 +1,13 @@
 from gogen import runtime
+from gogen import types
 
 
-def hello(*, name: str = "foo") -> None:
+def hello(*, name: str = "world", age: types.uint, debug: types.bool) -> None:
     """hello message"""
     from gogen.generate import cli
 
-    args = runtime.get_args()
-    args.name.help = "name of person"
-
     with runtime.generate(cli):
-        runtime.printf("hello %s\n", name)
+        runtime.printf("hello %s(%d)\n", name, age)
 
 
 if __name__ == "__main__":
