@@ -66,7 +66,10 @@ def get_resolver() -> Resolver:
         return json.dumps(v or "")
 
     resolver.register(
-        types.str, gotype="string", parse_method="StringVar", default_function=default_str
+        types.str,
+        gotype="string",
+        parse_method="StringVar",
+        default_function=default_str,
     )
 
     def default_bool(v: t.Optional[t.Any]) -> str:
