@@ -1,9 +1,10 @@
 from __future__ import annotations
 import typing as t
 import dataclasses
-from prestring.go import Module
+
 from .langhelpers import reify
 from .types import Command
+from .prestringutil import Module
 
 
 class RuntimeContext:
@@ -56,15 +57,14 @@ class Env:
 _context = None
 
 
-def printf(fmt: str, *args: t.Any) -> None:
-    from prestring.utils import LazyArguments, UnRepr
+def printf(fmt_str: str, *args: t.Any) -> None:
+    from prestring.utils import UnRepr
     import json
 
     m = get_self().stack[-1].m
-    m.import_("fmt")  # TODO: return symbol
-    m.append("fmt.Printf(")
-    m.append(LazyArguments([UnRepr(json.dumps(fmt)), *args]))
-    m.stmt(")")
+    fmt = m.import_("fmt")
+    # fixme: remove Unrepr and json.dumps
+    m.stmt(fmt.Printf(UnRepr(json.dumps(fmt_str)), *args))
 
 
 def generate(generate_fn):

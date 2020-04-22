@@ -1,12 +1,10 @@
 import typing as t
 import pathlib
 import contextlib
-from prestring.output import output
-from prestring.go import Module, goname
-from prestring.codeobject import Symbol
 from . import types
-from .naming import get_path_from_function_name
 from . import runtime
+from .naming import get_path_from_function_name
+from .prestringutil import output, Module, goname, Symbol
 
 # todo: separate "parse, setup component, run action"
 # todo: support other types
@@ -152,12 +150,9 @@ def cli(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
     m.stmt("// this packaage is auto generated")
     m.sep()
 
-    with m.import_group() as im:
-        im.import_("fmt")
-        im.import_("flag")
-        im.import_("os")
-        im.import_("log")
-        m.import_ = im.import_  # xxx
+    m.import_("flag")
+    m.import_("os")
+    m.import_("log")  # xxx:
 
     m.stmt("// Option ...")
     with m.struct("Option"):
