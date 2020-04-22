@@ -87,7 +87,7 @@ def set_self(c: RuntimeContext) -> None:
     _context = c
 
 
-def main(*, name: str, here: str) -> None:
+def main(*, name: str, here: str, root: str = "") -> None:
     from gogen.cmdutil import as_subcommand, Config
 
     @as_subcommand
@@ -97,7 +97,7 @@ def main(*, name: str, here: str) -> None:
         describe(name)
 
     @as_subcommand
-    def generate(*, root: str = "cmd"):
+    def generate(*, root: str = root):
         import sys
         import pathlib
         from gogen.generate import generate_all

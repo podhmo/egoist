@@ -10,4 +10,4 @@ def hello(*, name: str) -> None:
 
 
 if __name__ == "__main__":
-    runtime.main(name=__name__, here=__file__)
+    runtime.main(name=__name__, here=__file__, root="cmd")

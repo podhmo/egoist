@@ -11,4 +11,4 @@ def hello(*, name: str = "world", age: types.uint, debug: types.bool) -> None:
 
 
 if __name__ == "__main__":
-    runtime.main(name=__name__, here=__file__)
+    runtime.main(name=__name__, here=__file__, root="cmd")
