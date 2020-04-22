@@ -13,8 +13,13 @@ class RuntimeContext:
 
 class ArgsAttr:
     def __init__(self, names: t.List[str]):
-        for name in names:
-            setattr(self, name, Arg(name=name))
+        self.data = {name: Arg(name=name) for name in names}
+
+    def __getattr__(self, name: str) -> Arg:
+        try:
+            return self.data[name]
+        except KeyError:
+            raise AttributeError(name)
 
 
 @dataclasses.dataclass
@@ -22,6 +27,7 @@ class Arg:
     name: str
     short_name: t.Optional[str] = None
     help: t.Optional[str] = None
+    default: t.Optional[t.Any] = None
 
 
 @dataclasses.dataclass
@@ -60,7 +66,7 @@ def generate(generate_fn):
     return generate_fn(env)
 
 
-def get_args() -> Args:
+def get_args() -> ArgsAttr:
     return get_self().stack[-1].args
 
 

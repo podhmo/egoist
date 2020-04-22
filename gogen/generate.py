@@ -63,10 +63,15 @@ def cli(env: runtime.Env) -> None:
         )
         m.sep()
 
-        # TODO:
         for name, v, kind in spec.keyword_arguments:
-            help_usage = getattr(env.args, name).help or "-"
-            m.stmt(f'cmd.StringVar(&opt.{goname(name)}, "{name}", "", "{help_usage}")')
+            arg = getattr(env.args, name)
+            help_usage = arg.help or "-"
+            import json  # xxx
+
+            default = json.dumps(arg.default or "")
+            m.stmt(
+                f'cmd.StringVar(&opt.{goname(name)}, "{name}", {default}, "{help_usage}")'
+            )
 
         m.sep()
         m.stmt("if err := cmd.Parse(os.Args[1:]); err != nil {")

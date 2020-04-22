@@ -7,6 +7,7 @@ def hello(*, name: str) -> None:
 
     args = runtime.get_args()
     args.name.help = "name of person"
+    args.name.default = "foo"
 
     with runtime.generate(cli) as m:
         runtime.printf("hello %s\n", name)
