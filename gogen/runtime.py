@@ -80,3 +80,26 @@ def get_self() -> RuntimeContext:
 def set_self(c: RuntimeContext) -> None:
     global _context
     _context = c
+
+
+def main(*, name: str, here: str) -> None:
+    from gogen.cmdutil import as_subcommand, Config
+
+    @as_subcommand
+    def describe():
+        from gogen.cli import describe
+
+        describe(name)
+
+    @as_subcommand
+    def generate(*, root: str = "cmd"):
+        import sys
+        import pathlib
+        from gogen.generate import generate_all
+        from gogen.scan import scan_module
+
+        rootdir = pathlib.Path(here).parent / root
+        fns = scan_module(sys.modules[name])
+        generate_all(fns, root=rootdir)
+
+    as_subcommand.run(config=Config(ignore_expose=True), _force=True)
