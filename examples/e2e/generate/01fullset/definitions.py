@@ -11,7 +11,6 @@ def hello(*, name: str) -> None:
 
     with runtime.generate(cli) as m:
         runtime.printf("hello %s\n", name)
-        m.return_("nil")
 
 
 if __name__ == "__main__":

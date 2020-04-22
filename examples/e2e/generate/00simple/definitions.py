@@ -5,18 +5,16 @@ def hello(*, name: str) -> None:
     """hello message"""
     from gogen.generate import cli
 
-    with runtime.generate(cli) as m:
+    with runtime.generate(cli):
         runtime.printf("hello %s\n", name)
-        m.return_("nil")
 
 
 def byebye(*, name: str) -> None:
     """byebye message"""
     from gogen.generate import cli
 
-    with runtime.generate(cli) as m:
+    with runtime.generate(cli):
         runtime.printf("byebye %s\n", name)
-        m.return_("nil")
 
 
 if __name__ == "__main__":

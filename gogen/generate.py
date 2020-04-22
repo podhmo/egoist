@@ -89,6 +89,8 @@ def cli(env: runtime.Env) -> None:
 
     with m.func("run", "opt *Option", return_="error"):
         yield m
+        if spec.return_type == type(None):
+            m.return_("nil")
 
 
 # def _extract_internal_code(fn: Command):
