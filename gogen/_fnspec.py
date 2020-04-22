@@ -44,12 +44,13 @@ class Fnspec:
         return self._classified[name]
 
     def default_of(self, name: str) -> t.Any:
-        return self._defaults[name]
+        return self._defaults.get(name)
 
     def default_str_of(self, name: str) -> t.Any:
         val = self.default_of(name)
         return repr(val)
 
+    # TODO: remove
     def type_str_of(
         self, typ: t.Type[t.Any], *, nonetype: t.Type[t.Any] = type(None)
     ) -> str:

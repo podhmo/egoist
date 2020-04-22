@@ -43,7 +43,12 @@ class Env:
 
     @reify
     def args(self) -> ArgsAttr:
-        return ArgsAttr([name for name, _, _ in self.fnspec.parameters])
+        attr = ArgsAttr([name for name, _, _ in self.fnspec.parameters])
+        for name, _, _ in self.fnspec.parameters:
+            default = self.fnspec.default_of(name)
+            if default is not None:
+                getattr(attr, name).default = default
+        return attr
 
 
 _context = None

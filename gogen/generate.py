@@ -4,7 +4,7 @@ import contextlib
 from prestring.output import output
 from prestring.go import Module, goname
 from prestring.codeobject import Symbol
-from .types import Command
+from . import types
 from .naming import get_path_from_function_name
 from . import runtime
 
@@ -14,7 +14,7 @@ from . import runtime
 # todo: support use stubs
 
 
-def generate_all(fns: t.Dict[str, Command], *, root: str) -> None:
+def generate_all(fns: t.Dict[str, types.Command], *, root: str) -> None:
     with output(root=root, opener=Module) as fs:
         c = runtime.get_self()
 
@@ -32,8 +32,99 @@ def generate_all(fns: t.Dict[str, Command], *, root: str) -> None:
                 c.stack.pop()
 
 
+class Resolver:
+    def __init__(self):
+        self.gotype_map = {}
+        self.parse_method_map = {}
+        self.default_function_map = {}
+
+    # see mro?
+
+    def resolve_gotype(self, typ: t.Type[t.Any]) -> str:
+        return self.gotype_map[typ]
+
+    def resolve_parse_method(self, typ: t.Type[t.Any]) -> str:
+        return self.parse_method_map[typ]
+
+    def resolve_default(self, typ: t.Type[t.Any], val: t.Any) -> str:
+        return self.default_function_map[typ](val)
+
+    def register(
+        self, typ: t.Type[t.Any], *, gotype: str, parse_method: str, default_function
+    ) -> None:
+        self.gotype_map[typ] = gotype
+        self.parse_method_map[typ] = parse_method
+        self.default_function_map[typ] = default_function
+
+
+def get_resolver() -> Resolver:
+    resolver = Resolver()
+
+    def default_str(v: t.Optional[t.Any]) -> str:
+        import json  # xxx
+
+        return json.dumps(v or "")
+
+    resolver.register(
+        types.str, gotype="string", parse_method="StringVar", default_function=default_str
+    )
+
+    def default_bool(v: t.Optional[t.Any]) -> str:
+        return "true" if v else "false"
+
+    resolver.register(
+        types.bool, gotype="bool", parse_method="BoolVar", default_function=default_bool
+    )
+
+    def default_int(v: t.Optional[t.Any]) -> str:
+        return str(v or 0)
+
+    resolver.register(
+        types.int, gotype="int", parse_method="IntVar", default_function=default_int
+    )
+
+    def default_uint(v: t.Optional[t.Any]) -> str:
+        return str(v or 0)
+
+    resolver.register(
+        types.uint, gotype="uint", parse_method="UintVar", default_function=default_uint
+    )
+
+    def default_int64(v: t.Optional[t.Any]) -> str:
+        return str(v or 0)
+
+    resolver.register(
+        types.int64,
+        gotype="int64",
+        parse_method="Int64Var",
+        default_function=default_int64,
+    )
+
+    def default_uint64(v: t.Optional[t.Any]) -> str:
+        return str(v or 0)
+
+    resolver.register(
+        types.uint64,
+        gotype="uint64",
+        parse_method="Uint64Var",
+        default_function=default_uint64,
+    )
+
+    def default_float(v: t.Optional[t.Any]) -> str:
+        return str(v or 0.0)
+
+    resolver.register(
+        types.float,
+        gotype="float",
+        parse_method="FloatVar",
+        default_function=default_float,
+    )
+
+    return resolver
+
+
 @contextlib.contextmanager
-def cli(env: runtime.Env) -> None:
+def cli(env: runtime.Env, *, resolver=get_resolver()) -> None:
     m = env.m
     fn = env.fn
     spec = env.fnspec
@@ -51,8 +142,8 @@ def cli(env: runtime.Env) -> None:
         m.import_ = im.import_  # xxx
 
     with m.struct("Option"):
-        for name, v, kind in spec.keyword_arguments:
-            m.stmt("{} string", goname(name))
+        for name, typ, kind in spec.keyword_arguments:
+            m.stmt(f"{goname(name)} {resolver.resolve_gotype(typ)}")
 
     m.sep()
 
@@ -63,14 +154,16 @@ def cli(env: runtime.Env) -> None:
         )
         m.sep()
 
-        for name, v, kind in spec.keyword_arguments:
+        for name, typ, kind in spec.keyword_arguments:
             arg = getattr(env.args, name)
-            help_usage = arg.help or "-"
-            import json  # xxx
 
-            default = json.dumps(arg.default or "")
+            parse_method = resolver.resolve_parse_method(typ)
+            help_usage = resolver.resolve_default(str, arg.help or "-")
+
+            default = resolver.resolve_default(typ, arg.default)
+
             m.stmt(
-                f'cmd.StringVar(&opt.{goname(name)}, "{name}", {default}, "{help_usage}")'
+                f'cmd.{parse_method}(&opt.{goname(name)}, "{name}", {default}, {help_usage})'
             )
 
         m.sep()
@@ -93,7 +186,7 @@ def cli(env: runtime.Env) -> None:
             m.return_("nil")
 
 
-# def _extract_internal_code(fn: Command):
+# def _extract_internal_code(fn: types.Command):
 #     import inspect
 #     import textwrap
 #     from prestring.python.parse import parse_string, node_name
