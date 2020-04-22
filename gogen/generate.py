@@ -159,9 +159,10 @@ def cli(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
         im.import_("log")
         m.import_ = im.import_  # xxx
 
+    m.stmt("// Option ...")
     with m.struct("Option"):
         for name, typ, kind in spec.keyword_arguments:
-            m.stmt(f"{goname(name)} {resolver.resolve_gotype(typ)}")
+            m.stmt(f"{goname(name)} {resolver.resolve_gotype(typ)} // for `-{name}`")
 
     m.sep()
 

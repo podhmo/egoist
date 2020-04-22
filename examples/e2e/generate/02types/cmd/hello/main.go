@@ -1,23 +1,24 @@
 package main
-
 // this packaage is auto generated
 
 import (
-	"flag"
 	"fmt"
-	"log"
+	"flag"
 	"os"
+	"log"
 	"time"
 )
 
+// Option ...
 type Option struct {
-	Name  string
-	Age   uint
-	Debug bool
-	Dur   time.Duration
+	Name string // for `-name`
+	Age uint // for `-age`
+	Debug bool // for `-debug`
+	Dur time.Duration // for `-dur`
 }
 
-func main() {
+
+func main()  {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("hello", flag.ContinueOnError)
 

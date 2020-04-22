@@ -8,8 +8,9 @@ import (
 	"log"
 )
 
+// Option ...
 type Option struct {
-	Name string
+	Name string // for `-name`
 }
 
 
