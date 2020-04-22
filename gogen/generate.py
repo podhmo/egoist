@@ -123,11 +123,26 @@ def get_resolver() -> Resolver:
         default_function=default_float,
     )
 
+    def default_duration(v: t.Optional[t.Any]) -> str:
+        # xxx:
+        from .runtime import get_self
+
+        m = get_self().stack[-1].m
+        m.import_("time")
+        return f"{str(v or 0)}*time.Second"
+
+    resolver.register(
+        types.duration,
+        gotype="time.Duration",
+        parse_method="DurationVar",
+        default_function=default_duration,
+    )
+
     return resolver
 
 
 @contextlib.contextmanager
-def cli(env: runtime.Env, *, resolver=get_resolver()) -> None:
+def cli(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
     m = env.m
     fn = env.fn
     spec = env.fnspec

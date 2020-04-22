@@ -2,7 +2,9 @@ from gogen import runtime
 from gogen import types
 
 
-def hello(*, name: str = "world", age: types.uint, debug: types.bool) -> None:
+def hello(
+    *, name: str = "world", age: types.uint, debug: types.bool, dur: types.duration
+) -> None:
     """hello message"""
     from gogen.generate import cli
 

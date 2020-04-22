@@ -26,5 +26,5 @@ float = float
 # float64
 float64 = float
 
-# # not support
-# time.Duration
+# dtime.Duration
+duration = t.NewType("duration", int)

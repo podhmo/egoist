@@ -7,6 +7,8 @@ from .types import Command
 
 
 class RuntimeContext:
+    stack: t.List[Env]
+
     def __init__(self) -> None:
         self.stack = []
 
