@@ -31,6 +31,6 @@ func main()  {
 }
 
 func run(opt *Option) error {
-	fmt.Printf("%#+v\n", *opt)
+	fmt.Printf("hello %s\n", opt.Name)
 	return nil
 }

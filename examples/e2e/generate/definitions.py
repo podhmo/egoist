@@ -1,11 +1,14 @@
+from gogen import runtime
+
+
 def hello(*, name: str) -> None:
     """hello message"""
-    pass
+    runtime.printf("hello %s\n", name)
 
 
 def byebye(*, name: str) -> None:
     """byebye message"""
-    pass
+    runtime.printf("byebye %s\n", name)
 
 
 if __name__ == "__main__":
