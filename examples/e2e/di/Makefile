@@ -1,5 +1,5 @@
 # default: 00
-default: 01 02 03
+default: 01 02 03 04
 
 SHELL := $(shell which bash)
 
@@ -14,3 +14,6 @@ SHELL := $(shell which bash)
 	python $(shell echo $@*/)main.py |& tee $(shell echo $@*/)deps.output
 03:
 	python $(shell echo $@*/)main.py |& tee $(shell echo $@*/)deps.output
+04:
+	python $(shell echo $@*/)main.py |& tee $(shell echo $@*/)deps.output
+	python $(shell echo $@*/)main2.py |& tee $(shell echo $@*/)deps2.output
