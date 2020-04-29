@@ -17,7 +17,10 @@ type Option struct {
 func main()  {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("wire_example", flag.ContinueOnError)
-
+	cmd.Usage = func(){
+		fmt.Fprintln(cmd.Output(), `wire_example - google/wire event examples`)
+		fmt.PrintDefaults()
+	}
 	cmd.BoolVar(&opt.Grumby, "grumby", false, "-")
 
 	if err := cmd.Parse(os.Args[1:]); err != nil {
