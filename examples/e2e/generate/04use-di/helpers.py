@@ -56,7 +56,7 @@ def _get_args(g: Graph) -> t.List[str]:
     return root_args
 
 
-def emit(m: Module, g: Graph) -> Symbol:
+def inject(m: Module, g: Graph) -> Symbol:
     # TODO: name
     # TODO: import_
     i = 0

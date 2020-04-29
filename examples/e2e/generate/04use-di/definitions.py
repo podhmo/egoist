@@ -19,8 +19,8 @@ def wire_example() -> None:
         b.add_node(**h.parse(internal.NewEvent))
 
         g = b.build()
-        component = h.emit(m, g)
-        m.stmt(component.Start())
+        event = h.inject(m, g)  # TODO: primitive args
+        m.stmt(event.Start())
 
 
 if __name__ == "__main__":
