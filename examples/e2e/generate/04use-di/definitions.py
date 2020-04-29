@@ -19,10 +19,8 @@ def wire_example(*, grumby: bool = False) -> None:
         b.add_node(**h.parse(internal.NewEvent))
 
         g = b.build()
-        kwargs = locals()  # xxx
-        variables = {
-            node.uid: kwargs[node.name] for node in g.nodes if node.is_primitive
-        }
+
+        variables = h.new_variables(g, locals())
 
         event = h.inject(m, g, variables=variables)
         m.stmt(event.Start())
