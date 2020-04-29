@@ -119,7 +119,10 @@ class Graph:
         self.nodes = sorted(self._node_map.values(), key=lambda node: node.uid)
 
     def get_node_by_name(self, name: str) -> t.Optional[Node]:
-        return self._node_map.get(name)
+        for node in self.nodes:
+            if node.name == name:
+                return node
+        return None
 
     def __repr__(self) -> str:
         return f"<Graph len={len(self.nodes)}>"
