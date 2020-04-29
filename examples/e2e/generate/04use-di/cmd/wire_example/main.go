@@ -1,12 +1,13 @@
 package main
-// this packaage is auto generated
-
 import (
 	"flag"
+	"fmt"
 	"os"
 	"log"
 	"m/internal"
 )
+
+// this packaage is auto generated
 
 // Option ...
 type Option struct {
@@ -19,7 +20,7 @@ func main()  {
 	cmd := flag.NewFlagSet("wire_example", flag.ContinueOnError)
 	cmd.Usage = func(){
 		fmt.Fprintln(cmd.Output(), `wire_example - google/wire event examples`)
-		fmt.PrintDefaults()
+		cmd.PrintDefaults()
 	}
 	cmd.BoolVar(&opt.Grumby, "grumby", false, "-")
 
