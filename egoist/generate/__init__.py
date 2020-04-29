@@ -27,19 +27,3 @@ def walk(fns: t.Dict[str, types.Command], *, root: str) -> None:
                 }
                 fn(**kwargs)
                 c.stack.pop()
-
-
-# def _extract_internal_code(fn: types.Command):
-#     import inspect
-#     import textwrap
-#     from prestring.python.parse import parse_string, node_name
-
-#     source = inspect.getsource(fn)
-#     tree = parse_string(source)
-
-#     func_def = tree.children[0]
-#     assert node_name(func_def) == "func_def"
-
-#     suite = func_def.children[-1]
-#     assert node_name(suite) == "suite"
-#     return textwrap.dedent(str(suite))
