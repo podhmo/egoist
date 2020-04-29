@@ -3,9 +3,9 @@ from egoist import runtime
 
 def hello(*, name: str) -> None:
     """hello message"""
-    from egoist.generate import cli
+    from egoist.generate.clikit import clikit
 
-    with runtime.generate(cli):
+    with runtime.generate(clikit):
         runtime.printf("hello %s\n", name)
 
 

@@ -98,7 +98,7 @@ def get_resolver() -> Resolver:
 
     def default_duration(v: t.Optional[t.Any]) -> str:
         # xxx:
-        from .runtime import get_self
+        from egoist.runtime import get_self
 
         m = get_self().stack[-1].m
         m.import_("time")
