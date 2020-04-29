@@ -19,12 +19,9 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
 
     # TODO: support normal arguments
     m.stmt("package main")
+    m.import_("")
     m.stmt("// this packaage is auto generated")
     m.sep()
-
-    m.import_("flag")
-    m.import_("os")
-    m.import_("log")  # xxx:
 
     m.stmt("// Option ...")
     with m.struct("Option"):
@@ -35,13 +32,16 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
 
     with m.func("main"):
         m.stmt("opt := &Option{}")
+
+        m.import_("flag")  # import:
         m.stmt(
             'cmd := flag.NewFlagSet("{}", flag.ContinueOnError)', fn.__name__,
         )
         m.stmt("cmd.Usage = func(){")
         with m.scope():
+            m.import_("fmt")  # import:
             m.stmt(f"fmt.Fprintln(cmd.Output(), `{oneline_description}`)")
-            m.stmt("fmt.PrintDefaults()")
+            m.stmt("cmd.PrintDefaults()")
         m.append("}")
 
         m.sep()
@@ -59,6 +59,8 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
             )
 
         m.sep()
+
+        m.import_("os")  # import:
         m.stmt("if err := cmd.Parse(os.Args[1:]); err != nil {")
         with m.scope():
             m.stmt("if err != flag.ErrHelp {")
@@ -69,6 +71,7 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
         m.stmt("}")
         m.stmt("if err := run(opt); err != nil {")
         with m.scope():
+            m.import_("log")  # import:
             m.stmt('log.Fatalf("!!%+v", err)')
         m.stmt("}")
 
