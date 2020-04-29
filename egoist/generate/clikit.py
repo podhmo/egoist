@@ -40,11 +40,9 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
             m.stmt("cmd.Usage = func(){")
             with m.scope():
                 m.import_("fmt")  # import:
-                m.stmt(
-                    f"""fmt.Fprintln(cmd.Output(), `{description}
-
-    Usage:`)"""
-                )
+                m.stmt(f"fmt.Fprintln(cmd.Output(), `{description}`)")
+                m.stmt('fmt.Fprintln(cmd.Output(), "")')
+                m.stmt('fmt.Fprintln(cmd.Output(), "Usage:")')
                 m.stmt("cmd.PrintDefaults()")
             m.append("}")
 
