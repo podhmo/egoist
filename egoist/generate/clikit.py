@@ -1,5 +1,6 @@
 import typing as t
 import contextlib
+import inspect
 from egoist import types
 from egoist import runtime
 from egoist.internal.prestringutil import goname
@@ -120,6 +121,12 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
     fn = env.fn
     spec = env.fnspec
 
+    oneline_description = f"{fn.__name__}"
+    doc = inspect.getdoc(fn)
+    if doc is not None:
+        new_line = "\n"
+        oneline_description = f"{oneline_description} - {doc.split(new_line, 1)[0]}"
+
     # TODO: support normal arguments
     m.stmt("package main")
     m.stmt("// this packaage is auto generated")
@@ -141,6 +148,12 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
         m.stmt(
             'cmd := flag.NewFlagSet("{}", flag.ContinueOnError)', fn.__name__,
         )
+        m.stmt("cmd.Usage = func(){")
+        with m.scope():
+            m.stmt(f"fmt.Fprintln(cmd.Output(), `{oneline_description}`)")
+            m.stmt("fmt.PrintDefaults()")
+        m.append("}")
+
         m.sep()
 
         for name, typ, kind in spec.keyword_arguments:

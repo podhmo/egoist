@@ -17,7 +17,10 @@ type Option struct {
 func main()  {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("hello", flag.ContinueOnError)
-
+	cmd.Usage = func(){
+		fmt.Fprintln(cmd.Output(), `hello - hello message`)
+		fmt.PrintDefaults()
+	}
 	cmd.StringVar(&opt.Name, "name", "", "-")
 
 	if err := cmd.Parse(os.Args[1:]); err != nil {
