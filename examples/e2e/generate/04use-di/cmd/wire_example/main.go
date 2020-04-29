@@ -4,24 +4,25 @@ import (
 	"fmt"
 	"os"
 	"log"
+	"m/internal"
 )
 
 // this packaage is auto generated
 
 // Option ...
 type Option struct {
-	Name string // for `-name`
+	Grumby bool // for `-grumby`
 }
 
 
 func main()  {
 	opt := &Option{}
-	cmd := flag.NewFlagSet("hello", flag.ContinueOnError)
+	cmd := flag.NewFlagSet("wire_example", flag.ContinueOnError)
 	cmd.Usage = func(){
-		fmt.Fprintln(cmd.Output(), `hello - hello message`)
+		fmt.Fprintln(cmd.Output(), `wire_example - google/wire event examples`)
 		cmd.PrintDefaults()
 	}
-	cmd.StringVar(&opt.Name, "name", "", "-")
+	cmd.BoolVar(&opt.Grumby, "grumby", false, "-")
 
 	if err := cmd.Parse(os.Args[1:]); err != nil {
 		if err != flag.ErrHelp {
@@ -35,6 +36,12 @@ func main()  {
 }
 
 func run(opt *Option) error {
-	fmt.Printf("hello %s\n", opt.Name)
+	v0 := internal.NewMessage()
+	v1 := internal.NewGreeter(v0, opt.Grumby)
+	v2, err := internal.NewEvent(v1)
+	if err != nil  {
+		return err
+	}
+	v2.Start()
 	return nil
 }

@@ -118,6 +118,9 @@ class Graph:
         self._node_map: t.Dict[int, Node] = node_map
         self.nodes = sorted(self._node_map.values(), key=lambda node: node.uid)
 
+    def get_node_by_name(self, name: str) -> t.Optional[Node]:
+        return self._node_map.get(name)
+
     def __repr__(self) -> str:
         return f"<Graph len={len(self.nodes)}>"
 

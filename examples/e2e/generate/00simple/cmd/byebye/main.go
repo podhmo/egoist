@@ -1,12 +1,12 @@
 package main
-// this packaage is auto generated
-
 import (
 	"flag"
+	"fmt"
 	"os"
 	"log"
-	"fmt"
 )
+
+// this packaage is auto generated
 
 // Option ...
 type Option struct {
@@ -19,7 +19,7 @@ func main()  {
 	cmd := flag.NewFlagSet("byebye", flag.ContinueOnError)
 	cmd.Usage = func(){
 		fmt.Fprintln(cmd.Output(), `byebye - byebye message`)
-		fmt.PrintDefaults()
+		cmd.PrintDefaults()
 	}
 	cmd.StringVar(&opt.Name, "name", "", "-")
 

@@ -126,7 +126,10 @@ class Fnspec:
 def fnspec(fn: t.Callable[..., t.Any]) -> Fnspec:
     argspec = inspect.getfullargspec(fn)
     annotations = t.get_type_hints(fn)
-    assert len(argspec.annotations) == len(annotations)
+    assert len(argspec.annotations) == len(annotations), (
+        len(argspec.annotations),
+        len(annotations),
+    )
     argspec.annotations.update(annotations)
     spec = Fnspec(fn, argspec=argspec)
     update_wrapper(spec, fn)  # type: ignore
