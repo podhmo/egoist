@@ -3,7 +3,6 @@ from egoist.internal.cmdutil import is_marked_subcommand
 from .types import ModuleType, Command
 
 
-
 def scan_module(
     m: ModuleType, *, is_ignored: t.Callable[[Command], bool] = is_marked_subcommand
 ) -> t.Dict[str, Command]:
