@@ -3,9 +3,9 @@ from egoist import runtime
 
 def hello(*, name: str = "World") -> None:
     """hello message"""
-    from egoist.generate import cli
+    from egoist.generate import clikit
 
-    with runtime.generate(cli) as m:
+    with runtime.generate(clikit) as m:
         hello = m.import_("m/hello")
         m.stmt(hello.Hello(name))
 

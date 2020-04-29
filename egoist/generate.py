@@ -140,7 +140,7 @@ def get_resolver() -> Resolver:
 
 
 @contextlib.contextmanager
-def cli(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
+def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
     m = env.m
     fn = env.fn
     spec = env.fnspec

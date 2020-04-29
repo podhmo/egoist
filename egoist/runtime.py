@@ -67,10 +67,10 @@ def printf(fmt_str: str, *args: t.Any) -> None:
     m.stmt(fmt.Printf(UnRepr(json.dumps(fmt_str)), *args))
 
 
-def generate(generate_fn):
+def generate(visit: t.Callable[[Env], t.ContextManager[None]]):
     c = get_self()
     env = c.stack[-1]
-    return generate_fn(env)
+    return visit(env)
 
 
 def get_args() -> ArgsAttr:
