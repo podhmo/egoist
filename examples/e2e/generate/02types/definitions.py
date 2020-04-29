@@ -1,12 +1,12 @@
-from gogen import runtime
-from gogen import types
+from egoist import runtime
+from egoist import types
 
 
 def hello(
     *, name: str = "world", age: types.uint, debug: types.bool, dur: types.duration
 ) -> None:
     """hello message"""
-    from gogen.generate import cli
+    from egoist.generate import cli
 
     with runtime.generate(cli):
         runtime.printf("hello %s(%d)\n", name, age)

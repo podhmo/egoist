@@ -1,9 +1,9 @@
-from gogen import runtime
+from egoist import runtime
 
 
 def hello(*, name: str = "World") -> None:
     """hello message"""
-    from gogen.generate import cli
+    from egoist.generate import cli
 
     with runtime.generate(cli) as m:
         hello = m.import_("m/hello")

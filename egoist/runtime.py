@@ -90,11 +90,11 @@ def set_self(c: RuntimeContext) -> None:
 
 
 def main(*, name: str, here: str, root: str = "") -> None:
-    from gogen.cmdutil import as_subcommand, Config
+    from egoist.cmdutil import as_subcommand, Config
 
     @as_subcommand
     def describe():
-        from gogen.cli import describe
+        from egoist.cli import describe
 
         describe(name)
 
@@ -102,8 +102,8 @@ def main(*, name: str, here: str, root: str = "") -> None:
     def generate(*, root: str = root):
         import sys
         import pathlib
-        from gogen.generate import generate_all
-        from gogen.scan import scan_module
+        from egoist.generate import generate_all
+        from egoist.scan import scan_module
 
         rootdir = pathlib.Path(here).parent / root
         fns = scan_module(sys.modules[name])
