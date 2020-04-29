@@ -1,5 +1,6 @@
 import typing as t
 import contextlib
+import inspect
 from egoist import types
 from egoist import runtime
 from egoist.internal.prestringutil import goname
@@ -119,8 +120,6 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
     m = env.m
     fn = env.fn
     spec = env.fnspec
-
-    import inspect
 
     oneline_description = f"{fn.__name__}"
     doc = inspect.getdoc(fn)
