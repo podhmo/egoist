@@ -2,11 +2,11 @@ package main
 // this packaage is auto generated
 
 import (
-	"fmt"
 	"flag"
 	"os"
 	"log"
 	"time"
+	"fmt"
 )
 
 // Option ...
