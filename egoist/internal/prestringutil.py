@@ -1,5 +1,5 @@
 from prestring.go import goname
-from prestring.go.codeobject import Module
+from prestring.go.codeobject import Module, go_file
 from prestring.output import output
 from prestring.codeobject import Symbol
 

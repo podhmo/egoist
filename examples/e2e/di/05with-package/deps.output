@@ -1,0 +1,29 @@
+package main
+
+
+import (
+	"m/conf"
+	"m/internal"
+)
+
+
+func run()  {
+	config := "config.json"
+
+	v0, err := conf.NewConfig(config)
+	if err != nil  {
+		return err
+	}
+	v1, teardown := internal.NewX(v0)
+	defer teardown()
+	v2, teardown, err := internal.NewY(v0)
+	if err != nil  {
+		return err
+	}
+	defer teardown()
+	v3, err := internal.NewZ(v1, v2)
+	if err != nil  {
+		return err
+	}
+	return v3.Run()
+}
