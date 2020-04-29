@@ -9,7 +9,7 @@ def init(*, root: str = "."):
     import shutil
     from importlib.util import find_spec
 
-    spec = find_spec("gogen")
+    spec = find_spec("egoist")
     dirpath = pathlib.Path(spec.submodule_search_locations[0]) / "data"
 
     src = dirpath / "definitions.py.tmpl"

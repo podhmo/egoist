@@ -1,9 +1,9 @@
-from gogen import runtime
+from egoist import runtime
 
 
 def hello(*, name: str = "foo") -> None:
     """hello message"""
-    from gogen.generate import cli
+    from egoist.generate import cli
 
     args = runtime.get_args()
     args.name.help = "name of person"

@@ -1,2 +1,2 @@
 00:
-	cd $(shell echo $@*/) && rm -rf * && gogen init
+	cd $(shell echo $@*/) && rm -rf * && egoist init

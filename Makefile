@@ -2,23 +2,23 @@ test:
 	pytest -vv --show-capture=all
 
 ci:
-	pytest --show-capture=all --cov=gogen --no-cov-on-fail --cov-report term-missing
+	pytest --show-capture=all --cov=egoist --no-cov-on-fail --cov-report term-missing
 	$(MAKE) lint typing
 
 format:
 #	pip install -e .[dev]
-	black gogen setup.py
+	black egoist setup.py
 
 # https://www.flake8rules.com/rules/W503.html
 # https://www.flake8rules.com/rules/E203.html
 # https://www.flake8rules.com/rules/E501.html
 lint:
 #	pip install -e .[dev]
-	flake8 gogen --ignore W503,E203,E501
+	flake8 egoist --ignore W503,E203,E501
 
 typing:
 #	pip install -e .[dev]
-	mypy --strict --strict-equality --ignore-missing-imports gogen
+	mypy --strict --strict-equality --ignore-missing-imports egoist
 mypy: typing
 
 build:
@@ -27,7 +27,7 @@ build:
 
 upload:
 #	pip install twine
-	twine check dist/gogen-$(shell cat VERSION)*
-	twine upload dist/gogen-$(shell cat VERSION)*
+	twine check dist/egoist-$(shell cat VERSION)*
+	twine upload dist/egoist-$(shell cat VERSION)*
 
 .PHONY: test ci format lint typing mypy build upload

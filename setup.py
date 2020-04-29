@@ -16,13 +16,13 @@ setup(
         "Development Status :: 3 - Alpha",
     ],
     python_requires=">3.5",
-    packages=find_packages(exclude=["gogen.tests"]),
+    packages=find_packages(exclude=["egoist.tests"]),
     install_requires=install_requires,
     extras_require={"testing": tests_requires, "dev": dev_requires},
     tests_require=tests_requires,
-    test_suite="gogen.tests",
+    test_suite="egoist.tests",
     entry_points="""
       [console_scripts]
-      gogen = gogen.cli:main
+      egoist = egoist.cli:main
 """,
 )

@@ -1,4 +1,4 @@
-# gogen
+# egoist
 
 :construction: this project is under construction :construction:
 
