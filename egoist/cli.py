@@ -1,4 +1,4 @@
-from .cmdutil import as_subcommand, Config
+from egoist.internal.cmdutil import as_subcommand, Config
 from .scan import scan_module
 
 

@@ -90,7 +90,7 @@ def set_self(c: RuntimeContext) -> None:
 
 
 def main(*, name: str, here: str, root: str = "") -> None:
-    from egoist.cmdutil import as_subcommand, Config
+    from egoist.internal.cmdutil import as_subcommand, Config
 
     @as_subcommand
     def describe():
