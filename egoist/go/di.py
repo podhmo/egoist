@@ -76,8 +76,12 @@ def inject(
         spec: Fnspec = metadata.get("fnspec")
         provider_callable: t.Optional[Symbol] = None
         if spec is not None:
-            pkg_prefix = m.import_(metadata["component_type"].gopackage)
-            provider_callable = m.symbol(f"{pkg_prefix}.{spec.name}")
+            provider = spec.name
+            pkg = getattr(metadata["component_type"], "gopackage", None)
+            if pkg is not None:
+                pkg_prefix = m.import_(pkg)
+                provider = f"{pkg_prefix}.{provider}"
+            provider_callable = m.symbol(provider)
         if provider_callable is None:
             provider_callable = m.symbol(spec.name if spec else node.name)
 
