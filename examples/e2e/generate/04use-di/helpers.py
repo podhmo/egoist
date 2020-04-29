@@ -42,20 +42,6 @@ def parse(fn: t.Callable[..., t.Any]) -> t.Tuple[str, t.List[str], Metadata]:
     }
 
 
-def _get_args(g: Graph) -> t.List[str]:
-    root_args = []
-    for node in g.nodes:
-        if not node.is_primitive:
-            continue
-        metadata = t.cast(Metadata, node.metadata)
-        if issubclass(metadata["component_type"], int):
-            gotype = "int"
-        else:
-            gotype = "string"
-        root_args.append(f"{node.name} {gotype}")
-    return root_args
-
-
 def inject(
     m: Module, g: Graph, *, variables: t.Dict[int, Symbol], strict: bool = True
 ) -> Symbol:
