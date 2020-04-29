@@ -3,7 +3,7 @@ from egoist import runtime
 
 def hello(*, name: str = "foo") -> None:
     """hello message"""
-    from egoist.generate import clikit
+    from egoist.generate.clikit import clikit
 
     args = runtime.get_args()
     args.name.help = "name of person"

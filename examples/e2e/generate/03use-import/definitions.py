@@ -3,7 +3,7 @@ from egoist import runtime
 
 def hello(*, name: str = "World") -> None:
     """hello message"""
-    from egoist.generate import clikit
+    from egoist.generate.clikit import clikit
 
     with runtime.generate(clikit) as m:
         hello = m.import_("m/hello")
