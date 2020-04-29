@@ -4,12 +4,12 @@ from egoist import runtime
 from magicalimport import import_module
 
 internal = import_module("./internal.py", here=__file__)
-di = import_module("./helpers.py", here=__file__)
 
 
 def wire_example(*, grumby: bool = False) -> None:
     """google/wire event examples"""
     from egoist.generate.clikit import clikit
+    from egoist.generate.go import di
 
     with runtime.generate(clikit) as m:
         b = Builder()
