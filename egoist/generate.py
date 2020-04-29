@@ -4,7 +4,7 @@ import contextlib
 from . import types
 from . import runtime
 from .naming import get_path_from_function_name
-from .prestringutil import output, Module, goname, Symbol
+from .internal.prestringutil import output, Module, goname, Symbol
 
 # todo: separate "parse, setup component, run action"
 # todo: support other types

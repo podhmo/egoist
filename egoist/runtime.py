@@ -4,7 +4,7 @@ import dataclasses
 
 from .langhelpers import reify
 from .types import Command
-from .prestringutil import Module
+from .internal.prestringutil import Module
 
 
 class RuntimeContext:

@@ -3,7 +3,7 @@ from prestring.go import Module as _Module
 from prestring.go import goname, ImportGroup
 from prestring.output import output
 from prestring.codeobject import Symbol
-from .langhelpers import reify
+from prestring.utils import reify
 
 __all__ = ["goname", "Symbol", "output", "Module"]
 
