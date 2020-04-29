@@ -4,7 +4,7 @@ import dataclasses
 
 from .langhelpers import reify
 from .types import Command
-from .prestringutil import Module
+from .internal.prestringutil import Module
 
 
 class RuntimeContext:
@@ -40,7 +40,7 @@ class Env:
 
     @reify
     def fnspec(self):
-        from ._fnspec import fnspec
+        from .internal._fnspec import fnspec
 
         return fnspec(self.fn)
 
@@ -90,7 +90,7 @@ def set_self(c: RuntimeContext) -> None:
 
 
 def main(*, name: str, here: str, root: str = "") -> None:
-    from egoist.cmdutil import as_subcommand, Config
+    from egoist.internal.cmdutil import as_subcommand, Config
 
     @as_subcommand
     def describe():

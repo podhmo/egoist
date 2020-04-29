@@ -1,6 +1,6 @@
 import typing as t
+from egoist.internal.cmdutil import is_marked_subcommand
 from .types import ModuleType, Command
-from .cmdutil import is_marked_subcommand
 
 
 def scan_module(
