@@ -11,7 +11,7 @@ def wire_example(*, grumby: bool = False) -> None:
     google/wire event examples
     """
     from egoist.generate.clikit import clikit
-    from egoist.generate.go import di
+    from egoist.go import di
 
     with runtime.generate(clikit) as m:
         b = Builder()

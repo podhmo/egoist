@@ -2,7 +2,7 @@ import contextlib
 import inspect
 from egoist import runtime
 from egoist.internal.prestringutil import goname
-from .go.resolver import get_resolver, Resolver
+from egoist.go.resolver import get_resolver, Resolver
 
 
 @contextlib.contextmanager

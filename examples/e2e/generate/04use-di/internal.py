@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing as t
-from egoist.generate.go.types import GoError
+from egoist.go.types import GoError
 
 
 class Message:
