@@ -42,7 +42,7 @@ def parse(fn: t.Callable[..., t.Any]) -> t.Tuple[str, t.List[str], Metadata]:
     }
 
 
-def new_variables(g: Graph, local_mapping: t.Dict[str, Symbol]) -> t.Dict[int, Symbol]:
+def primitives(g: Graph, local_mapping: t.Dict[str, Symbol]) -> t.Dict[int, Symbol]:
     try:
         return {
             node.uid: local_mapping[node.name] for node in g.nodes if node.is_primitive

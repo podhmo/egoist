@@ -4,7 +4,7 @@ from egoist import runtime
 from magicalimport import import_module
 
 internal = import_module("./internal.py", here=__file__)
-h = import_module("./helpers.py", here=__file__)
+di = import_module("./helpers.py", here=__file__)
 
 
 def wire_example(*, grumby: bool = False) -> None:
@@ -14,15 +14,14 @@ def wire_example(*, grumby: bool = False) -> None:
     with runtime.generate(clikit) as m:
         b = Builder()
 
-        b.add_node(**h.parse(internal.NewMessage))
-        b.add_node(**h.parse(internal.NewGreeter))
-        b.add_node(**h.parse(internal.NewEvent))
+        b.add_node(**di.parse(internal.NewMessage))
+        b.add_node(**di.parse(internal.NewGreeter))
+        b.add_node(**di.parse(internal.NewEvent))
 
         g = b.build()
 
-        variables = h.new_variables(g, locals())
-
-        event = h.inject(m, g, variables=variables)
+        primitives = di.primitives(g, locals())
+        event = di.inject(m, g, variables=primitives)
         m.stmt(event.Start())
 
 
