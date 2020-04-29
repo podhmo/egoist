@@ -42,17 +42,21 @@ class providers:
 @as_command  # type: ignore
 def run() -> None:
     m = Module()
-    config = m.let("config", '"config.json"')
-    m.sep()
+    with m.func("run"):
+        config = m.let("config", '"config.json"')
+        m.sep()
 
-    b = Builder()
+        b = Builder()
 
-    b.add_node(**di.parse(providers.NewConfig))
-    b.add_node(**di.parse(providers.NewX))
-    b.add_node(**di.parse(providers.NewY))
-    b.add_node(**di.parse(providers.NewZ))
+        b.add_node(**di.parse(providers.NewConfig))
+        b.add_node(**di.parse(providers.NewX))
+        b.add_node(**di.parse(providers.NewY))
+        b.add_node(**di.parse(providers.NewZ))
 
-    g = b.build()
-    variables = di.primitives(g, {"filename": config})
-    di.inject(m, g, variables=variables)
+        g = b.build()
+        variables = di.primitives(g, {"filename": config})
+        z = di.inject(m, g, variables=variables)
+
+        m.return_(z.Run())
+
     print(m)
