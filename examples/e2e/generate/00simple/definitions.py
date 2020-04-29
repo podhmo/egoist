@@ -3,17 +3,17 @@ from egoist import runtime
 
 def hello(*, name: str) -> None:
     """hello message"""
-    from egoist.generate import cli
+    from egoist.generate.clikit import clikit
 
-    with runtime.generate(cli):
+    with runtime.generate(clikit):
         runtime.printf("hello %s\n", name)
 
 
 def byebye(*, name: str) -> None:
     """byebye message"""
-    from egoist.generate import cli
+    from egoist.generate.clikit import clikit
 
-    with runtime.generate(cli):
+    with runtime.generate(clikit):
         runtime.printf("byebye %s\n", name)
 
 

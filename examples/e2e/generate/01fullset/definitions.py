@@ -3,12 +3,12 @@ from egoist import runtime
 
 def hello(*, name: str = "foo") -> None:
     """hello message"""
-    from egoist.generate import cli
+    from egoist.generate.clikit import clikit
 
     args = runtime.get_args()
     args.name.help = "name of person"
 
-    with runtime.generate(cli):
+    with runtime.generate(clikit):
         runtime.printf("hello %s\n", name)
 
 

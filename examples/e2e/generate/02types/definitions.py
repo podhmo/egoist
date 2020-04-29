@@ -6,9 +6,9 @@ def hello(
     *, name: str = "world", age: types.uint, debug: types.bool, dur: types.duration
 ) -> None:
     """hello message"""
-    from egoist.generate import cli
+    from egoist.generate.clikit import clikit
 
-    with runtime.generate(cli):
+    with runtime.generate(clikit):
         runtime.printf("hello %s(%d)\n", name, age)
 
 

@@ -1,33 +1,8 @@
 import typing as t
-import pathlib
 import contextlib
-from . import types
-from . import runtime
-from .naming import get_path_from_function_name
-from .internal.prestringutil import output, Module, goname, Symbol
-
-# todo: separate "parse, setup component, run action"
-# todo: support other types
-# todo: DI resolution
-# todo: support use stubs
-
-
-def generate_all(fns: t.Dict[str, types.Command], *, root: str) -> None:
-    with output(root=root, opener=Module) as fs:
-        c = runtime.get_self()
-
-        for name, fn in fns.items():
-            fpath = get_path_from_function_name(fn.__name__)
-
-            with fs.open(str(pathlib.Path(fpath) / "main.go"), "w") as m:
-                env = runtime.Env(m=m, fn=fn)
-                c.stack.append(env)
-                kwargs = {
-                    name: Symbol(f"opt.{goname(name)}")  # xxx
-                    for name, _, _ in env.fnspec.parameters
-                }
-                fn(**kwargs)
-                c.stack.pop()
+from egoist import types
+from egoist import runtime
+from egoist.internal.prestringutil import goname
 
 
 class Resolver:
@@ -123,7 +98,7 @@ def get_resolver() -> Resolver:
 
     def default_duration(v: t.Optional[t.Any]) -> str:
         # xxx:
-        from .runtime import get_self
+        from egoist.runtime import get_self
 
         m = get_self().stack[-1].m
         m.import_("time")
@@ -140,7 +115,7 @@ def get_resolver() -> Resolver:
 
 
 @contextlib.contextmanager
-def cli(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
+def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
     m = env.m
     fn = env.fn
     spec = env.fnspec
@@ -198,19 +173,3 @@ def cli(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
         yield m
         if spec.return_type == type(None):
             m.return_("nil")
-
-
-# def _extract_internal_code(fn: types.Command):
-#     import inspect
-#     import textwrap
-#     from prestring.python.parse import parse_string, node_name
-
-#     source = inspect.getsource(fn)
-#     tree = parse_string(source)
-
-#     func_def = tree.children[0]
-#     assert node_name(func_def) == "func_def"
-
-#     suite = func_def.children[-1]
-#     assert node_name(suite) == "suite"
-#     return textwrap.dedent(str(suite))
