@@ -8,3 +8,5 @@
 
 - YAMLは補完が効かないし、モジュールシステムも無い
 - main.goは生成するもの
+- yoman, cookiecutterと衝突しない
+- scaffoldは onetime deploy 、やりたいのは continuous deploy
