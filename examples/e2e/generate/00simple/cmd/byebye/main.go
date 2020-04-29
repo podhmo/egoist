@@ -18,9 +18,9 @@ func main()  {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("byebye", flag.ContinueOnError)
 	cmd.Usage = func(){
-		fmt.Fprintln(cmd.Output(), `byebye - byebye message
-
-    Usage:`)
+		fmt.Fprintln(cmd.Output(), `byebye - byebye message`)
+		fmt.Fprintln(cmd.Output(), "")
+		fmt.Fprintln(cmd.Output(), "Usage:")
 		cmd.PrintDefaults()
 	}
 	cmd.StringVar(&opt.Name, "name", "", "-")

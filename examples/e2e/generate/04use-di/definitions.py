@@ -7,7 +7,9 @@ internal = import_module("./internal.py", here=__file__)
 
 
 def wire_example(*, grumby: bool = False) -> None:
-    """google/wire event examples"""
+    """
+    google/wire event examples
+    """
     from egoist.generate.clikit import clikit
     from egoist.generate.go import di
 
