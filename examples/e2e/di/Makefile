@@ -9,3 +9,5 @@ SHELL := $(shell which bash)
 
 01:
 	python $(shell echo $@*/)main.py |& tee $(shell echo $@*/)deps.output
+02:
+	python $(shell echo $@*/)main.py |& tee $(shell echo $@*/)deps.output
