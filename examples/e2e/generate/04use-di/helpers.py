@@ -56,12 +56,6 @@ def _get_args(g: Graph) -> t.List[str]:
     return root_args
 
 
-def get_module(name: str) -> Module:
-    from prestring.go.codeobject import go_file
-
-    return go_file(name)
-
-
 def emit(m: Module, g: Graph) -> Symbol:
     # TODO: name
     # TODO: import_
