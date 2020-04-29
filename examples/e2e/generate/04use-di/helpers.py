@@ -56,15 +56,17 @@ def _get_args(g: Graph) -> t.List[str]:
     return root_args
 
 
-def inject(m: Module, g: Graph) -> Symbol:
+def inject(
+    m: Module, g: Graph, *, variables: t.Dict[int, Symbol], strict: bool = True
+) -> Symbol:
     # TODO: name
-    # TODO: import_
     i = 0
-    variables: t.Dict[int, Symbol] = {}
-
     for node in topological_sorted(g):
         if node.is_primitive:
-            variables[node.uid] = m.symbol(node.name)
+            if strict:
+                assert node.uid in variables
+            else:
+                variables[node.uid] = m.symbol(node.name)
             continue
 
         metadata = t.cast(Metadata, node.metadata)
@@ -87,6 +89,7 @@ def inject(m: Module, g: Graph) -> Symbol:
         args = [variables[dep.uid] for dep in node.depends]
         variables[node.uid], *extra_vars = m.letN(var_names, provider_callable(*args))
 
+        # xxx:
         if extra_vars:
             for sym, typ in sorted(
                 zip(extra_vars, return_types[1:]),

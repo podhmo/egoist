@@ -7,7 +7,7 @@ internal = import_module("./internal.py", here=__file__)
 h = import_module("./helpers.py", here=__file__)
 
 
-def wire_example() -> None:
+def wire_example(*, grumby: bool = False) -> None:
     """google/wire event examples"""
     from egoist.generate.clikit import clikit
 
@@ -19,7 +19,12 @@ def wire_example() -> None:
         b.add_node(**h.parse(internal.NewEvent))
 
         g = b.build()
-        event = h.inject(m, g)  # TODO: primitive args
+        kwargs = locals()  # xxx
+        variables = {
+            node.uid: kwargs[node.name] for node in g.nodes if node.is_primitive
+        }
+
+        event = h.inject(m, g, variables=variables)
         m.stmt(event.Start())
 
 

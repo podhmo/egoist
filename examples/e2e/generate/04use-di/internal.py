@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing as t
-from egoist.types import GoError
+from egoist.generate.go.types import GoError
 
 
 class Message:
@@ -19,7 +19,7 @@ def NewMessage() -> Message:
     pass
 
 
-def NewGreeter(message: Message) -> Greeter:
+def NewGreeter(message: Message, grumby: bool) -> Greeter:
     pass
 
 

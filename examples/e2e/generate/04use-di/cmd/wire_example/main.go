@@ -10,7 +10,7 @@ import (
 
 // Option ...
 type Option struct {
-
+	Grumby bool // for `-grumby`
 }
 
 
@@ -18,6 +18,7 @@ func main()  {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("wire_example", flag.ContinueOnError)
 
+	cmd.BoolVar(&opt.Grumby, "grumby", false, "-")
 
 	if err := cmd.Parse(os.Args[1:]); err != nil {
 		if err != flag.ErrHelp {
@@ -32,7 +33,7 @@ func main()  {
 
 func run(opt *Option) error {
 	v0 := internal.NewMessage()
-	v1 := internal.NewGreeter(v0)
+	v1 := internal.NewGreeter(v0, opt.Grumby)
 	v2, err := internal.NewEvent(v1)
 	if err != nil  {
 		return err

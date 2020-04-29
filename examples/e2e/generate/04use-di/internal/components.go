@@ -3,7 +3,6 @@ package internal
 import (
 	"errors"
 	"fmt"
-	"time"
 )
 
 type Message string
@@ -12,11 +11,7 @@ func NewMessage() Message {
 	return Message("Hi there!")
 }
 
-func NewGreeter(m Message) Greeter {
-	var grumby bool
-	if time.Now().Unix()%2 == 0 {
-		grumby = true
-	}
+func NewGreeter(m Message, grumby bool) Greeter {
 	return Greeter{Message: m, Grumby: grumby}
 }
 
