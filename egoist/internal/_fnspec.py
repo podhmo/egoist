@@ -5,7 +5,7 @@ import typing_extensions as tx
 import inspect
 import dataclasses
 from functools import update_wrapper
-from .langhelpers import reify
+from egoist.langhelpers import reify
 
 # note: internal package, need to merge with metashape's one?
 

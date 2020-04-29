@@ -40,7 +40,7 @@ class Env:
 
     @reify
     def fnspec(self):
-        from ._fnspec import fnspec
+        from .internal._fnspec import fnspec
 
         return fnspec(self.fn)
 
