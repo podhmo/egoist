@@ -1,9 +1,15 @@
 from prestring.go.codeobject import Module, Symbol  # noqa F401
 
 
+class priority:
+    HIGH = 10
+    NORMAL = 5
+    LOW = 1
+
+
 class GoError:
     name = "err"
-    priority = 10
+    priority = priority.HIGH
 
     @classmethod
     def emit(self, m: Module, err: Symbol) -> None:
@@ -13,7 +19,7 @@ class GoError:
 
 class GoTeardown:
     name = "teardown"
-    priority = 1
+    priority = priority.LOW
 
     @classmethod
     def emit(self, m: Module, teardown: Symbol) -> None:
