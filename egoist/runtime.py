@@ -102,11 +102,11 @@ def main(*, name: str, here: str, root: str = "") -> None:
     def generate(*, root: str = root):
         import sys
         import pathlib
-        from egoist.generate import generate_all
+        from egoist.generate import walk
         from egoist.scan import scan_module
 
         rootdir = pathlib.Path(here).parent / root
         fns = scan_module(sys.modules[name])
-        generate_all(fns, root=rootdir)
+        walk(fns, root=rootdir)
 
     as_subcommand.run(config=Config(ignore_expose=True), _force=True)

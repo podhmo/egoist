@@ -12,7 +12,7 @@ from .internal.prestringutil import output, Module, goname, Symbol
 # todo: support use stubs
 
 
-def generate_all(fns: t.Dict[str, types.Command], *, root: str) -> None:
+def walk(fns: t.Dict[str, types.Command], *, root: str) -> None:
     with output(root=root, opener=Module) as fs:
         c = runtime.get_self()
 
