@@ -20,7 +20,7 @@ def wire_example() -> None:
 
         g = b.build()
         component = h.emit(m, g)
-        m.stmt(f"{component}.Start()")
+        m.stmt(component.Start())
 
 
 if __name__ == "__main__":
