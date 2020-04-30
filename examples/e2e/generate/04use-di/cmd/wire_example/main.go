@@ -12,6 +12,7 @@ import (
 // Option ...
 type Option struct {
 	Grumby bool // for `-grumby`
+	Args []string // cmd.Args
 }
 
 
@@ -32,6 +33,7 @@ func main()  {
 		}
 		os.Exit(1)
 	}
+	opt.Args = cmd.Args()
 	if err := run(opt); err != nil {
 		log.Fatalf("!!%+v", err)
 	}

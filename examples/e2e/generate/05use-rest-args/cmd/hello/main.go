@@ -39,6 +39,8 @@ func main()  {
 }
 
 func run(opt *Option) error {
-	fmt.Printf("hello %s\n", opt.Name)
+	for _, target := range opt.Args  {
+		fmt.Printf("%s: hello %s\n", opt.Name, target)
+	}
 	return nil
 }

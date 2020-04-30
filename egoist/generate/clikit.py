@@ -27,6 +27,8 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
         for name, typ, kind in spec.keyword_arguments:
             m.stmt(f"{goname(name)} {resolver.resolve_gotype(typ)} // for `-{name}`")
 
+        # NOTE: accessable via runtime.get_cli_rest_args()
+        m.stmt(f"{goname(runtime._REST_ARGS_NAME)} []string // cmd.Args")
     m.sep()
 
     with m.func("main"):
@@ -71,6 +73,7 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
             m.stmt("}")
             m.stmt("os.Exit(1)")
         m.stmt("}")
+        m.stmt("opt.Args = cmd.Args()")
         m.stmt("if err := run(opt); err != nil {")
         with m.scope():
             m.import_("log")  # import:

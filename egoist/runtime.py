@@ -5,6 +5,7 @@ import dataclasses
 from .langhelpers import reify
 from .types import Command
 from .internal.prestringutil import Module
+from .internal.prestringutil import goname, Symbol
 
 
 class RuntimeContext:
@@ -14,8 +15,12 @@ class RuntimeContext:
         self.stack = []
 
 
+_REST_ARGS_NAME = "args"
+
+
 class ArgsAttr:
     def __init__(self, names: t.List[str]):
+        assert _REST_ARGS_NAME not in names
         self.data = {name: Arg(name=name) for name in names}
 
     def __getattr__(self, name: str) -> Arg:
@@ -37,6 +42,7 @@ class Arg:
 class Env:
     m: Module
     fn: Command
+    prefix: str
 
     @reify
     def fnspec(self):
@@ -73,8 +79,14 @@ def generate(visit: t.Callable[[Env], t.ContextManager[None]]):
     return visit(env)
 
 
-def get_args() -> ArgsAttr:
+def get_cli_options() -> ArgsAttr:
     return get_self().stack[-1].args
+
+
+def get_cli_rest_args() -> Symbol:
+    prefix = get_self().stack[-1].prefix
+    name = _REST_ARGS_NAME
+    return Symbol(f"{prefix}.{goname(name)}")
 
 
 def get_self() -> RuntimeContext:

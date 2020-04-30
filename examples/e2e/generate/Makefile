@@ -24,3 +24,7 @@ default: 00 01 02 03 04
 	$(MAKE) -C $(shell echo $@*/)
 04-run:
 	cd $(shell echo $(subst -run,,$@*/)) && go run cmd/wire_example/main.go
+05:
+	$(MAKE) -C $(shell echo $@*/)
+05-run:
+	cd $(shell echo $(subst -run,,$@*/)) && go run cmd/hello/main.go --name foo xxx yyy zzz
