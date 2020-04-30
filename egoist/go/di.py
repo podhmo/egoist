@@ -5,6 +5,7 @@ from prestring.go.codeobject import Module, Symbol
 from egoist.internal.graph import primitive, Graph
 from egoist.internal.graph import topological_sorted
 from egoist.internal._fnspec import fnspec, Fnspec
+from .types import get_gopackage
 
 
 class Metadata(tx.TypedDict, total=False):
@@ -77,7 +78,7 @@ def inject(
         provider_callable: t.Optional[Symbol] = None
         if spec is not None:
             provider = spec.name
-            pkg = getattr(metadata["component_type"], "gopackage", None)
+            pkg = get_gopackage(metadata["fnspec"].body)
             if pkg is not None:
                 pkg_prefix = m.import_(pkg)
                 provider = f"{pkg_prefix}.{provider}"
