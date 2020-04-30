@@ -1,18 +1,24 @@
 import typing as t
-from egoist.internal.cmdutil import is_marked_subcommand
 from .types import ModuleType, Command
 
 
 def scan_module(
-    m: ModuleType, *, is_ignored: t.Callable[[Command], bool] = is_marked_subcommand
+    module: ModuleType,
+    *,
+    is_ignored: t.Callable[[Command], bool] = lambda x: False,
+    targets: t.Optional[t.List[str]] = None,
 ) -> t.Dict[str, Command]:
+    targets = targets or list(module.__dict__.keys())
     defs = {}
-    for name, v in m.__dict__.items():
+    for name in targets:
+        v = module.__dict__.get(name)
+        if v is None:
+            continue
         if name.startswith("_"):
             continue
         if not callable(v):
             continue
-        if getattr(v, "__module__", "") != m.__name__:
+        if getattr(v, "__module__", "") != module.__name__:
             continue
         if is_ignored(v):
             continue
