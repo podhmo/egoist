@@ -62,3 +62,11 @@ def gopackage(pkg: str) -> t.Callable[[_DECORATE_TARGET], _DECORATE_TARGET]:
         return cls_or_callable
 
     return do
+
+
+def rename(name: str) -> t.Callable[..., t.Any]:
+    def set_name(fn: t.Callable[..., t.Any]):
+        fn.__name__ = name
+        return fn
+
+    return set_name
