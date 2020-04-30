@@ -102,23 +102,58 @@ def set_self(c: RuntimeContext) -> None:
 
 
 def main(*, name: str, here: str, root: str = "") -> None:
-    from egoist.internal.cmdutil import as_subcommand, Config
+    import sys
+    from egoist.scan import scan_module
 
-    @as_subcommand
     def describe():
         from egoist.cli import describe
 
         describe(name)
 
-    @as_subcommand
-    def generate(*, root: str = root):
-        import sys
+    def generate(*, root: str = root, targets: t.Optional[t.List[str]] = None):
         import pathlib
         from egoist.generate import walk
-        from egoist.scan import scan_module
 
         rootdir = pathlib.Path(here).parent / root
-        fns = scan_module(sys.modules[name])
+        fns = scan_module(sys.modules[name], targets=targets)
         walk(fns, root=rootdir)
 
-    as_subcommand.run(config=Config(ignore_expose=True), _force=True)
+    def run(argv: t.Optional[t.List[str]] = None) -> t.Any:
+        import argparse
+
+        parser = argparse.ArgumentParser(
+            formatter_class=type(
+                "_HelpFormatter",
+                (argparse.ArgumentDefaultsHelpFormatter, argparse.RawTextHelpFormatter),
+                {},
+            )
+        )
+        parser.print_usage = parser.print_help  # type: ignore
+        subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
+        subparsers.required = True
+
+        fn = describe
+        sub_parser = subparsers.add_parser(
+            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+        )
+        sub_parser.set_defaults(subcommand=fn)
+
+        fn = generate  # type: ignore
+        sub_parser = subparsers.add_parser(
+            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+        )
+        sub_parser.add_argument("--root", required=False, default="cmd", help="-")
+        sub_parser.add_argument(
+            "targets",
+            nargs="*",
+            choices=[[]] + list(scan_module(sys.modules[name]).keys()),
+        )  # todo: scan modules in show_help only
+        sub_parser.set_defaults(subcommand=fn)
+
+        args = parser.parse_args(argv)
+        params = vars(args).copy()
+        subcommand = params.pop("subcommand")
+        return subcommand(**params)
+
+    # TODO: logging setup
+    run()
