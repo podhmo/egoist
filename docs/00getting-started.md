@@ -144,6 +144,13 @@ more details is [here](../examples/e2e/generate/03use-import).
 
 It partially supports DI like [google/wire](https://github.com/google/wire).
 
+So, supporting following provider functions.
+
+- `func() X`
+- `func() (X, error)`
+- `func() (X, func())`
+- `func() (X, func(), error)`
+
 definitions.py
 
 ```python
