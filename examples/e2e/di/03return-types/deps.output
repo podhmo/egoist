@@ -1,0 +1,20 @@
+func run()  {
+	config := "config.json"
+
+	v0, err := NewConfig(config)
+	if err != nil  {
+		return err
+	}
+	v1, teardown := NewX(v0)
+	defer teardown()
+	v2, teardown, err := NewY(v0)
+	if err != nil  {
+		return err
+	}
+	defer teardown()
+	v3, err := NewZ(v1, v2)
+	if err != nil  {
+		return err
+	}
+	return v3.Run()
+}
