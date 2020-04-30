@@ -2,58 +2,58 @@ from __future__ import annotations
 import typing as t
 from egoist.internal.graph import Builder
 from egoist.go import di
-from egoist.go.types import GoError, GoTeardown
-from egoist.internal.prestringutil import go_file
+from egoist.go.types import GoError, GoTeardown, gopackage
+from egoist.internal.prestringutil import gofile
 from egoist.internal.cmdutil import as_command
 
 
+@gopackage("m/conf")
 class Config:
-    gopackage = "m/conf"
+    pass
 
 
-class X:
-    gopackage = "m/internal"
+@gopackage("m/conf")
+def NewConfig(filename: str) -> t.Tuple[Config, GoError]:
+    pass
 
 
-class Y:
-    gopackage = "m/internal"
+@gopackage("m/internal")
+class internal:
+    class X:
+        pass
 
+    class Y:
+        pass
 
-class Z:
-    gopackage = "m/internal"
-
-
-class providers:
-    @staticmethod
-    def NewConfig(filename: str) -> t.Tuple[Config, GoError]:
+    class Z:
         pass
 
     @staticmethod
-    def NewX(config: Config) -> t.Tuple[X, GoTeardown]:
+    def NewX(config: Config) -> t.Tuple[internal.X, GoTeardown]:
         pass
 
     @staticmethod
-    def NewY(config: Config) -> t.Tuple[Y, GoTeardown, GoError]:
+    def NewY(config: Config) -> t.Tuple[internal.Y, GoTeardown, GoError]:
         pass
 
     @staticmethod
-    def NewZ(x: X, y: Y) -> t.Tuple[Z, GoError]:
+    def NewZ(x: internal.X, y: internal.Y) -> t.Tuple[internal.Z, GoError]:
         pass
 
 
 @as_command  # type: ignore
 def run() -> None:
-    m = go_file("main")
+    m = gofile("main")
     with m.func("run"):
         config = m.let("config", '"config.json"')
         m.sep()
 
         b = Builder()
 
-        b.add_node(**di.parse(providers.NewConfig))
-        b.add_node(**di.parse(providers.NewX))
-        b.add_node(**di.parse(providers.NewY))
-        b.add_node(**di.parse(providers.NewZ))
+        b.add_node(**di.parse(NewConfig))
+        b.add_node(**di.parse(internal.NewX))
+        b.add_node(**di.parse(internal.NewY))
+        b.add_node(**di.parse(internal.NewZ))
 
         g = b.build()
         variables = di.primitives(g, {"filename": config})
