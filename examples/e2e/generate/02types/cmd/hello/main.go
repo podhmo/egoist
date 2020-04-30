@@ -15,6 +15,7 @@ type Option struct {
 	Age uint // for `-age`
 	Debug bool // for `-debug`
 	Dur time.Duration // for `-dur`
+	Args []string // cmd.Args
 }
 
 
@@ -38,6 +39,7 @@ func main()  {
 		}
 		os.Exit(1)
 	}
+	opt.Args = cmd.Args()
 	if err := run(opt); err != nil {
 		log.Fatalf("!!%+v", err)
 	}
