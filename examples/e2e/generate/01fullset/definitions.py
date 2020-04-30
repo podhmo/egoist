@@ -5,8 +5,8 @@ def hello(*, name: str = "foo") -> None:
     """hello message"""
     from egoist.generate.clikit import clikit
 
-    args = runtime.get_args()
-    args.name.help = "name of person"
+    options = runtime.get_cli_options()
+    options.name.help = "name of person"
 
     with runtime.generate(clikit):
         runtime.printf("hello %s\n", name)

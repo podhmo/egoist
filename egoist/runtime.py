@@ -79,7 +79,7 @@ def generate(visit: t.Callable[[Env], t.ContextManager[None]]):
     return visit(env)
 
 
-def get_args() -> ArgsAttr:
+def get_cli_options() -> ArgsAttr:
     return get_self().stack[-1].args
 
 
