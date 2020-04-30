@@ -70,7 +70,7 @@ if __name__ == "__main__":
     runtime.main(name=__name__, here=__file__, root="cmd")
 ```
 
-## use other packages's function
+## using other package's function
 
 if you want to calling other package's function. you can use `m.import_()`.
 
@@ -142,7 +142,7 @@ func Hello(name string) {
 
 More details is [here](../examples/e2e/generate/03use-import).
 
-## use DI
+## using DI in main.go
 
 It partially supports DI like [google/wire](https://github.com/google/wire).
 
