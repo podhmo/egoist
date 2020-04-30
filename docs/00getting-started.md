@@ -16,7 +16,7 @@ $ tree
 0 directories, 1 file
 ```
 
-generate `cmd/{hello}/main.go` by definitions.py
+generate `cmd/{hello}/main.go` by definitions.py. (this is generated [main.go](../examples/e2e/generate/00simple/cmd/hello/main.go))
 
 ```console
 $ python definitions.py generate
@@ -138,7 +138,9 @@ func Hello(name string) {
 }
 ```
 
-more details is [here](../examples/e2e/generate/03use-import).
+[cmd/hello/main.go](../examples/e2e/generate/03use-import/cmd/hello/main.go)
+
+More details is [here](../examples/e2e/generate/03use-import).
 
 ## use DI
 
@@ -261,5 +263,6 @@ def NewEvent(g: Greeter) -> t.Tuple[Event, GoError]:
 ```
 
 [internal/components.go](../examples/e2e/generate/04use-di/internal/components.go)
+[cmd/wire_example/main.go](../examples/e2e/generate/04use-di/cmd/wire_example/main.go)
 
 more details is [here](../examples/e2e/generate/04use-di).
