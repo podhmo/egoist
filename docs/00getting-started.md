@@ -1,8 +1,8 @@
-# egoist
+# getting started
 
 :warning: The API design is a prototype and may change in the future.
 
-## getting started
+## init and run
 
 scaffold (init)
 
@@ -47,6 +47,8 @@ exit status 1
 $ go run cmd/hello/main.go -name foo
 hello foo
 ```
+
+more details is [here](../examples/e2e/generate/00simple).
 
 ### defnitions.py
 
