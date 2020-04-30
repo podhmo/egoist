@@ -1,7 +1,5 @@
 from __future__ import annotations
-import typing as t
 from egoist.go import di
-from egoist.go.types import GoError, GoTeardown
 from egoist.internal.prestringutil import Module
 from egoist.internal.cmdutil import as_command
 
@@ -24,19 +22,19 @@ class Z:
 
 class providers:
     @staticmethod
-    def NewConfig(filename: str) -> t.Tuple[Config, GoError]:
+    def NewConfig(filename: str) -> Config:
         pass
 
     @staticmethod
-    def NewX(config: Config) -> t.Tuple[X, GoTeardown]:
+    def NewX(config: Config) -> X:
         pass
 
     @staticmethod
-    def NewY(config: Config) -> t.Tuple[Y, GoTeardown, GoError]:
+    def NewY(config: Config) -> Y:
         pass
 
     @staticmethod
-    def NewZ(x: X, y: Y) -> t.Tuple[Z, GoError]:
+    def NewZ(x: X, y: Y) -> Z:
         pass
 
 
@@ -58,4 +56,5 @@ def run() -> None:
         z = injector.inject()
 
         m.return_(z.Run())
+
     print(m)

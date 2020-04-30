@@ -1,6 +1,5 @@
 from __future__ import annotations
 import typing as t
-from egoist.internal.graph import Builder
 from egoist.go import di
 from egoist.go.types import GoError, GoTeardown, gopackage
 from egoist.internal.prestringutil import gofile
@@ -48,16 +47,15 @@ def run() -> None:
         config = m.let("config", '"config.json"')
         m.sep()
 
-        b = Builder()
+        b = di.Builder(m)
 
-        b.add_node(**di.parse(NewConfig))
-        b.add_node(**di.parse(internal.NewX))
-        b.add_node(**di.parse(internal.NewY))
-        b.add_node(**di.parse(internal.NewZ))
+        b.add_provider(NewConfig)
+        b.add_provider(internal.NewX)
+        b.add_provider(internal.NewY)
+        b.add_provider(internal.NewZ)
 
-        g = b.build()
-        variables = di.primitives(g, {"filename": config})
-        z = di.inject(m, g, variables=variables)
+        injector = b.build(variables={"filename": config})
+        z = injector.inject()
 
         m.return_(z.Run())
     print(m)
