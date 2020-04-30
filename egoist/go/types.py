@@ -8,6 +8,10 @@ class priority:
     LOW = 1
 
 
+class GoPointer(t.Generic[t.T]):
+    pass
+
+
 class GoError:
     name = "err"
     priority = priority.HIGH

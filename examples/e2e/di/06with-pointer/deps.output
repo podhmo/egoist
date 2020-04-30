@@ -1,0 +1,14 @@
+package main
+
+
+import (
+	"m/internal"
+)
+
+
+func run()  {
+	v0 := internal.NewX()
+	v1 := internal.NewY(&v0)
+	v2 := internal.NewZ(v0, *v1)
+	return v2.Run()
+}
