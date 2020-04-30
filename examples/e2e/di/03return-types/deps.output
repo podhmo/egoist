@@ -5,13 +5,13 @@ func run()  {
 	if err != nil  {
 		return err
 	}
-	v1, teardown := NewX(v0)
-	defer teardown()
-	v2, teardown, err := NewY(v0)
+	v1, cleanup := NewX(v0)
+	defer cleanup()
+	v2, cleanup, err := NewY(v0)
 	if err != nil  {
 		return err
 	}
-	defer teardown()
+	defer cleanup()
 	v3, err := NewZ(v1, v2)
 	if err != nil  {
 		return err

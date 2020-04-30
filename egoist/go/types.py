@@ -22,13 +22,13 @@ class GoError:
             m.return_(err)
 
 
-class GoTeardown:
-    name = "teardown"
+class GoCleanup:
+    name = "cleanup"
     priority = priority.LOW
 
     @classmethod
-    def emit(self, m: Module, teardown: Symbol) -> None:
-        m.stmt(f"defer {teardown}()")
+    def emit(self, m: Module, cleanup: Symbol) -> None:
+        m.stmt(f"defer {cleanup}()")
 
 
 _DECORATE_TARGET = t.Union[t.Type[t.Any], t.Callable[..., t.Any]]

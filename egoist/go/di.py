@@ -156,7 +156,7 @@ def inject(
 
         variables[node.uid], *extra_vars = m.letN(var_names, provider_callable(*args))
 
-        # handling error and teardown:
+        # handling error and cleanup:
         if extra_vars:
             for sym, typ in sorted(
                 zip(extra_vars, return_types[1:]),

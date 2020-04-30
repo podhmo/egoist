@@ -1,7 +1,7 @@
 from __future__ import annotations
 import typing as t
 from egoist.go import di
-from egoist.go.types import GoError, GoTeardown
+from egoist.go.types import GoError, GoCleanup
 from egoist.internal.prestringutil import Module
 from egoist.internal.cmdutil import as_command
 
@@ -28,11 +28,11 @@ class providers:
         pass
 
     @staticmethod
-    def NewX(config: Config) -> t.Tuple[X, GoTeardown]:
+    def NewX(config: Config) -> t.Tuple[X, GoCleanup]:
         pass
 
     @staticmethod
-    def NewY(config: Config) -> t.Tuple[Y, GoTeardown, GoError]:
+    def NewY(config: Config) -> t.Tuple[Y, GoCleanup, GoError]:
         pass
 
     @staticmethod
