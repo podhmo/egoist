@@ -7,8 +7,7 @@ from egoist.internal.prestringutil import output, Module, goname, Symbol
 
 # todo: separate "parse, setup component, run action"
 # todo: support other types
-# todo: DI resolution
-# todo: support use stubs
+# todo: separate from clikit
 
 
 def walk(fns: t.Dict[str, types.Command], *, root: str) -> None:
@@ -19,10 +18,10 @@ def walk(fns: t.Dict[str, types.Command], *, root: str) -> None:
             fpath = get_path_from_function_name(fn.__name__)
 
             with fs.open(str(pathlib.Path(fpath) / "main.go"), "w") as m:
-                env = runtime.Env(m=m, fn=fn)
+                env = runtime.Env(m=m, fn=fn, prefix="opt")  # xxx:
                 c.stack.append(env)
                 kwargs = {
-                    name: Symbol(f"opt.{goname(name)}")  # xxx
+                    name: Symbol(f"{env.prefix}.{goname(name)}")
                     for name, _, _ in env.fnspec.parameters
                 }
                 fn(**kwargs)
