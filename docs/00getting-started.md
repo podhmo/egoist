@@ -266,3 +266,9 @@ def NewEvent(g: Greeter) -> t.Tuple[Event, GoError]:
 [cmd/wire_example/main.go](../examples/e2e/generate/04use-di/cmd/wire_example/main.go)
 
 more details is [here](../examples/e2e/generate/04use-di).
+
+## todo
+
+- adding help message is [here](../examples/e2e/generate/01fullset)
+- using cli rest args is [here](../examples/e2e/generate/05use-rest-args)
+
