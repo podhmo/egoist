@@ -16,7 +16,7 @@ $ tree
 0 directories, 1 file
 ```
 
-generate
+generate `cmd/{hello}/main.go` by definitions.py
 
 ```console
 $ python definitions.py generate
@@ -92,6 +92,9 @@ def hello(*, name: str = "World") -> None:
 run command.
 
 ```console
+# cmd/hello/main.go is generated
+$ python definitions.py generate
+
 $ go run cmd/hello/main.go
 Hello World
 $ go run cmd/hello/main.go -name Foo
@@ -179,6 +182,10 @@ if __name__ == "__main__":
 run command.
 
 ```console
+# cmd/wire_example/main.go is generated
+$ python definitions.py generate
+
+
 $ go run cmd/wire_example/main.go
 Hi there!
 
