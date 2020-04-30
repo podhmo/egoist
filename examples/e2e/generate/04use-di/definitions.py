@@ -1,5 +1,4 @@
 from __future__ import annotations
-from egoist.internal.graph import Builder
 from egoist import runtime
 from magicalimport import import_module
 
@@ -14,16 +13,14 @@ def wire_example(*, grumby: bool = False) -> None:
     from egoist.go import di
 
     with runtime.generate(clikit) as m:
-        b = Builder()
+        b = di.Builder()
 
-        b.add_node(**di.parse(internal.NewMessage))
-        b.add_node(**di.parse(internal.NewGreeter))
-        b.add_node(**di.parse(internal.NewEvent))
+        b.add_provider(internal.NewMessage)
+        b.add_provider(internal.NewGreeter)
+        b.add_provider(internal.NewEvent)
 
-        g = b.build()
-
-        primitives = di.primitives(g, locals())
-        event = di.inject(m, g, variables=primitives)
+        injector = b.build(variables=locals())
+        event = injector.inject(m)
         m.stmt(event.Start())
 
 

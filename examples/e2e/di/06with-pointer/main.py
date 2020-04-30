@@ -39,15 +39,15 @@ class internal:
 @as_command  # type: ignore
 def run() -> None:
     m = gofile("main")
-    with m.func("run"):
-        b = di.Builder(m)
-
+    with m.func("run", return_="error"):
+        b = di.Builder()
+        
         b.add_provider(internal.NewX)
         b.add_provider(internal.NewY)
         b.add_provider(internal.NewZ)
 
         injector = b.build()
-        z = injector.inject()
+        z = injector.inject(m)
 
         m.return_(z.Run())
     print(m)

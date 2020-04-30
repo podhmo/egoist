@@ -43,14 +43,14 @@ def run() -> None:
 
         m.sep()
 
-        b = di.Builder(m)
+        b = di.Builder()
 
         b.add_provider(providers.NewX)
         b.add_provider(providers.NewY)
         b.add_provider(providers.NewZ)
 
         injector = b.build(variables={"x_filename": config, "y_filename": config2})
-        z = injector.inject()
+        z = injector.inject(m)
 
         m.return_(z.Run())
     print(m)

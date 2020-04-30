@@ -6,7 +6,7 @@ import (
 )
 
 
-func run()  {
+func run() error {
 	v0 := internal.NewX()
 	v1 := internal.NewY(&v0)
 	v2 := internal.NewZ(v0, *v1)

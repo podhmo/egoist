@@ -45,7 +45,7 @@ def run() -> None:
         config = m.let("config", '"config.json"')
         m.sep()
 
-        b = di.Builder(m)
+        b = di.Builder()
 
         b.add_provider(providers.NewConfig)
         b.add_provider(providers.NewX)
@@ -53,7 +53,7 @@ def run() -> None:
         b.add_provider(providers.NewZ)
 
         injector = b.build(variables={"filename": config})
-        z = injector.inject()
+        z = injector.inject(m)
 
         m.return_(z.Run())
 

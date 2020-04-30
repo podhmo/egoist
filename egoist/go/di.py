@@ -171,8 +171,7 @@ def inject(
 
 
 class Builder:
-    def __init__(self, m: Module):
-        self.m: Module = m
+    def __init__(self):
         self.b: _Builder = _Builder()
 
     def add_provider(self, provider: t.Callable[..., t.Any]):
@@ -181,17 +180,14 @@ class Builder:
     def build(self, *, variables: t.Optional[str, Symbol] = None) -> Injector:
         g = self.b.build()
         uid_variable_mapping = primitives(g, variables)
-        return Injector(self.m, g, variables=uid_variable_mapping)
+        return Injector(g, variables=uid_variable_mapping)
 
 
 class Injector:
-    def __init__(self, m: Module, g: Graph, *, variables: t.Dict[int, Symbol]) -> None:
-        self.m = m
+    def __init__(self, g: Graph, *, variables: t.Dict[int, Symbol]) -> None:
         self.g = g
         self.variables: t.Dict[int, Symbol] = variables
         self.variable_levels: t.Dict[int, int] = defaultdict(int)
 
-    def inject(self) -> Symbol:
-        return inject(
-            self.m, self.g, variables=self.variables, levels=self.variable_levels
-        )
+    def inject(self, m: Module) -> Symbol:
+        return inject(m, self.g, variables=self.variables, levels=self.variable_levels)
