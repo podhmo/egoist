@@ -18,11 +18,11 @@ def logging_activate(
     params: t.Dict[str, t.Any],
     *,
     debug: bool = False,
-    logging_level: t.Optional[str] = None,
+    logging_level: t.Optional[int] = None,
     logging_format: t.Optional[str] = None,
-    logging_stream: t.Optional[str] = None,
+    logging_stream: t.Optional[t.IO[str]] = None,
     logging_time: t.Optional[str] = None,  # "relative", "asctime", None
-):
+) -> None:
     time_format_map = {
         "relative": "relative:%(relativeCreated)s	",
         "asctime": "asctime:%(asctime)s	",
