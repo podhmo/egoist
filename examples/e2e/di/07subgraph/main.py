@@ -1,7 +1,5 @@
 from __future__ import annotations
-import typing as t
 from egoist.go import di
-from egoist.go.types import GoError, GoCleanup
 from egoist.internal.prestringutil import Module
 
 
