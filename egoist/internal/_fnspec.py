@@ -34,7 +34,7 @@ class Fnspec:
 
     @property
     def doc(self) -> t.Optional[str]:
-        return self.body.__doc__
+        return inspect.getdoc(self.body)
 
     @property
     def is_coroutinefunction(self) -> bool:
@@ -45,38 +45,6 @@ class Fnspec:
 
     def default_of(self, name: str) -> t.Any:
         return self._defaults.get(name)
-
-    def default_str_of(self, name: str) -> t.Any:
-        val = self.default_of(name)
-        return repr(val)
-
-    # TODO: remove
-    def type_str_of(
-        self, typ: t.Type[t.Any], *, nonetype: t.Type[t.Any] = type(None)
-    ) -> str:
-        if typ.__module__ == "builtins":
-            if typ.__name__ == "NoneType":
-                return "None"
-            else:
-                return typ.__name__
-
-        if self.body.__module__ == typ.__module__:
-            return f"{self.module}.{typ.__name__}"
-        if hasattr(typ, "__name__"):
-            return f"{self._aliases.get(typ.__module__, typ.__module__)}.{typ.__name__}"
-        elif hasattr(typ, "__origin__"):  # for typing.Union, typing.Optional, ...
-            prefix = self._aliases.get(typ.__module__, typ.__module__)
-            args = typ.__args__
-            if typ.__origin__ == t.Union and len(args) == 2:
-                args = [x for x in args if x is not nonetype]
-                if len(args) == 1:
-                    return f"{prefix}.Optional[{self.type_str_of(args[0])}]"
-            name = getattr(typ, "_name") or getattr(typ.__origin__, "_name")
-            return f"{prefix}.{name}[{', '.join(self.type_str_of(x) for x in args)}]"
-        return str(typ).replace(
-            typ.__module__ + ".",
-            self._aliases.get(typ.__module__, typ.__module__) + ".",
-        )  # xxx
 
     @reify
     def parameters(self) -> t.List[t.Tuple[str, t.Type[t.Any], Kind]]:
