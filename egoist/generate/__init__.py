@@ -3,7 +3,6 @@ import logging
 import pathlib
 from egoist import types
 from egoist import runtime
-from egoist.naming import get_path_from_function_name
 from egoist.internal.prestringutil import output, Module, goname, Symbol
 
 # todo: separate "parse, setup component, run action"
@@ -20,7 +19,7 @@ def walk(fns: t.Dict[str, types.Command], *, root: str) -> None:
         for name, fn in fns.items():
             logger.info("walk %s", name)
 
-            fpath = get_path_from_function_name(fn.__name__)
+            fpath = _get_path_from_function_name(fn.__name__)
 
             with fs.open(str(pathlib.Path(fpath) / "main.go"), "w") as m:
                 env = runtime.Env(m=m, fn=fn, prefix="opt")  # xxx:
@@ -31,3 +30,8 @@ def walk(fns: t.Dict[str, types.Command], *, root: str) -> None:
                 }
                 fn(**kwargs)
                 c.stack.pop()
+
+
+def _get_path_from_function_name(fnname: str) -> str:
+    """foo__bar__boo -> foo/bar/boo"""
+    return fnname.replace("__", "/")
