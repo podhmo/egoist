@@ -34,6 +34,7 @@ def describe(module_name: str) -> None:
 
 def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
     import argparse
+    from egoist.internal.logutil import logging_setup
 
     parser = argparse.ArgumentParser(
         formatter_class=type(
@@ -60,7 +61,9 @@ def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
     sub_parser.add_argument("module_name", help="-")
     sub_parser.set_defaults(subcommand=fn)
 
+    activate = logging_setup(parser)
     args = parser.parse_args(argv)
     params = vars(args).copy()
+    activate(params)
     subcommand = params.pop("subcommand")
     return subcommand(**params)
