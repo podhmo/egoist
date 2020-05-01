@@ -16,14 +16,6 @@ class Metadata(tx.TypedDict, total=False):
     levels: t.Dict[str, int]  # name -> level
 
 
-class Variable(Symbol):
-    __slots__ = ("name", "as_", "level")
-
-    def __init__(self, name: str, as_: t.Optional[str] = None, level=0):
-        super().__init__(name, as_=as_)
-        self.level = level
-
-
 def _unwrap_pointer_type(
     typ: t.Type[t.Any], *, level: int = 0
 ) -> t.Tuple[t.Type[t.Any], int]:
