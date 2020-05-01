@@ -7,6 +7,9 @@ from .types import Command
 from .internal.prestringutil import Module
 from .internal.prestringutil import goname, Symbol
 
+if t.TYPE_CHECKING:
+    from .internal._fnspec import Fnspec
+
 
 class RuntimeContext:
     stack: t.List[Env]
@@ -45,7 +48,7 @@ class Env:
     prefix: str
 
     @reify
-    def fnspec(self):
+    def fnspec(self) -> Fnspec:
         from .internal._fnspec import fnspec
 
         return fnspec(self.fn)
@@ -73,7 +76,9 @@ def printf(fmt_str: str, *args: t.Any) -> None:
     m.stmt(fmt.Printf(UnRepr(json.dumps(fmt_str)), *args))
 
 
-def generate(visit: t.Callable[[Env], t.ContextManager[None]]):
+def generate(
+    visit: t.Callable[[Env], t.ContextManager[None]]
+) -> t.ContextManager[None]:
     c = get_self()
     env = c.stack[-1]
     return visit(env)
@@ -93,6 +98,7 @@ def get_self() -> RuntimeContext:
     global _context
     if _context is None:
         set_self(RuntimeContext())
+    assert _context is not None
     return _context
 
 
@@ -105,12 +111,12 @@ def main(*, name: str, here: str, root: str = "") -> None:
     import sys
     from egoist.scan import scan_module
 
-    def describe():
+    def describe() -> None:
         from egoist.cli import describe
 
         describe(name)
 
-    def generate(*, root: str = root, targets: t.Optional[t.List[str]] = None):
+    def generate(*, root: str = root, targets: t.Optional[t.List[str]] = None) -> None:
         import pathlib
         from egoist.generate import walk
 
@@ -139,16 +145,17 @@ def main(*, name: str, here: str, root: str = "") -> None:
         )
         sub_parser.set_defaults(subcommand=fn)
 
-        fn = generate  # type: ignore
+        fn = generate
         sub_parser = subparsers.add_parser(
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
         sub_parser.add_argument("--root", required=False, default="cmd", help="-")
+        # todo: scan modules in show_help only
         sub_parser.add_argument(
             "targets",
             nargs="*",
-            choices=[[]] + list(scan_module(sys.modules[name]).keys()),
-        )  # todo: scan modules in show_help only
+            choices=[[]] + list(scan_module(sys.modules[name]).keys()),  # type: ignore
+        )
         sub_parser.set_defaults(subcommand=fn)
 
         activate = logging_setup(parser)
