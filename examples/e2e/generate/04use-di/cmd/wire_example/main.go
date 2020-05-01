@@ -40,12 +40,12 @@ func main()  {
 }
 
 func run(opt *Option) error {
-	v0 := internal.NewMessage()
-	v1 := internal.NewGreeter(v0, opt.Grumby)
-	v2, err := internal.NewEvent(v1)
+	v1 := internal.NewMessage()
+	v2 := internal.NewGreeter(v1, opt.Grumby)
+	v3, err := internal.NewEvent(v2)
 	if err != nil  {
 		return err
 	}
-	v2.Start()
+	v3.Start()
 	return nil
 }

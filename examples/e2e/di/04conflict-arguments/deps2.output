@@ -4,8 +4,8 @@ func run2()  {
 	config := "config.json"
 	config2 := "config2.json"
 
-	v0 := NewX(config)
-	v1 := NewY(config2)
-	v2 := NewZ(v0, v1)
-	return v2.Run()
+	v2 := NewX(config)
+	v3 := NewY(config2)
+	v4 := NewZ(v2, v3)
+	return v4.Run()
 }
