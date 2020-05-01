@@ -1,12 +1,15 @@
+from __future__ import annotations
 import typing as t
 from egoist import types
 
 
 class Resolver:
-    def __init__(self):
-        self.gotype_map = {}
-        self.parse_method_map = {}
-        self.default_function_map = {}
+    def __init__(self) -> None:
+        self.gotype_map: t.Dict[t.Type[t.Any], str] = {}
+        self.parse_method_map: t.Dict[t.Type[t.Any], str] = {}
+        self.default_function_map: t.Dict[
+            t.Type[t.Any], t.Callable[[t.Optional[t.Any]], str]
+        ] = {}
 
     # see mro?
 
@@ -20,7 +23,12 @@ class Resolver:
         return self.default_function_map[typ](val)
 
     def register(
-        self, typ: t.Type[t.Any], *, gotype: str, parse_method: str, default_function
+        self,
+        typ: t.Type[t.Any],
+        *,
+        gotype: str,
+        parse_method: str,
+        default_function: t.Callable[[t.Optional[t.Any]], str],
     ) -> None:
         self.gotype_map[typ] = gotype
         self.parse_method_map[typ] = parse_method
