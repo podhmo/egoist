@@ -3,9 +3,16 @@ import typing as t
 import typing_extensions as tx
 from collections import defaultdict
 from prestring.go.codeobject import Module, Symbol
-from egoist.internal.graph import Seed as _Seed, primitive, Graph, Builder as _Builder
+from egoist.internal.graph import (
+    Seed as _Seed,
+    primitive,
+    Graph,
+    Builder as _Builder,
+    Node,
+)
 from egoist.internal.graph import topological_sorted
 from egoist.internal._fnspec import fnspec, Fnspec
+from egoist.langhelpers import reify
 from .types import get_gopackage, GoPointer, priority
 
 
@@ -93,13 +100,19 @@ def inject(
     *,
     variables: t.Dict[int, Symbol],
     levels: t.Optional[t.Dict[int, int]] = None,
+    nodes: t.Optional[t.List[Node]] = None,
+    seen: t.Optional[t.Set[int]] = None,
     strict: bool = True,
 ) -> Symbol:
     # TODO: name
-    i = 0
+    i = len(variables)
     if levels is None:
         levels = defaultdict(int)
-    for node in topological_sorted(g):
+    if nodes:
+        node = nodes[0]
+
+    nodes = topological_sorted(g, seen=seen, nodes=nodes)
+    for node in nodes:
         if node.is_primitive:
             if strict:
                 assert node.uid in variables
@@ -188,7 +201,28 @@ class Injector:
     def __init__(self, g: Graph, *, variables: t.Dict[int, Symbol]) -> None:
         self.g = g
         self.variables: t.Dict[int, Symbol] = variables
-        self.variable_levels: t.Dict[int, int] = defaultdict(int)
+        self.levels_mapping: t.Dict[int, int] = defaultdict(int)
+        self.seen: t.Set[int] = set()
 
-    def inject(self, m: Module) -> Symbol:
-        return inject(m, self.g, variables=self.variables, levels=self.variable_levels)
+    def inject(
+        self, m: Module, *, provider: t.Optional[t.Callable[..., t.Any]] = None
+    ) -> Symbol:
+        nodes: t.Optional[t.List[Node]] = None
+        if provider is not None:
+            nodes = [self._provider_to_node_mapping[provider]]
+        return inject(
+            m,
+            self.g,
+            variables=self.variables,
+            levels=self.levels_mapping,
+            nodes=nodes,
+            seen=self.seen,
+        )
+
+    @reify
+    def _provider_to_node_mapping(self) -> t.Dict[t.Callable[..., t.Any], Node]:
+        mapping: t.Dict[t.Callable[..., t.Any], Node] = {}
+        for node in self.g.nodes:
+            metadata = t.cast(Metadata, node.metadata)
+            mapping[metadata["fnspec"].body] = node
+        return mapping

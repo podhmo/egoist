@@ -1,20 +1,20 @@
 func run()  {
 	config := "config.json"
 
-	v0, err := NewConfig(config)
+	v1, err := NewConfig(config)
 	if err != nil  {
 		return err
 	}
-	v1, cleanup := NewX(v0)
+	v2, cleanup := NewX(v1)
 	defer cleanup()
-	v2, cleanup, err := NewY(v0)
+	v3, cleanup, err := NewY(v1)
 	if err != nil  {
 		return err
 	}
 	defer cleanup()
-	v3, err := NewZ(v1, v2)
+	v4, err := NewZ(v2, v3)
 	if err != nil  {
 		return err
 	}
-	return v3.Run()
+	return v4.Run()
 }

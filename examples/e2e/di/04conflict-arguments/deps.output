@@ -3,8 +3,8 @@
 func run2()  {
 	config := "config.json"
 
-	v0 := NewX(config)
-	v1 := NewY(config)
-	v2 := NewZ(v0, v1)
-	return v2.Run()
+	v1 := NewX(config)
+	v2 := NewY(config)
+	v3 := NewZ(v1, v2)
+	return v3.Run()
 }

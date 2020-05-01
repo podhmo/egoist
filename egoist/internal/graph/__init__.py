@@ -128,18 +128,28 @@ class Graph:
         return f"<Graph len={len(self.nodes)}>"
 
 
-def topological_sorted(g: Graph) -> t.List[Node]:
-    seen: t.Set[int] = set()
+def topological_sorted(
+    g: Graph,
+    *,
+    seen: t.Optional[t.Set[int]] = None,
+    nodes: t.Optional[t.List[Node]] = None,
+) -> t.List[Node]:
+    if seen is None:
+        seen = set()
+
+    if nodes is None:
+        nodes = g.nodes
+
     r: t.List[Node] = []
 
-    def visit(node: Node) -> None:
+    def visit(node: Node, *, seen: t.Set[int]) -> None:
         if node.uid in seen:
             return
         seen.add(node.uid)
         for dep in node.depends:
-            visit(dep)
+            visit(dep, seen=seen)
         r.append(node)
 
-    for node in g.nodes:
-        visit(node)
+    for node in nodes:
+        visit(node, seen=seen)
     return r
