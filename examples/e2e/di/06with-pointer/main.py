@@ -2,7 +2,6 @@ from __future__ import annotations
 from egoist.go import di
 from egoist.go.types import GoPointer, gopackage
 from egoist.internal.prestringutil import gofile
-from egoist.internal.cmdutil import as_command
 
 
 """
@@ -36,18 +35,16 @@ class internal:
         pass
 
 
-@as_command  # type: ignore
-def run() -> None:
-    m = gofile("main")
-    with m.func("run", return_="error"):
-        b = di.Builder()
-        
-        b.add_provider(internal.NewX)
-        b.add_provider(internal.NewY)
-        b.add_provider(internal.NewZ)
+m = gofile("main")
+with m.func("run", return_="error"):
+    b = di.Builder()
 
-        injector = b.build()
-        z = injector.inject(m)
+    b.add_provider(internal.NewX)
+    b.add_provider(internal.NewY)
+    b.add_provider(internal.NewZ)
 
-        m.return_(z.Run())
-    print(m)
+    injector = b.build()
+    z = injector.inject(m)
+
+    m.return_(z.Run())
+print(m)

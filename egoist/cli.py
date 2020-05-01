@@ -1,8 +1,7 @@
-from egoist.internal.cmdutil import as_subcommand, Config
+import typing as t
 from .scan import scan_module
 
 
-@as_subcommand
 def init(*, root: str = "."):
     """scaffold"""
     import pathlib
@@ -17,7 +16,6 @@ def init(*, root: str = "."):
     shutil.copy(src, dst)
 
 
-@as_subcommand
 def describe(module_name: str) -> None:
     import inspect
     import json
@@ -34,5 +32,35 @@ def describe(module_name: str) -> None:
     print(json.dumps(d, indent=2, ensure_ascii=False))
 
 
-def main():
-    return as_subcommand.run(_force=True, config=Config(ignore_expose=True))
+def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        formatter_class=type(
+            "_HelpFormatter",
+            (argparse.ArgumentDefaultsHelpFormatter, argparse.RawTextHelpFormatter),
+            {},
+        )
+    )
+    parser.print_usage = parser.print_help  # type: ignore
+    subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
+    subparsers.required = True
+
+    fn = init
+    sub_parser = subparsers.add_parser(
+        fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+    )
+    sub_parser.add_argument("--root", required=False, default=".", help="-")
+    sub_parser.set_defaults(subcommand=fn)
+
+    fn = describe  # type: ignore
+    sub_parser = subparsers.add_parser(
+        fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+    )
+    sub_parser.add_argument("module_name", help="-")
+    sub_parser.set_defaults(subcommand=fn)
+
+    args = parser.parse_args(argv)
+    params = vars(args).copy()
+    subcommand = params.pop("subcommand")
+    return subcommand(**params)

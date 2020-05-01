@@ -3,7 +3,6 @@ import typing as t
 from egoist.go import di
 from egoist.go.types import GoError, GoCleanup, gopackage
 from egoist.internal.prestringutil import gofile
-from egoist.internal.cmdutil import as_command
 
 
 @gopackage("m/conf")
@@ -40,22 +39,20 @@ class internal:
         pass
 
 
-@as_command  # type: ignore
-def run() -> None:
-    m = gofile("main")
-    with m.func("run"):
-        config = m.let("config", '"config.json"')
-        m.sep()
+m = gofile("main")
+with m.func("run"):
+    config = m.let("config", '"config.json"')
+    m.sep()
 
-        b = di.Builder()
+    b = di.Builder()
 
-        b.add_provider(NewConfig)
-        b.add_provider(internal.NewX)
-        b.add_provider(internal.NewY)
-        b.add_provider(internal.NewZ)
+    b.add_provider(NewConfig)
+    b.add_provider(internal.NewX)
+    b.add_provider(internal.NewY)
+    b.add_provider(internal.NewZ)
 
-        injector = b.build(variables={"filename": config})
-        z = injector.inject(m)
+    injector = b.build(variables={"filename": config})
+    z = injector.inject(m)
 
-        m.return_(z.Run())
-    print(m)
+    m.return_(z.Run())
+print(m)
