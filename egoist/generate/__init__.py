@@ -12,8 +12,8 @@ from egoist.internal.prestringutil import output, Module, goname, Symbol
 logger = logging.getLogger(__name__)
 
 
-def walk(fns: t.Dict[str, types.Command], *, root: str) -> None:
-    with output(root=root, opener=Module) as fs:
+def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
+    with output(root=str(root), opener=Module) as fs:
         c = runtime.get_self()
 
         for name, fn in fns.items():
@@ -21,7 +21,9 @@ def walk(fns: t.Dict[str, types.Command], *, root: str) -> None:
 
             fpath = _get_path_from_function_name(fn.__name__)
 
-            with fs.open(str(pathlib.Path(fpath) / "main.go"), "w") as m:
+            with fs.open(
+                str(pathlib.Path(fpath) / "main.go"), "w"
+            ) as m:  # type: Module
                 env = runtime.Env(m=m, fn=fn, prefix="opt")  # xxx:
                 c.stack.append(env)
                 kwargs = {

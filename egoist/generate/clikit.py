@@ -1,12 +1,15 @@
+import typing as t
 import contextlib
 import inspect
 from egoist import runtime
-from egoist.internal.prestringutil import goname
+from egoist.internal.prestringutil import goname, Module
 from egoist.go.resolver import get_resolver, Resolver
 
 
 @contextlib.contextmanager
-def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
+def clikit(
+    env: runtime.Env, *, resolver: Resolver = get_resolver()
+) -> t.Iterator[Module]:
     m = env.m
     fn = env.fn
     spec = env.fnspec
@@ -82,5 +85,5 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
 
     with m.func("run", "opt *Option", return_="error"):
         yield m
-        if spec.return_type == type(None):
+        if spec.return_type == type(None):  # noqa: E721
             m.return_("nil")

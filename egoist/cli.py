@@ -2,14 +2,19 @@ import typing as t
 from .scan import scan_module
 
 
-def init(*, root: str = "."):
+def init(*, root: str = ".") -> None:
     """scaffold"""
     import pathlib
     import shutil
     from importlib.util import find_spec
 
     spec = find_spec("egoist")
-    dirpath = pathlib.Path(spec.submodule_search_locations[0]) / "data"
+    if spec is None:
+        return
+    locations = spec.submodule_search_locations
+    if locations is None:
+        return
+    dirpath = pathlib.Path(locations[0]) / "data"
 
     src = dirpath / "definitions.py.tmpl"
     dst = pathlib.Path(root) / "definitions.py"

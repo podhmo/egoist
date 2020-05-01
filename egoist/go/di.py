@@ -3,7 +3,7 @@ import typing as t
 import typing_extensions as tx
 from collections import defaultdict
 from prestring.go.codeobject import Module, Symbol
-from egoist.internal.graph import primitive, Graph, Builder as _Builder
+from egoist.internal.graph import Seed as _Seed, primitive, Graph, Builder as _Builder
 from egoist.internal.graph import topological_sorted
 from egoist.internal._fnspec import fnspec, Fnspec
 from .types import get_gopackage, GoPointer, priority
@@ -16,12 +16,10 @@ class Metadata(tx.TypedDict, total=False):
     levels: t.Dict[str, int]  # name -> level
 
 
-class Variable(Symbol):
-    __slots__ = ("name", "as_", "level")
-
-    def __init__(self, name: str, as_: t.Optional[str] = None, level=0):
-        super().__init__(name, as_=as_)
-        self.level = level
+class AddNodeParamsDict(tx.TypedDict, total=True):
+    name: str
+    depends: t.List[t.Union[_Seed, str]]
+    metadata: Metadata
 
 
 def _unwrap_pointer_type(
@@ -37,10 +35,10 @@ def _unwrap_pointer_type(
     return typ, level
 
 
-def parse(fn: t.Callable[..., t.Any]) -> t.Tuple[str, t.List[str], Metadata]:
+def parse(fn: t.Callable[..., t.Any]) -> AddNodeParamsDict:
     spec = fnspec(fn)
 
-    depends: t.List[str] = []
+    depends: t.List[t.Union[str, _Seed]] = []
     levels: t.Dict[str, int] = {}
     for name, typ, _ in spec.arguments:  # parameters?
         if typ.__module__ == "builtins":
@@ -117,7 +115,7 @@ def inject(
             *[getattr(typ, "name", typ.__name__) for typ in return_types[1:]],
         ]
 
-        spec: Fnspec = metadata.get("fnspec")
+        spec: t.Optional[Fnspec] = metadata.get("fnspec")
         provider_callable: t.Optional[Symbol] = None
         if spec is not None:
             provider = spec.name
@@ -133,7 +131,7 @@ def inject(
         if spec is None:
             args = [variables[dep.uid] for dep in node.depends]  # todo: remove
         else:
-            args: t.List[Symbol] = []
+            args = []
             assert len(node.depends) == len(spec.arguments), (
                 len(node.depends),
                 len(spec.arguments),
@@ -171,13 +169,14 @@ def inject(
 
 
 class Builder:
-    def __init__(self):
+    def __init__(self) -> None:
         self.b: _Builder = _Builder()
 
-    def add_provider(self, provider: t.Callable[..., t.Any]):
-        self.b.add_node(**parse(provider))
+    def add_provider(self, provider: t.Callable[..., t.Any]) -> None:
+        self.b.add_node(**t.cast(t.Dict[str, t.Any], parse(provider)))
 
-    def build(self, *, variables: t.Optional[str, Symbol] = None) -> Injector:
+    def build(self, *, variables: t.Optional[t.Dict[str, Symbol]] = None) -> Injector:
+        variables = variables or {}
         g = self.b.build()
         uid_variable_mapping = primitives(g, variables)
         return Injector(g, variables=uid_variable_mapping)

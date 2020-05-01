@@ -1,6 +1,8 @@
 import typing as t
 from prestring.go.codeobject import Module, Symbol  # noqa F401
 
+T = t.TypeVar("T")
+
 
 class priority:
     HIGH = 10
@@ -8,7 +10,7 @@ class priority:
     LOW = 1
 
 
-class GoPointer(t.Generic[t.T]):
+class GoPointer(t.Generic[T]):
     pass
 
 
@@ -36,7 +38,7 @@ _DECORATE_TARGET = t.Union[t.Type[t.Any], t.Callable[..., t.Any]]
 
 def get_gopackage(target: t.Any) -> t.Optional[str]:
     target = getattr(target, "__func__", target)
-    return getattr(target, "_gopackage", None)
+    return getattr(target, "_gopackage", None)  # type: ignore
 
 
 def set_gopackage(target: t.Any, pkg: str) -> None:
@@ -65,7 +67,7 @@ def gopackage(pkg: str) -> t.Callable[[_DECORATE_TARGET], _DECORATE_TARGET]:
 
 
 def rename(name: str) -> t.Callable[..., t.Any]:
-    def set_name(fn: t.Callable[..., t.Any]):
+    def set_name(fn: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
         fn.__name__ = name
         return fn
 
