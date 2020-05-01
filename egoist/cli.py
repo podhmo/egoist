@@ -9,6 +9,8 @@ def init(*, root: str = ".") -> None:
     from importlib.util import find_spec
 
     spec = find_spec("egoist")
+    if spec is None:
+        return
     locations = spec.submodule_search_locations
     if locations is None:
         return
