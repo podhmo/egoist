@@ -82,5 +82,5 @@ def clikit(env: runtime.Env, *, resolver: Resolver = get_resolver()) -> None:
 
     with m.func("run", "opt *Option", return_="error"):
         yield m
-        if spec.return_type == type(None):
+        if spec.return_type == type(None):  # noqa: E721
             m.return_("nil")
