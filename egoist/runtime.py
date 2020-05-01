@@ -120,6 +120,7 @@ def main(*, name: str, here: str, root: str = "") -> None:
 
     def run(argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
+        from egoist.internal.logutil import logging_setup
 
         parser = argparse.ArgumentParser(
             formatter_class=type(
@@ -150,8 +151,10 @@ def main(*, name: str, here: str, root: str = "") -> None:
         )  # todo: scan modules in show_help only
         sub_parser.set_defaults(subcommand=fn)
 
+        activate = logging_setup(parser)
         args = parser.parse_args(argv)
         params = vars(args).copy()
+        activate(params)
         subcommand = params.pop("subcommand")
         return subcommand(**params)
 
