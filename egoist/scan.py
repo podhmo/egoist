@@ -1,11 +1,12 @@
 import typing as t
+import inspect
 from .types import ModuleType, Command
 
 
 def scan_module(
     module: ModuleType,
     *,
-    is_ignored: t.Callable[[Command], bool] = lambda x: False,
+    is_ignored: t.Callable[[Command], bool] = inspect.isclass,
     targets: t.Optional[t.List[str]] = None,
 ) -> t.Dict[str, Command]:
     targets = targets or list(module.__dict__.keys())
