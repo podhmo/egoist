@@ -54,6 +54,7 @@ def parse(fn: t.Callable[..., t.Any]) -> AddNodeParamsDict:
         component_type = return_type
     elif return_type.__origin__ == tuple:
         component_type, *_ = t.get_args(return_type)
+        component_type, return_level = _unwrap_pointer_type(component_type)
     elif return_type.__origin__ == GoPointer:
         component_type, return_level = _unwrap_pointer_type(return_type)
     else:
@@ -68,6 +69,7 @@ def parse(fn: t.Callable[..., t.Any]) -> AddNodeParamsDict:
         "fnspec": spec,
         "levels": levels,
     }
+
     return {
         "name": component_type.__name__,
         "depends": depends,
