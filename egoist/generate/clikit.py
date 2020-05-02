@@ -83,7 +83,7 @@ def clikit(
             m.stmt('log.Fatalf("!!%+v", err)')
         m.stmt("}")
 
-    with m.func("run", "opt *Option", return_="error"):
+    with m.func("run", "opt *Option", returns="error"):
         yield m
         if spec.return_type == type(None):  # noqa: E721
             m.return_("nil")
