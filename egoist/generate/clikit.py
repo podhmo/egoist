@@ -8,11 +8,13 @@ from egoist.go.resolver import get_resolver, Resolver
 
 @contextlib.contextmanager
 def clikit(
-    env: runtime.Env, *, resolver: Resolver = get_resolver()
+    env: runtime.Env, *, resolver: t.Optional[Resolver] = None
 ) -> t.Iterator[Module]:
     m = env.m
     fn = env.fn
     spec = env.fnspec
+
+    resolver = resolver or get_resolver(m)
 
     description = None
     doc = inspect.getdoc(fn)
