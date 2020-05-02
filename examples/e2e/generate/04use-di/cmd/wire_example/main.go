@@ -16,7 +16,7 @@ type Option struct {
 }
 
 
-func main()  {
+func main() {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("wire_example", flag.ContinueOnError)
 	cmd.Usage = func(){

@@ -1,6 +1,6 @@
 // both of NewX() and NewY() depend on an argument with the same name
 
-func run2()  {
+func run2() {
 	config := "config.json"
 
 	v1 := NewX(config)

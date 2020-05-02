@@ -19,7 +19,7 @@ type Option struct {
 }
 
 
-func main()  {
+func main() {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("hello", flag.ContinueOnError)
 	cmd.Usage = func(){
