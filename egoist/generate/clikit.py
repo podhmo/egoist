@@ -42,7 +42,7 @@ def clikit(
             'cmd := flag.NewFlagSet("{}", flag.ContinueOnError)', fn.__name__,
         )
         if description is not None:
-            m.stmt("cmd.Usage = func(){")
+            m.stmt("cmd.Usage = func() {")
             with m.scope():
                 m.import_("fmt")  # import:
                 m.stmt(f"fmt.Fprintln(cmd.Output(), `{description}`)")
