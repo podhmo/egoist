@@ -1,6 +1,7 @@
 from __future__ import annotations
 import typing as t
 from egoist import types
+from .types import GoPointer
 
 
 class Resolver:
@@ -12,10 +13,31 @@ class Resolver:
         ] = {}
 
     # see mro?
-
-    def resolve_gotype(self, typ: t.Type[t.Any]) -> str:
+    # todo: handling import
+    # todo: use lru_cache?
+    # todo: return Symbol?
+    def resolve_gotype(self, typ: t.Type[t.Any], *, _none_type=type(None)) -> str:
         """e.g. str -> 'string' """
-        return self.gotype_map[typ]
+        if hasattr(typ, "__origin__"):
+            origin = typ.__origin__
+            args = t.get_args(typ)
+            if origin == dict:
+                k = self.resolve_gotype(args[0])
+                v = self.resolve_gotype(args[1])
+                return f"map[{k}]{v}"
+            elif origin == list or origin == tuple:
+                v = self.resolve_gotype(args[0])
+                return f"[]{v}"
+            elif origin == GoPointer or (
+                origin == t.Union and len(args) == 2 and _none_type in args
+            ):
+                v = self.resolve_gotype(args[0])
+                return f"*{v}"
+        try:
+            return self.gotype_map[typ]
+        except KeyError:
+            self.gotype_map[typ] = typ.__name__
+            return typ.__name__
 
     def resolve_parse_method(self, typ: t.Type[t.Any]) -> str:
         """e.g. bool -> ParseBool """
@@ -40,6 +62,7 @@ class Resolver:
 
 def get_resolver() -> Resolver:
     resolver = Resolver()
+    resolver.gotype_map[t.Any] = "interface{}"
 
     def default_str(v: t.Optional[t.Any]) -> str:
         import json  # xxx
@@ -118,5 +141,4 @@ def get_resolver() -> Resolver:
         parse_method="DurationVar",
         default_function=default_duration,
     )
-
     return resolver
