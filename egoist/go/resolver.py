@@ -14,12 +14,15 @@ class Resolver:
     # see mro?
 
     def resolve_gotype(self, typ: t.Type[t.Any]) -> str:
+        """e.g. str -> 'string' """
         return self.gotype_map[typ]
 
     def resolve_parse_method(self, typ: t.Type[t.Any]) -> str:
+        """e.g. bool -> ParseBool """
         return self.parse_method_map[typ]
 
     def resolve_default(self, typ: t.Type[t.Any], val: t.Any) -> str:
+        """e.g. str, 'value' -> "value" """
         return self.default_function_map[typ](val)
 
     def register(
