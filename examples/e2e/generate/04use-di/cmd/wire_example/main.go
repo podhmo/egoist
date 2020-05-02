@@ -20,7 +20,7 @@ type Option struct {
 func main() {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("wire_example", flag.ContinueOnError)
-	cmd.Usage = func(){
+	cmd.Usage = func() {
 		fmt.Fprintln(cmd.Output(), `wire_example - google/wire event examples`)
 		fmt.Fprintln(cmd.Output(), "")
 		fmt.Fprintln(cmd.Output(), "Usage:")
