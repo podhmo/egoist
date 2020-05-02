@@ -1,4 +1,5 @@
 package main
+
 import (
 	"flag"
 	"fmt"
@@ -16,10 +17,10 @@ type Option struct {
 }
 
 
-func main()  {
+func main() {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("hello", flag.ContinueOnError)
-	cmd.Usage = func(){
+	cmd.Usage = func() {
 		fmt.Fprintln(cmd.Output(), `hello - hello message`)
 		fmt.Fprintln(cmd.Output(), "")
 		fmt.Fprintln(cmd.Output(), "Usage:")

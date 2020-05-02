@@ -1,6 +1,6 @@
 // But, in python, using the argument of different name
 
-func run2()  {
+func run2() {
 	config := "config.json"
 	config2 := "config2.json"
 

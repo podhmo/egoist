@@ -1,13 +1,11 @@
 package main
 
-
 import (
 	"m/conf"
 	"m/internal"
 )
 
-
-func run()  {
+func run() {
 	config := "config.json"
 
 	v1, err := conf.NewConfig(config)

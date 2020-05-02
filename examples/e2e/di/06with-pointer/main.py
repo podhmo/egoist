@@ -36,7 +36,7 @@ class internal:
 
 
 m = gofile("main")
-with m.func("run", return_="error"):
+with m.func("run", returns="error"):
     b = di.Builder()
 
     b.add_provider(internal.NewX)
