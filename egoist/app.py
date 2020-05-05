@@ -28,6 +28,8 @@ class Context(_Context):
     def registry(self) -> Registry:
         return Registry()
 
+    committed: t.ClassVar[bool] = False
+
 
 class App(_Configurator):
     context_factory = Context
@@ -37,6 +39,10 @@ class App(_Configurator):
         return self.context.registry
 
     def commit(self) -> App:
+        # only once
+        if self.context.committed:
+            return
+        self.context.committed = True
         logger.info("commit")
         super().commit()
 
@@ -55,14 +61,19 @@ class App(_Configurator):
         d = {"definitions": defs}
         print(json.dumps(d, indent=2, ensure_ascii=False))
 
-    def generate(self):
+    def generate(
+        self, *, root: t.Optinal[str] = None, targets: t.Optional[t.List[str]] = None
+    ) -> None:
         self.commit()
 
         import pathlib
 
-        here = self.settings["here"]
-        root = self.settings["root"]
-        rootdir = pathlib.Path(here).parent / root
+        if root is not None:
+            rootdir = root
+        else:
+            here = self.settings["here"]
+            root = self.settings["root"]
+            rootdir = root or pathlib.Path(here).parent / root
 
         for kit, fns in self.registry.generate_settings.items():
             generate_or_module = self.maybe_dotted(kit)
@@ -72,3 +83,44 @@ class App(_Configurator):
                 # TODO: genetle error message
                 generate = generate_or_module.generate
             generate({fn.__name__: fn for fn in fns}, root=rootdir)
+
+    def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
+        import argparse
+        from egoist.internal.logutil import logging_setup
+
+        parser = argparse.ArgumentParser(
+            formatter_class=type(
+                "_HelpFormatter",
+                (argparse.ArgumentDefaultsHelpFormatter, argparse.RawTextHelpFormatter),
+                {},
+            )
+        )
+        parser.print_usage = parser.print_help  # type: ignore
+        subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
+        subparsers.required = True
+
+        fn = self.describe
+        sub_parser = subparsers.add_parser(
+            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+        )
+        sub_parser.set_defaults(subcommand=fn)
+
+        fn = self.generate
+        sub_parser = subparsers.add_parser(
+            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+        )
+        sub_parser.add_argument("--root", required=False, default="cmd", help="-")
+        # todo: scan modules in show_help only
+        sub_parser.add_argument(
+            "targets",
+            nargs="*",
+            choices=[[]] + list(fn.__name__ for fns in self.registry.generate_settings.values() for fn in fns),  # type: ignore
+        )
+        sub_parser.set_defaults(subcommand=fn)
+
+        activate = logging_setup(parser)
+        args = parser.parse_args(argv)
+        params = vars(args).copy()
+        activate(params)
+        subcommand = params.pop("subcommand")
+        return subcommand(**params)
