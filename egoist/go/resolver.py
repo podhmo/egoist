@@ -1,6 +1,8 @@
 from __future__ import annotations
 import typing as t
 from egoist import types
+from prestring.utils import UnRepr
+from prestring.go import goname
 from prestring.go.codeobject import Module
 from .types import GoPointer, get_gopackage
 
@@ -8,7 +10,6 @@ from .types import GoPointer, get_gopackage
 class Resolver:
     def __init__(self, m: Module) -> None:
         self.m = m
-
         self.gotype_map: t.Dict[t.Type[t.Any], str] = {}
         self.parse_method_map: t.Dict[t.Type[t.Any], str] = {}
         self.default_function_map: t.Dict[
@@ -45,7 +46,13 @@ class Resolver:
         prefix = ""
         if pkg is not None:
             prefix = f"{self.m.import_(pkg)}."
-        return f"{prefix}{typ.__name__}"
+
+        py_clsname = getattr(typ, "__qualname__", typ.__name__)
+        if "." in py_clsname:
+            typename = "_".join([goname(x) for x in py_clsname.split(".")])
+        else:
+            typename = goname(py_clsname)
+        return f"{prefix}{typename}"
 
     def resolve_parse_method(self, typ: t.Type[t.Any]) -> str:
         """e.g. bool -> ParseBool """
