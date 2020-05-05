@@ -42,6 +42,7 @@ class App(_Configurator):
         # only once
         if self.context.committed:
             return
+
         self.context.committed = True
         logger.info("commit")
         super().commit()
