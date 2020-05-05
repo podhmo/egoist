@@ -29,3 +29,22 @@ class App(_Configurator):
     @property
     def registry(self) -> Registry:
         return self.context.registry
+
+    def commit(self) -> App:
+        logger.info("commit")
+        super().commit()
+
+    def describe(self):
+        self.commit()
+
+        import json
+        import inspect
+
+        defs = {}
+        for kit, fns in self.registry.generate_settings.items():
+            for fn in fns:
+                name = f"{fn.__module__}.{fn.__name__}".replace("__main__.", "")
+                summary = (inspect.getdoc(fn) or "").strip().split("\n", 1)[0]
+                defs[name] = {"doc": summary, "generator": kit}
+        d = {"definitions": defs}
+        print(json.dumps(d, indent=2, ensure_ascii=False))
