@@ -1,5 +1,6 @@
 from __future__ import annotations
 import typing as t
+import typing_extensions as tx
 import dataclasses
 from collections import defaultdict
 import logging
@@ -8,6 +9,11 @@ from miniconfig import Context as _Context
 from .langhelpers import reify
 
 logger = logging.getLogger(__name__)
+
+
+class SettingsDict(tx.TypedDict):
+    root: str
+    here: str
 
 
 @dataclasses.dataclass
