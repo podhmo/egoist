@@ -81,7 +81,7 @@ def setup_resolver(resolver: Resolver) -> None:
     def default_str(v: t.Optional[t.Any]) -> str:
         import json  # xxx
 
-        return json.dumps(v or "")
+        return UnRepr(json.dumps(v or ""))
 
     resolver.register(
         types.str,
