@@ -19,7 +19,7 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
         for name, fn in fns.items():
             logger.info("walk %s", name)
 
-            fpath = _get_path_from_function_name(fn.__name__)
+            fpath = _get_path_from_function_name(name)
 
             with fs.open(
                 str(pathlib.Path(fpath) / "main.go"), "w"

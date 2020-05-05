@@ -48,3 +48,21 @@ class App(_Configurator):
                 defs[name] = {"doc": summary, "generator": kit}
         d = {"definitions": defs}
         print(json.dumps(d, indent=2, ensure_ascii=False))
+
+    def generate(self):
+        self.commit()
+
+        import pathlib
+
+        here = self.settings["here"]
+        root = self.settings["root"]
+        rootdir = pathlib.Path(here).parent / root
+
+        for kit, fns in self.registry.generate_settings.items():
+            generate_or_module = self.maybe_dotted(kit)
+            if callable(generate_or_module):
+                generate = generate_or_module
+            else:
+                # TODO: genetle error message
+                generate = generate_or_module.generate
+            generate({fn.__name__: fn for fn in fns}, root=rootdir)
