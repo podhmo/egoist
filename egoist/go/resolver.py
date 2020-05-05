@@ -1,11 +1,15 @@
 from __future__ import annotations
 import typing as t
 from egoist import types
-from .types import GoPointer
+from prestring.utils import UnRepr
+from prestring.go import goname
+from prestring.go.codeobject import Module
+from .types import GoPointer, get_gopackage
 
 
 class Resolver:
-    def __init__(self) -> None:
+    def __init__(self, m: Module) -> None:
+        self.m = m
         self.gotype_map: t.Dict[t.Type[t.Any], str] = {}
         self.parse_method_map: t.Dict[t.Type[t.Any], str] = {}
         self.default_function_map: t.Dict[
@@ -33,11 +37,22 @@ class Resolver:
             ):
                 v = self.resolve_gotype(args[0])
                 return f"*{v}"
-        try:
-            return self.gotype_map[typ]
-        except KeyError:
-            self.gotype_map[typ] = typ.__name__
-            return typ.__name__
+
+        gotype = self.gotype_map.get(typ)
+        if gotype is not None:
+            return gotype
+
+        pkg = get_gopackage(typ)
+        prefix = ""
+        if pkg is not None:
+            prefix = f"{self.m.import_(pkg)}."
+
+        py_clsname = getattr(typ, "__qualname__", typ.__name__)
+        if "." in py_clsname:
+            typename = "_".join([goname(x) for x in py_clsname.split(".")])
+        else:
+            typename = goname(py_clsname)
+        return f"{prefix}{typename}"
 
     def resolve_parse_method(self, typ: t.Type[t.Any]) -> str:
         """e.g. bool -> ParseBool """
@@ -60,14 +75,20 @@ class Resolver:
         self.default_function_map[typ] = default_function
 
 
-def get_resolver() -> Resolver:
-    resolver = Resolver()
+def get_resolver(m: Module) -> Resolver:
+    resolver = Resolver(m)
+    setup_resolver(resolver)
+    return resolver
+
+
+# TODO: customizable
+def setup_resolver(resolver: Resolver) -> None:
     resolver.gotype_map[t.Any] = "interface{}"
 
     def default_str(v: t.Optional[t.Any]) -> str:
         import json  # xxx
 
-        return json.dumps(v or "")
+        return UnRepr(json.dumps(v or ""))
 
     resolver.register(
         types.str,
@@ -141,4 +162,3 @@ def get_resolver() -> Resolver:
         parse_method="DurationVar",
         default_function=default_duration,
     )
-    return resolver
