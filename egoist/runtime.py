@@ -5,7 +5,7 @@ import dataclasses
 from .langhelpers import reify
 from .types import Command
 from .internal.prestringutil import Module
-from .internal.prestringutil import goname, Symbol
+from .internal.prestringutil import Symbol
 
 if t.TYPE_CHECKING:
     from .internal._fnspec import Fnspec
@@ -45,7 +45,7 @@ class Arg:
 class Env:
     m: Module
     fn: Command
-    prefix: str
+    prefix: str = ""
 
     @reify
     def fnspec(self) -> Fnspec:
@@ -78,20 +78,10 @@ def printf(fmt_str: str, *args: t.Any) -> None:
 
 def generate(
     visit: t.Callable[[Env], t.ContextManager[None]]
-) -> t.ContextManager[None]:
+) -> t.ContextManager[t.Any]:
     c = get_self()
     env = c.stack[-1]
     return visit(env)
-
-
-def get_cli_options() -> ArgsAttr:
-    return get_self().stack[-1].args
-
-
-def get_cli_rest_args() -> Symbol:
-    prefix = get_self().stack[-1].prefix
-    name = _REST_ARGS_NAME
-    return Symbol(f"{prefix}.{goname(name)}")
 
 
 def get_self() -> RuntimeContext:

@@ -3,19 +3,17 @@ from magicalimport import import_module
 
 settings: SettingsDict = {"root": "cmd/", "here": __file__}
 app = App(settings)
-
-app.include("egoist.directives.define_cli")
-define_cli = app.define_cli("egoist.generate:walk")
-
 internal = import_module("./internal.py", here=__file__)
 
+app.include("egoist.directives.define_cli")
 
+
+@app.define_cli("egoist.generate.clikit:walk")
 def wire_example(*, grumby: bool = False) -> None:
     """
     google/wire event examples
     """
-    from egoist import runtime
-    from egoist.generate.clikit import clikit
+    from egoist.generate.clikit import runtime, clikit
     from egoist.go import di
 
     with runtime.generate(clikit) as m:
