@@ -31,3 +31,8 @@ def get_origin_type(typ: t.Type[t.Any]) -> t.Type[t.Any]:
     if hasattr(typ, "__origin__"):
         return typ.__origin__  # type: ignore
     return typ
+
+
+def get_path_from_function_name(fnname: str) -> str:
+    """foo__bar__boo -> foo/bar/boo"""
+    return fnname.replace("__", "/")

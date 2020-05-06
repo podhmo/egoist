@@ -7,6 +7,7 @@ from egoist import types
 from egoist.go.resolver import get_resolver, Resolver
 from egoist.langhelpers import get_path_from_function_name
 from egoist.internal.prestringutil import output, Module, goname, Symbol
+from egoist.runtime import _REST_ARGS_NAME
 from . import runtime
 
 # todo: separate "parse, setup component, run action"
@@ -65,7 +66,7 @@ def clikit(
             m.stmt(f"{goname(name)} {resolver.resolve_gotype(typ)} // for `-{name}`")
 
         # NOTE: accessable via runtime.get_cli_rest_args()
-        m.stmt(f"{goname(runtime._REST_ARGS_NAME)} []string // cmd.Args")
+        m.stmt(f"{goname(_REST_ARGS_NAME)} []string // cmd.Args")
     m.sep()
 
     with m.func("main"):

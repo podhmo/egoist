@@ -2,10 +2,10 @@ from __future__ import annotations
 import typing as t
 import dataclasses
 
-from .langhelpers import reify
-from .types import Command
-from .internal.prestringutil import Module
-from .internal.prestringutil import Symbol
+from egoist.langhelpers import reify
+from egoist.types import Command
+from egoist.internal.prestringutil import Module
+
 
 if t.TYPE_CHECKING:
     from .internal._fnspec import Fnspec
@@ -74,14 +74,6 @@ def printf(fmt_str: str, *args: t.Any) -> None:
     fmt = m.import_("fmt")
     # fixme: remove Unrepr and json.dumps
     m.stmt(fmt.Printf(UnRepr(json.dumps(fmt_str)), *args))
-
-
-def generate(
-    visit: t.Callable[[Env], t.ContextManager[None]]
-) -> t.ContextManager[t.Any]:
-    c = get_self()
-    env = c.stack[-1]
-    return visit(env)
 
 
 def get_self() -> RuntimeContext:

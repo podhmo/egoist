@@ -1,4 +1,5 @@
 default:
 	$(MAKE) -C init
-	$(MAKE) -C generate
+	$(MAKE) -C generate-clikit
+	$(MAKE) -C generate-structkit
 	$(MAKE) -C di
