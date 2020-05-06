@@ -23,12 +23,7 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
             with fs.open(str(pathlib.Path(fpath)) + ".go", "w") as m:  # type: Module
                 env = runtime.Env(m=m, fn=fn)  # xxx:
                 c.stack.append(env)
-                # xxx:
-                kwargs = {
-                    name: Symbol(f"{goname(name)}")
-                    for name, _, _ in env.fnspec.parameters
-                }
-                fn(**kwargs)
+                fn()
                 c.stack.pop()
 
 
