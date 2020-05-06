@@ -1,6 +1,16 @@
 from egoist.runtime import ArgsAttr, _REST_ARGS_NAME
-from egoist.runtime import get_self, generate, printf, Env  # noqa: F401
+from egoist.runtime import get_self, generate, printf, Env
 from egoist.internal.prestringutil import goname, Symbol
+
+__all__ = [
+    "get_self",
+    "generate",
+    "printf",
+    "Env",
+    # defined in this module
+    "get_cli_options",
+    "get_cli_rest_args",
+]
 
 
 def get_cli_options() -> ArgsAttr:

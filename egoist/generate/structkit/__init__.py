@@ -5,7 +5,7 @@ import contextlib
 from egoist import types
 from egoist import runtime
 from egoist.internal.prestringutil import output, Module, goname, Symbol
-from egoist.go.resolver import Resolver
+from egoist.go.resolver import Resolver, get_resolver
 from egoist.langhelpers import get_path_from_function_name
 from . import _walk
 from . import _emit
@@ -43,6 +43,7 @@ def structkit(
     resolver: t.Optional[Resolver] = None,
 ) -> t.Iterator[Module]:
     m = env.m
+    resolver = resolver or get_resolver(m)
     yield m
 
     for item in _walk.walk(classes):
@@ -56,10 +57,3 @@ def structkit(
                 _emit.emit_unmarshalJSON(m, item, resolver=resolver)
             m.sep()
     return m
-
-
-def metadata(
-    *, inline: bool = False, required: bool = True, comment: str = ""
-) -> t.Dict[str, t.Any]:
-    d: _walk.Metadata = {"inline": inline, "required": required, "comment": comment}
-    return d  # type: ignore

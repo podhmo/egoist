@@ -1,41 +1,29 @@
 import typing as t
-import typing_extensions as tx
 import dataclasses
-from metashape import runtime
 from metashape.declarative import MISSING
-
-
-class Metadata(tx.TypedDict, total=False):
-    inline: bool
-    required: bool
-    comment: str
-    default: t.Any
-    tags: t.Dict[str, t.List[str]]
-    _override_type: str  # hack
-
-
-Row = t.Tuple[str, t.Any, Metadata]
+from metashape.runtime import get_walker
+from . import runtime
 
 
 @dataclasses.dataclass
 class Item:
     type_: t.Type[t.Any]
-    fields: t.List[Row]
+    fields: t.List[runtime.Row]
     args: t.List[t.Type[t.Any]]
 
     @property
-    def is_object(self):
+    def is_object(self) -> bool:
         return not self.args
 
     @property
-    def is_union(self):
-        return not self.fields and self.args
+    def is_union(self) -> bool:
+        return not self.fields and bool(self.args)
 
 
 def walk(
     classes: t.List[t.Type[t.Any]], *, _nonetype: t.Type[t.Any] = type(None)
 ) -> t.Iterator[Item]:
-    w = runtime.get_walker(classes)
+    w = get_walker(classes)
     for cls in w.walk(kinds=["object", None]):
         if (
             getattr(cls, "__origin__", None) == t.Union
@@ -47,13 +35,13 @@ def walk(
                     w.append(subtyp)
             continue
 
-        fields: t.List[Row] = []
+        fields: t.List[runtime.Row] = []
         for name, info, _metadata in w.for_type(cls).walk(ignore_private=False):
             if name.startswith("_") and name.endswith("_"):
                 continue
 
-            filled_metadata: Metadata = metadata()
-            filled_metadata.update(_metadata)
+            filled_metadata: runtime.Metadata = runtime.metadata()
+            filled_metadata.update(_metadata)  # type:ignore
             if filled_metadata.get("default") == MISSING:
                 filled_metadata.pop("default")
             if info.is_optional:

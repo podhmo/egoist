@@ -1,7 +1,6 @@
 from __future__ import annotations
 import typing as t
 import inspect
-import dataclasses
 from prestring.go.codeobject import Module
 from prestring.go import goname
 from prestring.naming import untitleize
@@ -9,6 +8,7 @@ from egoist.go.resolver import Resolver
 from egoist.go.types import get_gopackage
 from metashape.analyze import typeinfo
 from _walk import Item
+from . import runtime
 
 
 def build_gotags(tags: t.Dict[str, t.List[str]]) -> str:
@@ -18,19 +18,13 @@ def build_gotags(tags: t.Dict[str, t.List[str]]) -> str:
 def has_class_object(info: typeinfo.TypeInfo) -> bool:
     if not hasattr(info, "args"):  # xxx
         return typeinfo.get_custom(info) is not None
-    return any(typeinfo.get_custom(sinfo) is not None for sinfo in info.args)
+    return any(typeinfo.get_custom(sinfo) is not None for sinfo in info.args)  # type: ignore
 
 
-@dataclasses.dataclass(frozen=True)
-class Definition:
-    name: str
-    code_module: t.Optional[Module]
-
-
-def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> Definition:
+def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
     gopackage = get_gopackage(item.type_)
     if gopackage is not None:
-        return ""
+        return runtime.Definition(name="", code_module=None)
 
     typename = str(resolver.resolve_gotype(item.type_))
 
@@ -71,12 +65,11 @@ def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> Definition:
                 comment = metadata.get("comment", "")
                 m.stmt(f"  // {comment.split(_NEWLINE, 1)[0]}" if comment else "")
 
-    definition = Definition(name=typename, code_module=None)
     m.stmt("}")
-    return definition
+    return runtime.Definition(name=typename, code_module=None)
 
 
-def emit_union(m: Module, item: Item, *, resolver: Resolver) -> Definition:
+def emit_union(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
     typename = goname(item.type_.__name__)
     kind_typename = typename + "Kind"
 
@@ -96,11 +89,15 @@ def emit_union(m: Module, item: Item, *, resolver: Resolver) -> Definition:
     m.sep()
 
     # UnmarshalJSON
-    discriminator_field = ("$kind", typeinfo.typeinfo(str), metadata())
+    discriminator_field = ("$kind", typeinfo.typeinfo(str), runtime.metadata())
     discriminator_field[-1]["_override_type"] = kind_typename
 
     pseudo_fields = [
-        (sub_type.__name__, typeinfo.typeinfo(sub_type), metadata(required=False))
+        (
+            sub_type.__name__,
+            typeinfo.typeinfo(sub_type),
+            runtime.metadata(required=False),
+        )
         for sub_type in item.args
     ]
     pseudo_item = Item(
@@ -129,8 +126,7 @@ def emit_union(m: Module, item: Item, *, resolver: Resolver) -> Definition:
     # enums
     emit_enums(m, item.type_, resolver=resolver, name=kind_typename)
 
-    definition = Definition(name=typename, code_module=None)
-    return definition
+    return runtime.Definition(name=typename, code_module=None)
 
 
 def emit_enums(
@@ -139,7 +135,7 @@ def emit_enums(
     *,
     resolver: Resolver,
     name: t.Optional[str] = None,
-) -> str:
+) -> runtime.Definition:
     # literal_type or union_type
     go_type = name or f"{resolver.resolve_gotype(literal_type)}"
 
@@ -170,10 +166,10 @@ def emit_enums(
     # ...
     # }
     with m.method(f"{this} {go_type}", "Valid", returns="error"):
-        with m.switch(this) as sm:
+        with m.switch(str(this)) as sm:
             with sm.case(", ".join(const_members.values())):
                 sm.return_("nil")
-            with sm.default() as sm:
+            with sm.default():
                 fmt_pkg = m.import_("fmt")
                 candidates = ", ".join([str(x) for x in const_names])
                 sm.return_(
@@ -192,11 +188,12 @@ def emit_enums(
         m.stmt(f'*{this} = {go_type}({strings_pkg}.Trim(string(b), `"`))')
         m.return_(this.Valid())
 
-    definition = Definition(name=go_type, code_module=None)
-    return definition
+    return runtime.Definition(name=go_type, code_module=None)
 
 
-def emit_unmarshalJSON(m: Module, item: Item, *, resolver: Resolver) -> Definition:
+def emit_unmarshalJSON(
+    m: Module, item: Item, *, resolver: Resolver
+) -> runtime.Definition:
     this = m.symbol(f"{item.type_.__name__[0].lower()}")
     this_type = f"{resolver.resolve_gotype(item.type_)}"
     this_type_pointer = f"*{this_type}"
@@ -227,9 +224,9 @@ def emit_unmarshalJSON(m: Module, item: Item, *, resolver: Resolver) -> Definiti
                     gotype: str = metadata["_override_type"]
                 elif has_class_object(info):
                     json_pkg = m.import_("encoding/json")
-                    gotype: str = str(json_pkg.RawMessage)
+                    gotype = str(json_pkg.RawMessage)
                 else:
-                    gotype: str = resolver.resolve_gotype(info.raw)
+                    gotype = resolver.resolve_gotype(info.raw)
 
                 m.append(f'{goname(name)} *{gotype} `json:"{name}"`')
                 m.stmt("// required" if metadata["required"] else "")
@@ -258,11 +255,11 @@ def emit_unmarshalJSON(m: Module, item: Item, *, resolver: Resolver) -> Definiti
                     if has_class_object(info):
                         # pointer
                         if info.is_optional:
-                            gotype: str = resolver.resolve_gotype(info.normalized)
+                            gotype = resolver.resolve_gotype(info.normalized)
                             m.stmt(f"{this}.{goname(name)} = &{gotype}{{}}")
                             ref = f"{this}.{field}"
                         elif hasattr(info, "args"):  # xxx
-                            gotype: str = resolver.resolve_gotype(info.normalized)
+                            gotype = resolver.resolve_gotype(info.normalized)
                             m.stmt(f"{this}.{goname(name)} = {gotype}{{}}")
                             ref = f"&{this}.{field}"
                         else:
@@ -290,7 +287,7 @@ def emit_unmarshalJSON(m: Module, item: Item, *, resolver: Resolver) -> Definiti
         m.return_(err.Untyped())
 
     m.stmt("}")
-    return Definition(name="UnmarshalJSON", code_module=code_module)
+    return runtime.Definition(name="UnmarshalJSON", code_module=code_module)
 
 
 _NEWLINE = "\n"
