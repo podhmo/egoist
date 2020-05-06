@@ -3,13 +3,10 @@ import logging
 import pathlib
 import contextlib
 from egoist import types
-from egoist import runtime
 from egoist.internal.prestringutil import output, Module, goname, Symbol
 from egoist.go.resolver import Resolver, get_resolver
 from egoist.langhelpers import get_path_from_function_name
-from . import _walk
-from . import _emit
-
+from . import runtime
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +39,9 @@ def structkit(
     *,
     resolver: t.Optional[Resolver] = None,
 ) -> t.Iterator[Module]:
+    from . import _walk
+    from . import _emit
+
     m = env.m
     resolver = resolver or get_resolver(m)
     yield m

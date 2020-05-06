@@ -7,7 +7,7 @@ from prestring.naming import untitleize
 from egoist.go.resolver import Resolver
 from egoist.go.types import get_gopackage
 from metashape.analyze import typeinfo
-from _walk import Item
+from ._walk import Item
 from . import runtime
 
 

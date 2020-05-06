@@ -76,14 +76,6 @@ def printf(fmt_str: str, *args: t.Any) -> None:
     m.stmt(fmt.Printf(UnRepr(json.dumps(fmt_str)), *args))
 
 
-def generate(
-    visit: t.Callable[[Env], t.ContextManager[None]]
-) -> t.ContextManager[t.Any]:
-    c = get_self()
-    env = c.stack[-1]
-    return visit(env)
-
-
 def get_self() -> RuntimeContext:
     global _context
     if _context is None:

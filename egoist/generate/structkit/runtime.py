@@ -2,9 +2,30 @@ import typing as t
 import typing_extensions as tx
 import dataclasses
 from prestring.go.codeobject import Module
+from egoist.runtime import get_self, printf, Env
 
-# from egoist.runtime import ArgsAttr, _REST_ARGS_NAME
-from egoist.runtime import get_self, generate, printf, Env  # noqa: F401
+
+__all__ = [
+    "get_self",
+    "printf",
+    "Env",
+    # defined in this module
+    "generate",
+    "Metadata",
+    "Row",
+    "metadata",
+    "Definition",
+]
+
+
+def generate(
+    visit: t.Callable[[Env, t.List[t.Type[t.Any]]], t.ContextManager[Module]],
+    *,
+    classes: t.List[t.Type[t.Any]],
+) -> t.ContextManager[Module]:
+    c = get_self()
+    env = c.stack[-1]
+    return visit(env, classes)
 
 
 class Metadata(tx.TypedDict, total=False):
@@ -30,13 +51,3 @@ def metadata(
 class Definition:
     name: str
     code_module: t.Optional[Module]
-
-
-# def get_cli_options() -> ArgsAttr:
-#     return get_self().stack[-1].args
-
-
-# def get_cli_rest_args() -> Symbol:
-#     prefix = get_self().stack[-1].prefix
-#     name = _REST_ARGS_NAME
-#     return Symbol(f"{prefix}.{goname(name)}")
