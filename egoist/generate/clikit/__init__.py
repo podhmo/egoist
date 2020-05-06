@@ -1,11 +1,41 @@
 import typing as t
 import contextlib
 import inspect
-from egoist import runtime
-from egoist.internal.prestringutil import goname, Module
+import logging
+import pathlib
+from egoist import types
 from egoist.go.resolver import get_resolver, Resolver
+from egoist.langhelpers import get_path_from_function_name
+from egoist.internal.prestringutil import output, Module, goname, Symbol
+from . import runtime
 
-from . import walk as generate  # noqa: F401
+# todo: separate "parse, setup component, run action"
+# todo: support other types
+# todo: separate from clikit
+
+logger = logging.getLogger(__name__)
+
+
+def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
+    with output(root=str(root), opener=Module) as fs:
+        c = runtime.get_self()
+
+        for name, fn in fns.items():
+            logger.info("walk %s", name)
+
+            fpath = get_path_from_function_name(name)
+
+            with fs.open(
+                str(pathlib.Path(fpath) / "main.go"), "w"
+            ) as m:  # type: Module
+                env = runtime.Env(m=m, fn=fn, prefix="opt")  # xxx:
+                c.stack.append(env)
+                kwargs = {
+                    name: Symbol(f"{env.prefix}.{goname(name)}")
+                    for name, _, _ in env.fnspec.parameters
+                }
+                fn(**kwargs)
+                c.stack.pop()
 
 
 @contextlib.contextmanager
