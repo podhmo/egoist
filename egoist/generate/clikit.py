@@ -5,7 +5,7 @@ from egoist import runtime
 from egoist.internal.prestringutil import goname, Module
 from egoist.go.resolver import get_resolver, Resolver
 
-from . import walk as generate
+from . import walk as generate  # noqa: F401
 
 
 @contextlib.contextmanager
