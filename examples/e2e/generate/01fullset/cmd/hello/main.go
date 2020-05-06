@@ -25,7 +25,7 @@ func main() {
 		fmt.Fprintln(cmd.Output(), "Usage:")
 		cmd.PrintDefaults()
 	}
-	cmd.StringVar(&opt.Name, "name", "", "name of person")
+	cmd.StringVar(&opt.Name, "name", "foo", "name of person")
 
 	if err := cmd.Parse(os.Args[1:]); err != nil {
 		if err != flag.ErrHelp {

@@ -8,7 +8,7 @@ define_cli = app.define_cli("egoist.generate:walk")
 
 
 @define_cli
-def hello(*, name: str) -> None:
+def hello(*, name: str = "foo") -> None:
     """hello message"""
     from egoist import runtime
     from egoist.generate.clikit import clikit
