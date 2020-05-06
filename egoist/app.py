@@ -75,7 +75,7 @@ class App(_Configurator):
         else:
             here = self.settings["here"]
             root = self.settings["root"]
-            rootdir = pathlib.Path(root) if root else (pathlib.Path(here).parent / root)
+            rootdir = pathlib.Path(here).parent / root
 
         for kit, fns in self.registry.generate_settings.items():
             generate_or_module = self.maybe_dotted(kit)
@@ -113,7 +113,7 @@ class App(_Configurator):
         sub_parser = subparsers.add_parser(
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
-        sub_parser.add_argument("--root", required=False, default="cmd", help="-")
+        sub_parser.add_argument("--root", required=False, help="-")
         # todo: scan modules in show_help only
         sub_parser.add_argument(
             "targets",
