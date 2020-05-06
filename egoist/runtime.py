@@ -2,10 +2,10 @@ from __future__ import annotations
 import typing as t
 import dataclasses
 
-from .langhelpers import reify
-from .types import Command
-from .internal.prestringutil import Module
-from .internal.prestringutil import Symbol
+from egoist.langhelpers import reify
+from egoist.types import Command
+from egoist.internal.prestringutil import Module
+
 
 if t.TYPE_CHECKING:
     from .internal._fnspec import Fnspec
