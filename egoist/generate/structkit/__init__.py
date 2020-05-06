@@ -3,7 +3,7 @@ import logging
 import pathlib
 import contextlib
 from egoist import types
-from egoist.internal.prestringutil import output, Module, goname, Symbol
+from egoist.internal.prestringutil import output, Module
 from egoist.go.resolver import Resolver, get_resolver
 from egoist.langhelpers import get_path_from_function_name
 from . import runtime
