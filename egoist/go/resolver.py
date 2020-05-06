@@ -20,7 +20,9 @@ class Resolver:
     # todo: handling import
     # todo: use lru_cache?
     # todo: return Symbol?
-    def resolve_gotype(self, typ: t.Type[t.Any], *, _none_type=type(None)) -> str:
+    def resolve_gotype(
+        self, typ: t.Type[t.Any], *, _none_type: t.Type[t.Any] = type(None)
+    ) -> str:
         """e.g. str -> 'string' """
         if hasattr(typ, "__origin__"):
             origin = typ.__origin__
@@ -83,12 +85,12 @@ def get_resolver(m: Module) -> Resolver:
 
 # TODO: customizable
 def setup_resolver(resolver: Resolver) -> None:
-    resolver.gotype_map[t.Any] = "interface{}"
+    resolver.gotype_map[t.Any] = "interface{}"  # type: ignore
 
     def default_str(v: t.Optional[t.Any]) -> str:
         import json  # xxx
 
-        return UnRepr(json.dumps(v or ""))
+        return UnRepr(json.dumps(v or ""))  # type: ignore
 
     resolver.register(
         types.str,

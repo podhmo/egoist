@@ -4,7 +4,7 @@ from .app import App
 AnyFunction = t.Callable[..., t.Any]
 
 
-def define_cli(app: App):
+def define_cli(app: App) -> None:
     name = "define_cli"
 
     def _register_cli(app: App, kit: str) -> AnyFunction:
