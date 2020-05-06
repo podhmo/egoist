@@ -4,6 +4,7 @@ test:
 ci:
 	pytest --show-capture=all --cov=egoist --no-cov-on-fail --cov-report term-missing
 	$(MAKE) lint typing
+	$(MAKE) examples
 
 format:
 #	pip install -e .[dev]
@@ -20,6 +21,10 @@ typing:
 #	pip install -e .[dev]
 	mypy --strict --strict-equality --ignore-missing-imports egoist
 mypy: typing
+
+examples:
+	$(MAKE) -C examples
+.PHONY: examples
 
 build:
 #	pip install wheel

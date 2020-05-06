@@ -1,6 +1,11 @@
-from __future__ import annotations
-from egoist import runtime
+from egoist.app import App, SettingsDict
 from magicalimport import import_module
+
+settings: SettingsDict = {"root": "cmd/", "here": __file__}
+app = App(settings)
+
+app.include("egoist.directives.define_cli")
+define_cli = app.define_cli("egoist.generate:walk")
 
 internal = import_module("./internal.py", here=__file__)
 
@@ -9,6 +14,7 @@ def wire_example(*, grumby: bool = False) -> None:
     """
     google/wire event examples
     """
+    from egoist import runtime
     from egoist.generate.clikit import clikit
     from egoist.go import di
 
@@ -25,4 +31,4 @@ def wire_example(*, grumby: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    runtime.main(name=__name__, here=__file__, root="cmd")
+    app.run()
