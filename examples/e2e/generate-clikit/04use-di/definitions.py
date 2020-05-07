@@ -1,9 +1,7 @@
 from egoist.app import App, SettingsDict
-from magicalimport import import_module
 
 settings: SettingsDict = {"root": "cmd/", "here": __file__}
 app = App(settings)
-internal = import_module("./internal.py", here=__file__)
 
 app.include("egoist.directives.define_cli")
 
@@ -15,6 +13,8 @@ def wire_example(*, grumby: bool = False) -> None:
     """
     from egoist.generate.clikit import runtime, clikit
     from egoist.go import di
+
+    internal = app.maybe_dotted("internal")
 
     with runtime.generate(clikit) as m:
         b = di.Builder()
