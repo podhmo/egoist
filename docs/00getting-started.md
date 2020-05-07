@@ -55,19 +55,25 @@ more details is [here](../examples/e2e/generate/00simple).
 definitions.py
 
 ```python
-from egoist import runtime
+from egoist.app import App, SettingsDict
+
+settings: SettingsDict = {"root": "cmd/", "here": __file__}
+app = App(settings)
+
+app.include("egoist.directives.define_cli")
 
 
+@app.define_cli("egoist.generate.clikit:walk")
 def hello(*, name: str) -> None:
     """hello message"""
-    from egoist.generate.clikit import clikit
+    from egoist.generate.clikit import runtime, clikit
 
     with runtime.generate(clikit):
         runtime.printf("hello %s\n", name)
 
 
 if __name__ == "__main__":
-    runtime.main(name=__name__, here=__file__, root="cmd")
+    app.run()
 ```
 
 ## using other package's function
@@ -77,16 +83,28 @@ if you want to calling other package's function. you can use `m.import_()`.
 definitions.py
 
 ```python
-from egoist import runtime
+from egoist.app import App, SettingsDict
+
+settings: SettingsDict = {"root": "cmd/", "here": __file__}
+app = App(settings)
+
+app.include("egoist.directives.define_cli")
 
 
-def hello(*, name: str = "World") -> None:
+@app.define_cli("egoist.generate.clikit:walk")
+def hello(*, name: str = "foo") -> None:
     """hello message"""
-    from egoist.generate.clikit import clikit
+    from egoist.generate.clikit import runtime, clikit
 
-    with runtime.generate(clikit) as m:
-        hello = m.import_("m/hello")
-        m.stmt(hello.Hello(name))
+    options = runtime.get_cli_options()
+    options.name.help = "name of person"
+
+    with runtime.generate(clikit):
+        runtime.printf("hello %s\n", name)
+
+
+if __name__ == "__main__":
+    app.run()
 ```
 
 run command.
@@ -156,19 +174,23 @@ So, supporting following provider functions.
 definitions.py
 
 ```python
-from __future__ import annotations
-from egoist import runtime
-from magicalimport import import_module
+from egoist.app import App, SettingsDict
 
-import internal # ./internal.py
+settings: SettingsDict = {"root": "cmd/", "here": __file__}
+app = App(settings)
+
+app.include("egoist.directives.define_cli")
 
 
+@app.define_cli("egoist.generate.clikit:walk")
 def wire_example(*, grumby: bool = False) -> None:
     """
     google/wire event examples
     """
-    from egoist.generate.clikit import clikit
+    from egoist.generate.clikit import runtime, clikit
     from egoist.go import di
+
+    internal = app.maybe_dotted("internal")  # ./internal.py
 
     with runtime.generate(clikit) as m:
         b = di.Builder()
@@ -185,7 +207,7 @@ def wire_example(*, grumby: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    runtime.main(name=__name__, here=__file__, root="cmd")
+    app.run()
 ```
 
 run command.
