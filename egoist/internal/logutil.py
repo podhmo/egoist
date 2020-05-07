@@ -36,6 +36,7 @@ def logging_activate(
         or f"level:%(levelname)s	name:%(name)sL%(lineno)s	{time_format_map.get(logging_time, '')}message:%(message)s"
     )
 
+    logging_level = logging_level or logging.INFO
     if debug or bool(os.environ.get("DEBUG", "").strip()):
         logging_level = logging.DEBUG
         print(
@@ -44,7 +45,7 @@ def logging_activate(
         )
 
     if os.environ.get("LOGGING_LEVEL"):
-        logging_level = logging._nameToLevel.get(os.environ["LOGGING_LEVEL"])
+        logging_level = logging._nameToLevel.get(os.environ["LOGGING_LEVEL"].upper())
     if os.environ.get("LOGGING_FORMAT"):
         logging_format = os.environ["LOGGING_FORMAT"]
     if os.environ.get("LOGGING_STREAM"):
@@ -55,7 +56,7 @@ def logging_activate(
         if level is not None:
             logging_level = level
 
-    if logging_level is not None:
-        logging.basicConfig(
-            level=logging_level, format=logging_format, stream=logging_stream,
-        )
+    logging.basicConfig(
+        level=logging_level, format=logging_format, stream=logging_stream,
+    )
+    logging.getLogger("metashape.analyze.walker").setLevel(logging.WARNING)
