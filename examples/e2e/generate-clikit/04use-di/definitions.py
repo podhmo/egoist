@@ -19,6 +19,8 @@ def wire_example(*, grumby: bool = False) -> None:
     with runtime.generate(clikit) as m:
         b = di.Builder()
 
+        # Greeter depends on Message
+        # and, Event depends on Greeter
         b.add_provider(internal.NewMessage)
         b.add_provider(internal.NewGreeter)
         b.add_provider(internal.NewEvent)
