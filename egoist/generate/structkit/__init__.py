@@ -40,6 +40,7 @@ def structkit(
     m = env.m
     resolver = resolver or get_resolver(m)
     yield m
+    m.import_("")
 
     for item in _walk.walk(classes):
         if item.is_union:
