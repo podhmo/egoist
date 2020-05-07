@@ -21,9 +21,14 @@ class Item:
 
 
 def walk(
-    classes: t.List[t.Type[t.Any]], *, _nonetype: t.Type[t.Any] = type(None)
+    classes: t.List[t.Type[t.Any]],
+    *,
+    _nonetype: t.Type[t.Any] = type(None),
+    metadata_handler: t.Optional[runtime.MetadataHandlerFunction] = None,
 ) -> t.Iterator[Item]:
     w = get_walker(classes)
+    metadata_handler = metadata_handler or runtime._default_metadata_handler
+
     for cls in w.walk(kinds=["object", None]):
         if (
             getattr(cls, "__origin__", None) == t.Union
@@ -46,6 +51,9 @@ def walk(
                 filled_metadata.pop("default")
             if info.is_optional:
                 filled_metadata["required"] = False
+
+            # handling tags
+            metadata_handler(cls, name=name, info=info, metadata=filled_metadata)
 
             if info.normalized.__module__ != "builtins":
                 w.append(info.normalized)

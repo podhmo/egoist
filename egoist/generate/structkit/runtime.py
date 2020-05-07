@@ -43,8 +43,37 @@ Row = t.Tuple[str, t.Any, Metadata]
 def metadata(
     *, inline: bool = False, required: bool = True, comment: str = ""
 ) -> Metadata:
-    d: Metadata = {"inline": inline, "required": required, "comment": comment}
+    d: Metadata = {
+        "inline": inline,
+        "required": required,
+        "comment": comment,
+        "tags": {},
+    }
     return d
+
+
+class MetadataHandlerFunction(tx.Protocol):
+    def __call__(
+        self, cls: t.Type[t.Any], *, name: str, info: t.Any, metadata: Metadata
+    ) -> None:
+        ...
+
+
+def add_jsontag_metadata_handler(
+    cls: t.Type[t.Any], *, name: str, info: t.Any, metadata: Metadata
+) -> None:
+    """inject `json:"<field name>"`"""
+    if "json" not in metadata:
+        metadata["tags"] = {"json": [name.rstrip("_")]}
+
+
+def set_metadata_handler(handler: MetadataHandlerFunction) -> MetadataHandlerFunction:
+    global _default_metadata_handler
+    _default_metadata_handler = handler
+    return handler
+
+
+_default_metadata_handler: MetadataHandlerFunction = add_jsontag_metadata_handler
 
 
 @dataclasses.dataclass(frozen=True)
