@@ -12,9 +12,9 @@ class Person:
     age: int
 
 
-@app.define_struct_set("egoist.generate.structkit:walk")
+@app.define_struct_set("egoist.generators.structkit:walk")
 def models__models() -> None:
-    from egoist.generate.structkit import runtime, structkit
+    from egoist.generators.structkit import runtime, structkit
 
     @runtime.set_metadata_handler
     def metadata_handler(

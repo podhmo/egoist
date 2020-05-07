@@ -25,9 +25,9 @@ class Comment:
     content: str
 
 
-@app.define_struct_set("egoist.generate.structkit:walk")
+@app.define_struct_set("egoist.generators.structkit:walk")
 def model__objects() -> None:
-    from egoist.generate.structkit import runtime, structkit
+    from egoist.generators.structkit import runtime, structkit
 
     with runtime.generate(structkit, classes=[Article]) as m:
         m.package("model")

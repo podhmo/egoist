@@ -7,12 +7,12 @@ app = App(settings)
 app.include("egoist.directives.define_cli")
 
 
-@app.define_cli("egoist.generate.clikit:walk")
+@app.define_cli("egoist.generators.clikit:walk")
 def hello(
     *, name: str = "world", age: types.uint, debug: types.bool, dur: types.duration
 ) -> None:
     """hello message"""
-    from egoist.generate.clikit import runtime, clikit
+    from egoist.generators.clikit import runtime, clikit
 
     with runtime.generate(clikit):
         runtime.printf("hello %s(%d)\n", name, age)

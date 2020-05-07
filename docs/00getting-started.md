@@ -63,10 +63,10 @@ app = App(settings)
 app.include("egoist.directives.define_cli")
 
 
-@app.define_cli("egoist.generate.clikit:walk")
+@app.define_cli("egoist.generators.clikit:walk")
 def hello(*, name: str) -> None:
     """hello message"""
-    from egoist.generate.clikit import runtime, clikit
+    from egoist.generators.clikit import runtime, clikit
 
     with runtime.generate(clikit):
         runtime.printf("hello %s\n", name)
@@ -91,10 +91,10 @@ app = App(settings)
 app.include("egoist.directives.define_cli")
 
 
-@app.define_cli("egoist.generate.clikit:walk")
+@app.define_cli("egoist.generators.clikit:walk")
 def hello(*, name: str = "foo") -> None:
     """hello message"""
-    from egoist.generate.clikit import runtime, clikit
+    from egoist.generators.clikit import runtime, clikit
 
     options = runtime.get_cli_options()
     options.name.help = "name of person"
@@ -182,12 +182,12 @@ app = App(settings)
 app.include("egoist.directives.define_cli")
 
 
-@app.define_cli("egoist.generate.clikit:walk")
+@app.define_cli("egoist.generators.clikit:walk")
 def wire_example(*, grumby: bool = False) -> None:
     """
     google/wire event examples
     """
-    from egoist.generate.clikit import runtime, clikit
+    from egoist.generators.clikit import runtime, clikit
     from egoist.go import di
 
     internal = app.maybe_dotted("internal")  # ./internal.py

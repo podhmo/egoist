@@ -6,10 +6,10 @@ app = App(settings)
 app.include("egoist.directives.define_cli")
 
 
-@app.define_cli("egoist.generate.clikit:walk")
+@app.define_cli("egoist.generators.clikit:walk")
 def hello(*, name: str = "foo") -> None:
     """hello message"""
-    from egoist.generate.clikit import runtime, clikit
+    from egoist.generators.clikit import runtime, clikit
 
     options = runtime.get_cli_options()
     options.name.help = "name of person"
