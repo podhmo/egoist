@@ -21,7 +21,10 @@ class Item:
 
 
 def walk(
-    classes: t.List[t.Type[t.Any]], *, _nonetype: t.Type[t.Any] = type(None)
+    classes: t.List[t.Type[t.Any]],
+    *,
+    _nonetype: t.Type[t.Any] = type(None),
+    metadata_handler: runtime.MetadataHandlerFunction = runtime.default_metadata_handler,
 ) -> t.Iterator[Item]:
     w = get_walker(classes)
     for cls in w.walk(kinds=["object", None]):
@@ -48,8 +51,7 @@ def walk(
                 filled_metadata["required"] = False
 
             # handling tags
-            if "json" not in filled_metadata:
-                filled_metadata["tags"] = {"json": [name.rstrip("_")]}
+            metadata_handler(cls, name=name, info=info, metadata=filled_metadata)
 
             if info.normalized.__module__ != "builtins":
                 w.append(info.normalized)

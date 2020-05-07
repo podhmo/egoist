@@ -52,6 +52,21 @@ def metadata(
     return d
 
 
+class MetadataHandlerFunction(tx.Protocol):
+    def __call__(
+        self, cls: t.Type[t.Any], *, name: str, info: t.Any, metadata: Metadata
+    ) -> None:
+        ...
+
+
+def default_metadata_handler(
+    cls: t.Type[t.Any], *, name: str, info: t.Any, metadata: Metadata
+) -> None:
+    """inject `json:"<field name>"`"""
+    if "json" not in metadata:
+        metadata["tags"] = {"json": [name.rstrip("_")]}
+
+
 @dataclasses.dataclass(frozen=True)
 class Definition:
     name: str
