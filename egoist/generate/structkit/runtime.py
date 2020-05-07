@@ -59,12 +59,20 @@ class MetadataHandlerFunction(tx.Protocol):
         ...
 
 
-def default_metadata_handler(
+def add_jsontag_metadata_handler(
     cls: t.Type[t.Any], *, name: str, info: t.Any, metadata: Metadata
 ) -> None:
     """inject `json:"<field name>"`"""
     if "json" not in metadata:
         metadata["tags"] = {"json": [name.rstrip("_")]}
+
+
+def set_metadata_handler(handler: MetadataHandlerFunction):
+    global default_metadata_handler
+    default_metadata_handler = handler
+
+
+default_metadata_handler: MetadataHandlerFunction = add_jsontag_metadata_handler
 
 
 @dataclasses.dataclass(frozen=True)
