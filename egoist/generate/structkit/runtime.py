@@ -67,12 +67,13 @@ def add_jsontag_metadata_handler(
         metadata["tags"] = {"json": [name.rstrip("_")]}
 
 
-def set_metadata_handler(handler: MetadataHandlerFunction):
-    global default_metadata_handler
-    default_metadata_handler = handler
+def set_metadata_handler(handler: MetadataHandlerFunction) -> MetadataHandlerFunction:
+    global _default_metadata_handler
+    _default_metadata_handler = handler
+    return handler
 
 
-default_metadata_handler: MetadataHandlerFunction = add_jsontag_metadata_handler
+_default_metadata_handler: MetadataHandlerFunction = add_jsontag_metadata_handler
 
 
 @dataclasses.dataclass(frozen=True)

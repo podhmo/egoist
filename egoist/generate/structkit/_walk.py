@@ -24,9 +24,11 @@ def walk(
     classes: t.List[t.Type[t.Any]],
     *,
     _nonetype: t.Type[t.Any] = type(None),
-    metadata_handler: runtime.MetadataHandlerFunction = runtime.default_metadata_handler,
+    metadata_handler: t.Optional[runtime.MetadataHandlerFunction] = None,
 ) -> t.Iterator[Item]:
     w = get_walker(classes)
+    metadata_handler = metadata_handler or runtime._default_metadata_handler
+
     for cls in w.walk(kinds=["object", None]):
         if (
             getattr(cls, "__origin__", None) == t.Union
