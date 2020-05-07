@@ -3,20 +3,27 @@ import typing as t
 
 def init(*, target: str = "clikit", root: str = ".") -> None:
     """scaffold"""
+    import logging
     import pathlib
     import shutil
     from importlib.util import find_spec
 
-    spec = find_spec("egoist")
-    if spec is None:
-        return
-    locations = spec.submodule_search_locations
-    if locations is None:
-        return
-    dirpath = pathlib.Path(locations[0]) / "data"
+    logger = logging.getLogger(__name__)
 
+    def _get_template_files_dir() -> str:
+        spec = find_spec("egoist")
+        if spec is None:
+            return
+        locations = spec.submodule_search_locations
+        if locations is None:
+            return
+        dirpath = pathlib.Path(locations[0]) / "data"
+        return dirpath
+
+    dirpath = _get_template_files_dir()
     src = dirpath / f"{target}_definitions.py.tmpl"
     dst = pathlib.Path(root) / "definitions.py"
+    logger.info("create %s", dst)
     shutil.copy(src, dst)
 
 
