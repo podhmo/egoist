@@ -45,7 +45,7 @@ class App(_Configurator):
             return
 
         self.context.committed = True  # type: ignore
-        logger.info("commit")
+        logger.debug("commit")
         super().commit()
 
     def describe(self) -> None:
