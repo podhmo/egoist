@@ -14,7 +14,7 @@ def wire_example(*, grumby: bool = False) -> None:
     from egoist.generate.clikit import runtime, clikit
     from egoist.go import di
 
-    internal = app.maybe_dotted("internal")
+    internal = app.maybe_dotted("internal")  # ./internal.py
 
     with runtime.generate(clikit) as m:
         b = di.Builder()
