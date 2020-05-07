@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
-    with output(root=str(root), opener=Module) as fs:
+    with output(root=str(root), opener=Module, verbose=True) as fs:
         c = runtime.get_self()
 
         for name, fn in fns.items():
-            logger.info("walk %s", name)
+            logger.debug("walk %s", name)
 
             fpath = get_path_from_function_name(name)
 
