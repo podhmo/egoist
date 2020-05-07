@@ -11,7 +11,7 @@ from ._walk import Item
 from . import runtime
 
 
-def build_gotags(tags: t.Dict[str, t.List[str]]) -> str:
+def build_tag_string(tags: t.Dict[str, t.List[str]]) -> str:
     return " ".join(f'''{k}:"{', '.join(vs)}"''' for k, vs in tags.items())
 
 
@@ -52,11 +52,8 @@ def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definit
             else:
                 m.append(f"{goname(name)} {gotype}")
 
-            # todo: handling tags
-            if "tags" not in metadata:
-                metadata["tags"] = {}
-            metadata["tags"] = {"json": [name.rstrip("_")]}
-            m.append(f" `{build_gotags(metadata['tags'])}`")
+            # note: metadata['tags'] is injected by _walker.walk()
+            m.append(f" `{build_tag_string(metadata['tags'])}`")
 
             # handling comments
             if metadata.get("inline", False):

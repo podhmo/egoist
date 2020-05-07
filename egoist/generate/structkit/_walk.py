@@ -47,6 +47,10 @@ def walk(
             if info.is_optional:
                 filled_metadata["required"] = False
 
+            # handling tags
+            if "json" not in filled_metadata:
+                filled_metadata["tags"] = {"json": [name.rstrip("_")]}
+
             if info.normalized.__module__ != "builtins":
                 w.append(info.normalized)
             if hasattr(info.normalized, "__origin__"):  # list, dict, etc..

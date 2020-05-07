@@ -43,7 +43,12 @@ Row = t.Tuple[str, t.Any, Metadata]
 def metadata(
     *, inline: bool = False, required: bool = True, comment: str = ""
 ) -> Metadata:
-    d: Metadata = {"inline": inline, "required": required, "comment": comment}
+    d: Metadata = {
+        "inline": inline,
+        "required": required,
+        "comment": comment,
+        "tags": {},
+    }
     return d
 
 
