@@ -2,6 +2,7 @@ import typing as t
 import typing_extensions as tx
 import dataclasses
 from prestring.go.codeobject import Module
+from metashape.declarative import field  # noqa: F401
 from egoist.runtime import get_self, printf, Env
 
 
@@ -9,6 +10,8 @@ __all__ = [
     "get_self",
     "printf",
     "Env",
+    # from other library
+    "field",
     # defined in this module
     "generate",
     "Metadata",

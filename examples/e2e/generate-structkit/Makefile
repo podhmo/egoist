@@ -1,7 +1,7 @@
 export CHECK ?=
 BUILD_FILE := ./x
 
-default: 00 01 02 03
+default: 00 01 02 03 04 05 06 07 08
 strict:
 	CHECK=1 $(MAKE)
 
@@ -36,8 +36,18 @@ strict:
 	$(MAKE) -C $(shell echo $@*/)
 	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
-# more nested
+# more nested (BROKEN)
 06:
+	$(MAKE) -C $(shell echo $@*/)
+	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
+
+# embedded
+07:
+	$(MAKE) -C $(shell echo $@*/)
+	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
+
+# empty
+08:
 	$(MAKE) -C $(shell echo $@*/)
 	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
