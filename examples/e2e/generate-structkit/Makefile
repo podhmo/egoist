@@ -1,7 +1,7 @@
 export CHECK ?=
 BUILD_FILE := ./x
 
-default: 00 01 02 03 04 05 06 07 08
+default: 00 01 02 03 04 05 06 07 08 09
 strict:
 	CHECK=1 $(MAKE)
 
@@ -51,9 +51,17 @@ strict:
 	$(MAKE) -C $(shell echo $@*/)
 	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
-# todo: embed
-# todo: union
+# enums
+09:
+	$(MAKE) -C $(shell echo $@*/)
+	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
+# docstring
+
+# todo: new type
+# todo: union
+# todo: with other packages
+# todo: docstring
 
 clean:
 	rm -f ${BUILD_FILE}
