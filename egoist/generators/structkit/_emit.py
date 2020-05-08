@@ -18,7 +18,7 @@ def build_tag_string(tags: t.Dict[str, t.List[str]]) -> str:
 def has_reference(info: typeinfo.TypeInfo) -> bool:
     if not hasattr(info, "args"):  # xxx
         return typeinfo.get_custom(info) is not None
-    return len(get_flatten_args(info.normalized)) > 0  # type: ignore
+    return len(get_flatten_args(info.normalized)) > 0
 
 
 def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import typing as t
 import typing_extensions as tx
 import dataclasses
@@ -34,12 +35,12 @@ def get_flatten_args(typ: t.Type[t.Any]) -> t.Tuple[t.Type[t.Any]]:
     if not hasattr(typ, "__args__"):
         if typ.__module__ != "builtins":
             return (typ,)
-        return ()
+        return ()  # type: ignore
 
-    r = set()
-    for subtype in typ.__args__:  # type: ignore
+    r: t.Set[t.Type[t.Any]] = set()
+    for subtype in typ.__args__:
         r.update(get_flatten_args(subtype))
-    return tuple(sorted(r, key=id))
+    return tuple(sorted(r, key=id))  # type: ignore
 
 
 def walk(
