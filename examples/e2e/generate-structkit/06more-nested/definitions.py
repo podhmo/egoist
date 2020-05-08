@@ -13,10 +13,14 @@ class Person:
     age: int
 
     followings: t.List[t.List[Person]]
-    followings2: t.List[t.List[t.Optional[Person]]]
+    followings2: t.List[t.List[t.Optional[Person2]]]
 
     groups: t.Dict[str, t.Dict[str, Person]]
-    groups2: t.Dict[str, t.Dict[str, t.Optional[Person]]]
+    groups2: t.Dict[str, t.Dict[str, t.Optional[Person2]]]
+
+
+class Person2:
+    name: str
 
 
 @app.define_struct_set("egoist.generators.structkit:walk")
