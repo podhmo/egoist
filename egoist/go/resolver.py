@@ -39,6 +39,10 @@ class Resolver:
             ):
                 v = self.resolve_gotype(args[0])
                 return f"*{v}"
+            elif hasattr(typ, "__name__"):
+                return typ.__name__  # TODO: prefix
+            else:
+                raise RuntimeError(f"unexpected origin {origin!r}")
 
         gotype = self.gotype_map.get(typ)
         if gotype is not None:

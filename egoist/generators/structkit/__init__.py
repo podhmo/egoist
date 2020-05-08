@@ -45,7 +45,10 @@ def structkit(
     m.sep()
 
     for item in _walk.walk(classes):
-        if item.is_union:
+        if item.is_enums:
+            _emit.emit_enums(m, item.type_, resolver=resolver)
+            m.sep()
+        elif item.is_union:
             _emit.emit_union(m, item, resolver=resolver)
             m.sep()
         else:
