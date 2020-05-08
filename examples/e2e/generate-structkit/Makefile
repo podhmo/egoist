@@ -26,6 +26,11 @@ strict:
 	$(MAKE) -C $(shell echo $@*/)
 	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
+# list
+04:
+	$(MAKE) -C $(shell echo $@*/)
+	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
+
 
 clean:
 	rm -f ${BUILD_FILE}
