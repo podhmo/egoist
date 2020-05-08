@@ -1,4 +1,5 @@
 import typing as t
+import typing_extensions as tx
 import dataclasses
 from metashape.declarative import MISSING
 from metashape.runtime import get_walker
@@ -10,6 +11,7 @@ class Item:
     type_: t.Type[t.Any]
     fields: t.List[runtime.Row]
     args: t.List[t.Type[t.Any]]
+    origin: t.Optional[t.Type[t.Any]] = None
 
     @property
     def is_object(self) -> bool:
@@ -18,6 +20,12 @@ class Item:
     @property
     def is_union(self) -> bool:
         return not self.fields and bool(self.args)
+
+    @property
+    def is_enums(self) -> bool:
+        return not self.fields and (
+            self.origin is not None and self.origin == tx.Literal  # type: ignore
+        )
 
 
 def walk(
@@ -30,15 +38,20 @@ def walk(
     metadata_handler = metadata_handler or runtime._default_metadata_handler
 
     for cls in w.walk(kinds=["object", None]):
-        if (
-            getattr(cls, "__origin__", None) == t.Union
-            and _nonetype not in cls.__args__
-        ):
-            yield Item(type_=cls, fields=[], args=cls.__args__)
-            for subtyp in cls.__args__:
-                if subtyp.__module__ != "builtins":
-                    w.append(subtyp)
-            continue
+        origin = getattr(cls, "__origin__", None)
+        if origin is not None:
+            args = list(t.get_args(cls))
+            if origin == t.Union and _nonetype not in args:  # union
+                yield Item(type_=cls, fields=[], args=args, origin=origin)
+                for subtyp in args:
+                    if subtyp.__module__ != "builtins":
+                        w.append(subtyp)
+                continue
+            elif origin == t.Literal:  # literal
+                yield Item(type_=cls, fields=[], args=args, origin=origin)
+                continue
+            else:
+                raise RuntimeError("unexpected type {cls!r}")
 
         fields: t.List[runtime.Row] = []
         for name, info, _metadata in w.for_type(cls).walk(ignore_private=False):
