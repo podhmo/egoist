@@ -31,6 +31,19 @@ strict:
 	$(MAKE) -C $(shell echo $@*/)
 	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
+# map
+05:
+	$(MAKE) -C $(shell echo $@*/)
+	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
+
+# more nested
+06:
+	$(MAKE) -C $(shell echo $@*/)
+	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
+
+# todo: embed
+# todo: union
+
 
 clean:
 	rm -f ${BUILD_FILE}
