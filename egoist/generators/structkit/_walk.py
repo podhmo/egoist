@@ -39,7 +39,7 @@ def get_flatten_args(typ: t.Type[t.Any]) -> t.Tuple[t.Type[t.Any]]:
     r = set()
     for subtype in typ.__args__:  # type: ignore
         r.update(get_flatten_args(subtype))
-    return tuple(sorted(r))
+    return tuple(sorted(r, key=id))
 
 
 def walk(
