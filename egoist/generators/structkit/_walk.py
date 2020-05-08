@@ -1,6 +1,8 @@
+from __future__ import annotations
 import typing as t
 import typing_extensions as tx
 import dataclasses
+from functools import lru_cache
 from metashape.declarative import MISSING
 from metashape.runtime import get_walker
 from . import runtime
@@ -28,6 +30,19 @@ class Item:
         )
 
 
+@lru_cache(maxsize=1024)
+def get_flatten_args(typ: t.Type[t.Any]) -> t.Tuple[t.Type[t.Any]]:
+    if not hasattr(typ, "__args__"):
+        if typ.__module__ != "builtins":
+            return (typ,)
+        return ()  # type: ignore
+
+    r: t.Set[t.Type[t.Any]] = set()
+    for subtype in typ.__args__:
+        r.update(get_flatten_args(subtype))
+    return tuple(sorted(r, key=id))  # type: ignore
+
+
 def walk(
     classes: t.List[t.Type[t.Any]],
     *,
@@ -43,9 +58,8 @@ def walk(
             args = list(t.get_args(cls))
             if origin == t.Union and _nonetype not in args:  # union
                 yield Item(type_=cls, fields=[], args=args, origin=origin)
-                for subtyp in args:
-                    if subtyp.__module__ != "builtins":
-                        w.append(subtyp)
+                for subtype in get_flatten_args(cls):
+                    w.append(subtype)
                 continue
             elif origin == t.Literal:  # literal
                 yield Item(type_=cls, fields=[], args=args, origin=origin)
@@ -67,13 +81,10 @@ def walk(
 
             # handling tags
             metadata_handler(cls, name=name, info=info, metadata=filled_metadata)
-
-            if info.normalized.__module__ != "builtins":
-                w.append(info.normalized)
-            if hasattr(info.normalized, "__origin__"):  # list, dict, etc..
-                for subtyp in t.get_args(info.normalized):
-                    if subtyp.__module__ != "builtins":
-                        w.append(subtyp)
-
             fields.append((name, info, filled_metadata))
+
+            # append to walker, if needed
+            for subtype in get_flatten_args(info.normalized):
+                w.append(subtype)
+
         yield Item(type_=cls, fields=fields, args=[])

@@ -8,26 +8,28 @@ app = App(settings)
 app.include("egoist.directives.define_struct_set")
 
 
-class Person:
-    name: str
-    age: int
-
-    followings: t.List[t.List[Person]]
-    followings2: t.List[t.List[t.Optional[Person2]]]
-
-    groups: t.Dict[str, t.Dict[str, Person]]
-    groups2: t.Dict[str, t.Dict[str, t.Optional[Person2]]]
+class Empty:
+    pass
 
 
-class Person2:
-    name: str
+class Leaf:
+    value: int
+
+
+class Node:
+    left: Tree
+    right: Tree
+
+
+Tree = t.Union[Empty, Leaf, Node]
+Tree.__name__ = "Tree"
 
 
 @app.define_struct_set("egoist.generators.structkit:walk")
 def models__models() -> None:
     from egoist.generators.structkit import runtime, structkit
 
-    with runtime.generate(structkit, classes=[Person]) as m:
+    with runtime.generate(structkit, classes=[Tree]) as m:
         m.package("models")
 
 

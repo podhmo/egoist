@@ -7,7 +7,7 @@ from prestring.naming import untitleize
 from egoist.go.resolver import Resolver
 from egoist.go.types import get_gopackage
 from metashape.analyze import typeinfo
-from ._walk import Item
+from ._walk import Item, get_flatten_args
 from . import runtime
 
 
@@ -15,10 +15,10 @@ def build_tag_string(tags: t.Dict[str, t.List[str]]) -> str:
     return " ".join(f'''{k}:"{', '.join(vs)}"''' for k, vs in tags.items())
 
 
-def has_class_object(info: typeinfo.TypeInfo) -> bool:
+def has_reference(info: typeinfo.TypeInfo) -> bool:
     if not hasattr(info, "args"):  # xxx
         return typeinfo.get_custom(info) is not None
-    return any(typeinfo.get_custom(sinfo) is not None for sinfo in info.args)  # type: ignore
+    return len(get_flatten_args(info.normalized)) > 0
 
 
 def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
@@ -219,7 +219,7 @@ def emit_unmarshalJSON(
 
                 if "_override_type" in metadata:
                     gotype: str = metadata["_override_type"]
-                elif has_class_object(info):
+                elif has_reference(info):
                     json_pkg = m.import_("encoding/json")
                     gotype = str(json_pkg.RawMessage)
                 else:
@@ -249,7 +249,7 @@ def emit_unmarshalJSON(
             for name, info, metadata in item.fields:
                 field = m.symbol(goname(name))
                 with m.if_(f"{inner}.{field} != nil"):
-                    if has_class_object(info):
+                    if has_reference(info):
                         # pointer
                         if info.is_optional:
                             gotype = resolver.resolve_gotype(info.normalized)

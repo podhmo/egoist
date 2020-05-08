@@ -1,7 +1,7 @@
 export CHECK ?=
 BUILD_FILE := ./x
 
-default: 00 01 02 03 04 05 06 07 08 09
+default: 00 01 02 03 04 05 06 07 08 09 10 11
 strict:
 	CHECK=1 $(MAKE)
 
@@ -61,8 +61,11 @@ strict:
 	$(MAKE) -C $(shell echo $@*/)
 	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
-# todo: new type
-# todo: union
+# sum types (union)
+11:
+	$(MAKE) -C $(shell echo $@*/)
+	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
+
 # todo: with other packages
 # todo: docstring
 
