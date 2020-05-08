@@ -57,6 +57,9 @@ strict:
 	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
 # docstring
+10:
+	$(MAKE) -C $(shell echo $@*/)
+	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
 # todo: new type
 # todo: union
