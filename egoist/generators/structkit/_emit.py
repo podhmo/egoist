@@ -15,9 +15,9 @@ def build_tag_string(tags: t.Dict[str, t.List[str]]) -> str:
 
 
 def has_reference(info: typeinfo.TypeInfo) -> bool:
-    if not hasattr(info, "args"):  # xxx
-        return typeinfo.get_custom(info) is not None
-    return len(get_flatten_args(info.normalized)) > 0
+    if not info.is_container:
+        return info.user_defined_type is not None
+    return len(get_flatten_args(info.type_)) > 0
 
 
 def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
@@ -247,11 +247,11 @@ def emit_unmarshalJSON(
                     if has_reference(info):
                         # pointer
                         if info.is_optional:
-                            gotype = resolver.resolve_gotype(info.normalized)
+                            gotype = resolver.resolve_gotype(info.type_)
                             m.stmt(f"{this}.{goname(name)} = &{gotype}{{}}")
                             ref = f"{this}.{field}"
-                        elif hasattr(info, "args"):  # xxx
-                            gotype = resolver.resolve_gotype(info.normalized)
+                        elif info.is_container and info.args:
+                            gotype = resolver.resolve_gotype(info.type_)
                             m.stmt(f"{this}.{goname(name)} = {gotype}{{}}")
                             ref = f"&{this}.{field}"
                         else:

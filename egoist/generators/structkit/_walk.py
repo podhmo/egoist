@@ -84,7 +84,7 @@ def walk(
             fields.append((name, info, filled_metadata))
 
             # append to walker, if needed
-            for subtype in get_flatten_args(info.normalized):
+            for subtype in get_flatten_args(info.type_):
                 w.append(subtype)
 
         yield Item(type_=cls, fields=fields, args=[])
