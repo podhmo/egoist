@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class SettingsDict(tx.TypedDict):
-    root: str
+    rootdir: str
     here: str
 
 
@@ -64,18 +64,21 @@ class App(_Configurator):
         print(json.dumps(d, indent=2, ensure_ascii=False))
 
     def generate(
-        self, *, root: t.Optional[str] = None, targets: t.Optional[t.List[str]] = None
+        self,
+        *,
+        rootdir: t.Optional[str] = None,
+        targets: t.Optional[t.List[str]] = None,
     ) -> None:
         self.commit()
 
         import pathlib
 
-        if root is not None:
-            rootdir: pathlib.Path = pathlib.Path(root)
+        if rootdir is not None:
+            root_path: pathlib.Path = pathlib.Path(rootdir)
         else:
             here = self.settings["here"]
-            root = self.settings["root"]
-            rootdir = pathlib.Path(here).parent / root
+            rootdir = self.settings["rootdir"]
+            root_path = pathlib.Path(here).parent / rootdir
 
         for kit, fns in self.registry.generate_settings.items():
             generate_or_module = self.maybe_dotted(kit)
@@ -86,7 +89,7 @@ class App(_Configurator):
             else:
                 # TODO: genetle error message
                 raise ConfigurationError("{kit!r} is not callable")
-            generate({fn.__name__: fn for fn in fns}, root=rootdir)
+            generate({fn.__name__: fn for fn in fns}, root=root_path)
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
@@ -113,7 +116,7 @@ class App(_Configurator):
         sub_parser = subparsers.add_parser(
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
-        sub_parser.add_argument("--root", required=False, help="-")
+        sub_parser.add_argument("--rootdir", required=False, help="-")
         # todo: scan modules in show_help only
         sub_parser.add_argument(
             "targets",

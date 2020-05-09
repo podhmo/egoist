@@ -3,7 +3,7 @@ import typing as t
 from egoist.app import App, SettingsDict
 from egoist.generators.structkit import runtime
 
-settings: SettingsDict = {"root": "", "here": __file__}
+settings: SettingsDict = {"rootdir": "", "here": __file__}
 app = App(settings)
 
 app.include("egoist.directives.define_struct_set")

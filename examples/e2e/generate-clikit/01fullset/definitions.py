@@ -1,6 +1,6 @@
 from egoist.app import App, SettingsDict
 
-settings: SettingsDict = {"root": "cmd/", "here": __file__}
+settings: SettingsDict = {"rootdir": "cmd/", "here": __file__}
 app = App(settings)
 
 app.include("egoist.directives.define_cli")
