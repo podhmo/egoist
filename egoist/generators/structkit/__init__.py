@@ -36,6 +36,7 @@ def structkit(
 ) -> t.Iterator[Module]:
     from . import _walk
     from . import _emit
+    from egoist.go.types import get_gopackage
 
     m = env.m
     resolver = resolver or get_resolver(m)
@@ -45,6 +46,10 @@ def structkit(
     m.sep()
 
     for item in _walk.walk(classes):
+        gopackage = get_gopackage(item.type_)
+        if gopackage is not None:
+            continue
+
         if item.is_enums:
             _emit.emit_enums(m, item.type_, resolver=resolver)
             m.sep()
