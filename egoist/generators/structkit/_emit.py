@@ -5,7 +5,6 @@ from prestring.go.codeobject import Module
 from prestring.go import goname
 from prestring.naming import untitleize
 from egoist.go.resolver import Resolver
-from egoist.go.types import get_gopackage
 from metashape.analyze import typeinfo
 from ._walk import Item, get_flatten_args
 from . import runtime
@@ -22,10 +21,6 @@ def has_reference(info: typeinfo.TypeInfo) -> bool:
 
 
 def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
-    gopackage = get_gopackage(item.type_)
-    if gopackage is not None:
-        return runtime.Definition(name="", code_module=None)
-
     typename = str(resolver.resolve_gotype(item.type_))
 
     # // <typename> ...
