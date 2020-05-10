@@ -1,12 +1,11 @@
 from __future__ import annotations
 import typing as t
 import inspect
-from prestring.go.codeobject import Module
 from prestring.go import goname
 from prestring.naming import untitleize
 import metashape.typeinfo as typeinfo
-from egoist.go.resolver import Resolver
-from ._walk import Item
+from egoist.go.types import _unwrap_pointer_type
+from ._context import Context, Item
 from . import runtime
 
 
@@ -18,7 +17,10 @@ def has_reference(info: typeinfo.TypeInfo) -> bool:
     return info.user_defined_type is not None
 
 
-def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
+def emit_struct(ctx: Context, item: Item) -> runtime.Definition:
+    m = ctx.m
+    resolver = ctx.resolver
+
     typename = str(resolver.resolve_gotype(item.type_))
 
     # // <typename> ...
@@ -35,7 +37,12 @@ def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definit
     m.stmt(f"type {typename} struct {{")
     with m.scope():
         for name, info, metadata in item.fields:
-            gotype: str = resolver.resolve_gotype(info.raw)
+            raw_type = ctx.raw_type_map.get(info) or info.raw
+
+            if raw_type in ctx.pseudo_item_map:
+                gotype: str = ctx.pseudo_item_map[raw_type].name
+            else:
+                gotype = resolver.resolve_gotype(raw_type)
 
             # handling field (private field?, embedded?)
             if metadata.get("inline", False):
@@ -59,7 +66,10 @@ def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definit
     return runtime.Definition(name=typename, code_module=None)
 
 
-def emit_union(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
+def emit_union(ctx: Context, item: Item) -> runtime.Definition:
+    m = ctx.m
+    resolver = ctx.resolver
+
     typename = goname(item.type_.__name__)
     kind_typename = typename + "Kind"
 
@@ -79,22 +89,8 @@ def emit_union(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definiti
     m.sep()
 
     # UnmarshalJSON
-    discriminator_field = ("$kind", typeinfo.typeinfo(str), runtime.metadata())
-    discriminator_field[-1]["_override_type"] = kind_typename
-
-    pseudo_fields = [
-        (
-            sub_type.__name__,
-            typeinfo.typeinfo(sub_type),
-            runtime.metadata(required=False),
-        )
-        for sub_type in item.args
-    ]
-    pseudo_item = Item(
-        type_=item.type_, fields=[discriminator_field] + pseudo_fields, args=[],
-    )
-
-    unmarshalJSON_definition = emit_unmarshalJSON(m, pseudo_item, resolver=resolver)
+    pseudo_item = ctx.create_pseudo_item(item, discriminator_name=kind_typename)
+    unmarshalJSON_definition = emit_unmarshalJSON(ctx, pseudo_item)
     m.sep()
 
     # one-of validation
@@ -114,18 +110,17 @@ def emit_union(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definiti
     sm.stmt("}")
 
     # enums
-    emit_enums(m, item.type_, resolver=resolver, name=kind_typename)
+    emit_enums(ctx, item.type_, name=kind_typename)
 
     return runtime.Definition(name=typename, code_module=None)
 
 
 def emit_enums(
-    m: Module,
-    literal_type: t.Type[t.Any],
-    *,
-    resolver: Resolver,
-    name: t.Optional[str] = None,
+    ctx: Context, literal_type: t.Type[t.Any], *, name: t.Optional[str] = None,
 ) -> runtime.Definition:
+    m = ctx.m
+    resolver = ctx.resolver
+
     # literal_type or union_type
     go_type = name or f"{resolver.resolve_gotype(literal_type)}"
 
@@ -181,9 +176,10 @@ def emit_enums(
     return runtime.Definition(name=go_type, code_module=None)
 
 
-def emit_unmarshalJSON(
-    m: Module, item: Item, *, resolver: Resolver
-) -> runtime.Definition:
+def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
+    m = ctx.m
+    resolver = ctx.resolver
+
     this = m.symbol(f"{item.type_.__name__[0].lower()}")
     this_type = f"{resolver.resolve_gotype(item.type_)}"
     this_type_pointer = f"*{this_type}"
@@ -210,13 +206,12 @@ def emit_unmarshalJSON(
                 if name.startswith("_"):
                     continue  # xxx:
 
-                if "_override_type" in metadata:
-                    gotype: str = metadata["_override_type"]
-                elif has_reference(info):
+                raw_type = ctx.raw_type_map.get(info) or info.raw
+                if has_reference(info):
                     json_pkg = m.import_("encoding/json")
                     gotype = str(json_pkg.RawMessage)
                 else:
-                    gotype = resolver.resolve_gotype(info.raw)
+                    gotype = resolver.resolve_gotype(raw_type)
 
                 m.append(f'{goname(name)} *{gotype} `json:"{name}"`')
                 m.stmt("// required" if metadata["required"] else "")
@@ -243,12 +238,37 @@ def emit_unmarshalJSON(
                 field = m.symbol(goname(name))
                 with m.if_(f"{inner}.{field} != nil"):
                     if has_reference(info):
-                        # pointer
-                        if info.is_optional:
+                        if info.is_optional or info in ctx.raw_type_map:  # pointer
+                            raw_type = ctx.raw_type_map.get(info) or info.raw
+                            level = max(1, _unwrap_pointer_type(raw_type)[1])
                             gotype = resolver.resolve_gotype(info.type_)
-                            m.stmt(f"{this}.{goname(name)} = &{gotype}{{}}")
+
+                            # NOTE: tricky code
+                            #
+                            # when *X   (1 level), generated code:
+                            #     ob.<attr> = &X{}
+                            # when **X  (2 level), generated code:
+                            #     v0 := &X{}
+                            #     ob.<attr> = &v0
+                            # when ***X (3 level), generated code:
+                            #     v0 := &X{}
+                            #     v1 := &v0
+                            #     ob.<attr> = &v1
+                            syms = [(":=", f"{gotype}{{}}")]
+                            for i in range(level - 1):
+                                syms.append((":=", f"v{i}"))
+                            syms.append(("=", f"{this}.{goname(name)}"))
+                            for i in range(1, len(syms)):
+                                _, rhs = syms[i - 1]
+                                op, lhs = syms[i]
+                                m.stmt(f"{lhs} {op} &{rhs}")
+
                             ref = f"{this}.{field}"
-                        elif info.is_container and info.args:
+                        elif (
+                            info.is_container
+                            and info.args
+                            and info.container_type != "union"
+                        ):
                             gotype = resolver.resolve_gotype(info.type_)
                             m.stmt(f"{this}.{goname(name)} = {gotype}{{}}")
                             ref = f"&{this}.{field}"

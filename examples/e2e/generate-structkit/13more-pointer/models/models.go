@@ -11,7 +11,8 @@ type Person struct {
 	Name string `json:"name"`
 	Age int `json:"age"`
 	Memo *Memo `json:"memo"`
-	Memo2 **Memo `json:"memo2"`
+	Memo2 ***Memo `json:"memo2"`
+	Memo3 ***Memo `json:"memo3"`
 }
 
 func (p *Person) UnmarshalJSON(b []byte) error {
@@ -23,6 +24,7 @@ func (p *Person) UnmarshalJSON(b []byte) error {
 		Age *int `json:"age"`// required
 		Memo *json.RawMessage `json:"memo"`
 		Memo2 *json.RawMessage `json:"memo2"`// required
+		Memo3 *json.RawMessage `json:"memo3"`// required
 	}
 	if rawErr := json.Unmarshal(b, &inner); rawErr != nil  {
 		return err.AddSummary(rawErr.Error())
@@ -47,12 +49,24 @@ func (p *Person) UnmarshalJSON(b []byte) error {
 			}
 		}
 		if inner.Memo2 != nil  {
-			p.Memo2 = &Memo{}
+			v0 := &Memo{}
+			v1 := &v0
+			p.Memo2 = &v1
 			if rawerr := json.Unmarshal(*inner.Memo2, p.Memo2); rawerr != nil  {
 				err = err.Add("memo2", maperr.Message{Error: rawerr})
 			}
 		} else  {
 			err = err.Add("memo2", maperr.Message{Text: "required"})
+		}
+		if inner.Memo3 != nil  {
+			v0 := &Memo{}
+			v1 := &v0
+			p.Memo3 = &v1
+			if rawerr := json.Unmarshal(*inner.Memo3, p.Memo3); rawerr != nil  {
+				err = err.Add("memo3", maperr.Message{Error: rawerr})
+			}
+		} else  {
+			err = err.Add("memo3", maperr.Message{Text: "required"})
 		}
 	}
 

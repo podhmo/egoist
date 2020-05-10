@@ -18,11 +18,11 @@ class Leaf:
 
 class Node:
     left: Tree
-    right: Tree
+    right: t.Optional[Tree]
 
 
 Tree = t.Union[Empty, Leaf, Node]
-Tree.__name__ = "Tree"
+Tree.__name__ = "Tree" # todo: remove
 
 
 @app.define_struct_set("egoist.generators.structkit:walk")

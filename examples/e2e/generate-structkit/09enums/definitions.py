@@ -7,7 +7,7 @@ app = App(settings)
 app.include("egoist.directives.define_struct_set")
 
 Op = tx.Literal["add", "sub", "mul"]
-Op.__name__ = "Op"
+Op.__name__ = "Op"  # TODO: remove
 
 
 @app.define_struct_set("egoist.generators.structkit:walk")

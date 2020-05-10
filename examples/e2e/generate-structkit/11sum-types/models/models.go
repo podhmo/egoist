@@ -38,17 +38,20 @@ func (t *Tree) UnmarshalJSON(b []byte) error {
 			err = err.Add("$kind", maperr.Message{Text: "required"})
 		}
 		if inner.Empty != nil  {
-			if rawerr := json.Unmarshal(*inner.Empty, &t.Empty); rawerr != nil  {
+			t.Empty = &Empty{}
+			if rawerr := json.Unmarshal(*inner.Empty, t.Empty); rawerr != nil  {
 				err = err.Add("Empty", maperr.Message{Error: rawerr})
 			}
 		}
 		if inner.Leaf != nil  {
-			if rawerr := json.Unmarshal(*inner.Leaf, &t.Leaf); rawerr != nil  {
+			t.Leaf = &Leaf{}
+			if rawerr := json.Unmarshal(*inner.Leaf, t.Leaf); rawerr != nil  {
 				err = err.Add("Leaf", maperr.Message{Error: rawerr})
 			}
 		}
 		if inner.Node != nil  {
-			if rawerr := json.Unmarshal(*inner.Node, &t.Node); rawerr != nil  {
+			t.Node = &Node{}
+			if rawerr := json.Unmarshal(*inner.Node, t.Node); rawerr != nil  {
 				err = err.Add("Node", maperr.Message{Error: rawerr})
 			}
 		}
@@ -127,7 +130,7 @@ func (l *Leaf) UnmarshalJSON(b []byte) error {
 
 type Node struct {
 	Left Tree `json:"left"`
-	Right Tree `json:"right"`
+	Right *Tree `json:"right"`
 }
 
 func (n *Node) UnmarshalJSON(b []byte) error {
@@ -136,7 +139,7 @@ func (n *Node) UnmarshalJSON(b []byte) error {
 	// loading internal data
 	var inner struct {
 		Left *json.RawMessage `json:"left"`// required
-		Right *json.RawMessage `json:"right"`// required
+		Right *json.RawMessage `json:"right"`
 	}
 	if rawErr := json.Unmarshal(b, &inner); rawErr != nil  {
 		return err.AddSummary(rawErr.Error())
@@ -145,7 +148,6 @@ func (n *Node) UnmarshalJSON(b []byte) error {
 	// binding field value and required check
 	{
 		if inner.Left != nil  {
-			n.Left = Tree{}
 			if rawerr := json.Unmarshal(*inner.Left, &n.Left); rawerr != nil  {
 				err = err.Add("left", maperr.Message{Error: rawerr})
 			}
@@ -153,12 +155,10 @@ func (n *Node) UnmarshalJSON(b []byte) error {
 			err = err.Add("left", maperr.Message{Text: "required"})
 		}
 		if inner.Right != nil  {
-			n.Right = Tree{}
-			if rawerr := json.Unmarshal(*inner.Right, &n.Right); rawerr != nil  {
+			n.Right = &Tree{}
+			if rawerr := json.Unmarshal(*inner.Right, n.Right); rawerr != nil  {
 				err = err.Add("right", maperr.Message{Error: rawerr})
 			}
-		} else  {
-			err = err.Add("right", maperr.Message{Text: "required"})
 		}
 	}
 

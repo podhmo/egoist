@@ -72,3 +72,16 @@ def rename(name: str) -> t.Callable[..., t.Any]:
         return fn
 
     return set_name
+
+
+def _unwrap_pointer_type(
+    typ: t.Type[t.Any], *, level: int = 0
+) -> t.Tuple[t.Type[t.Any], int]:
+    # todo: support slice, map
+    # value = 0, pointer = 1, pointer of pointer = 2, ...
+    if not hasattr(typ, "__origin__"):
+        return typ, level
+
+    if typ.__origin__ == GoPointer:
+        return _unwrap_pointer_type(t.get_args(typ)[0], level=level + 1)
+    return typ, level
