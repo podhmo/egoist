@@ -1,12 +1,11 @@
 from __future__ import annotations
 import typing as t
 import inspect
-from prestring.go.codeobject import Module
 from prestring.go import goname
 from prestring.naming import untitleize
 import metashape.typeinfo as typeinfo
 from egoist.go.resolver import Resolver
-from ._walk import Item
+from ._context import Context, Item
 from . import runtime
 
 
@@ -18,7 +17,10 @@ def has_reference(info: typeinfo.TypeInfo) -> bool:
     return info.user_defined_type is not None
 
 
-def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
+def emit_struct(ctx: Context, item: Item) -> runtime.Definition:
+    m = ctx.m
+    resolver = ctx.resolver
+
     typename = str(resolver.resolve_gotype(item.type_))
 
     # // <typename> ...
@@ -35,7 +37,9 @@ def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definit
     m.stmt(f"type {typename} struct {{")
     with m.scope():
         for name, info, metadata in item.fields:
-            gotype: str = resolver.resolve_gotype(info.raw)
+            gotype: str = resolver.resolve_gotype(
+                metadata.get("_raw_type") or info.raw,
+            )
 
             # handling field (private field?, embedded?)
             if metadata.get("inline", False):
@@ -59,7 +63,10 @@ def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definit
     return runtime.Definition(name=typename, code_module=None)
 
 
-def emit_union(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
+def emit_union(ctx: Context, item: Item) -> runtime.Definition:
+    m = ctx.m
+    resolver = ctx.resolver
+
     typename = goname(item.type_.__name__)
     kind_typename = typename + "Kind"
 
@@ -85,16 +92,17 @@ def emit_union(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definiti
     pseudo_fields = [
         (
             sub_type.__name__,
-            typeinfo.typeinfo(sub_type),
+            typeinfo.typeinfo(t.Optional[sub_type]),
             runtime.metadata(required=False),
         )
         for sub_type in item.args
     ]
+
     pseudo_item = Item(
         type_=item.type_, fields=[discriminator_field] + pseudo_fields, args=[],
     )
 
-    unmarshalJSON_definition = emit_unmarshalJSON(m, pseudo_item, resolver=resolver)
+    unmarshalJSON_definition = emit_unmarshalJSON(ctx, pseudo_item)
     m.sep()
 
     # one-of validation
@@ -114,18 +122,17 @@ def emit_union(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definiti
     sm.stmt("}")
 
     # enums
-    emit_enums(m, item.type_, resolver=resolver, name=kind_typename)
+    emit_enums(ctx, item.type_, name=kind_typename)
 
     return runtime.Definition(name=typename, code_module=None)
 
 
 def emit_enums(
-    m: Module,
-    literal_type: t.Type[t.Any],
-    *,
-    resolver: Resolver,
-    name: t.Optional[str] = None,
+    ctx: Context, literal_type: t.Type[t.Any], *, name: t.Optional[str] = None,
 ) -> runtime.Definition:
+    m = ctx.m
+    resolver = ctx.resolver
+
     # literal_type or union_type
     go_type = name or f"{resolver.resolve_gotype(literal_type)}"
 
@@ -181,9 +188,10 @@ def emit_enums(
     return runtime.Definition(name=go_type, code_module=None)
 
 
-def emit_unmarshalJSON(
-    m: Module, item: Item, *, resolver: Resolver
-) -> runtime.Definition:
+def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
+    m = ctx.m
+    resolver = ctx.resolver
+
     this = m.symbol(f"{item.type_.__name__[0].lower()}")
     this_type = f"{resolver.resolve_gotype(item.type_)}"
     this_type_pointer = f"*{this_type}"
@@ -210,7 +218,7 @@ def emit_unmarshalJSON(
                 if name.startswith("_"):
                     continue  # xxx:
 
-                if "_override_type" in metadata:
+                if "_override_type" in metadata:  # for enum's discriminator
                     gotype: str = metadata["_override_type"]
                 elif has_reference(info):
                     json_pkg = m.import_("encoding/json")
@@ -243,8 +251,7 @@ def emit_unmarshalJSON(
                 field = m.symbol(goname(name))
                 with m.if_(f"{inner}.{field} != nil"):
                     if has_reference(info):
-                        # pointer
-                        if info.is_optional:
+                        if info.is_optional or "_raw_type" in metadata:  # pointer
                             gotype = resolver.resolve_gotype(info.type_)
                             m.stmt(f"{this}.{goname(name)} = &{gotype}{{}}")
                             ref = f"{this}.{field}"

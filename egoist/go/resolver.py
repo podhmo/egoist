@@ -21,7 +21,7 @@ class Resolver:
     # todo: use lru_cache?
     # todo: return Symbol?
     def resolve_gotype(
-        self, typ: t.Type[t.Any], *, _none_type: t.Type[t.Any] = type(None)
+        self, typ: t.Type[t.Any], *, _none_type: t.Type[t.Any] = type(None),
     ) -> str:
         """e.g. str -> 'string' """
         if hasattr(typ, "__origin__"):

@@ -1,44 +1,20 @@
 from __future__ import annotations
 import typing as t
-import typing_extensions as tx
-import dataclasses
 from functools import lru_cache
 from metashape.declarative import MISSING
-from metashape.runtime import get_walker
 from . import runtime
-
-
-@dataclasses.dataclass
-class Item:
-    type_: t.Type[t.Any]
-    fields: t.List[runtime.Row]
-    args: t.List[t.Type[t.Any]]
-    origin: t.Optional[t.Type[t.Any]] = None
-
-    @property
-    def is_object(self) -> bool:
-        return not self.args
-
-    @property
-    def is_union(self) -> bool:
-        return not self.fields and bool(self.args)
-
-    @property
-    def is_enums(self) -> bool:
-        return not self.fields and (
-            self.origin is not None and self.origin == tx.Literal  # type: ignore
-        )
+from ._context import Context, Item
 
 
 def walk(
+    ctx: Context,
     classes: t.List[t.Type[t.Any]],
     *,
     _nonetype: t.Type[t.Any] = type(None),
-    metadata_handler: t.Optional[runtime.MetadataHandlerFunction] = None,
 ) -> t.Iterator[Item]:
-    w = get_walker(classes)
-    metadata_handler = metadata_handler or runtime._default_metadata_handler
+    metadata_handler = ctx.metadata_handler
 
+    w = ctx.get_walker(classes)
     for cls in w.walk(kinds=["object", None]):
         origin = getattr(cls, "__origin__", None)
         if origin is not None:
@@ -61,6 +37,7 @@ def walk(
 
             filled_metadata: runtime.Metadata = runtime.metadata()
             filled_metadata.update(_metadata)  # type:ignore
+
             if filled_metadata.get("default") == MISSING:
                 filled_metadata.pop("default")
             if info.is_optional:

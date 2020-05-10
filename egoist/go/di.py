@@ -13,7 +13,7 @@ from egoist.internal.graph import (
 from egoist.internal.graph import topological_sorted
 from egoist.internal._fnspec import fnspec, Fnspec
 from egoist.langhelpers import reify
-from .types import get_gopackage, GoPointer, priority
+from .types import get_gopackage, GoPointer, priority, _unwrap_pointer_type
 
 
 class Metadata(tx.TypedDict, total=False):
@@ -27,19 +27,6 @@ class AddNodeParamsDict(tx.TypedDict, total=True):
     name: str
     depends: t.List[t.Union[_Seed, str]]
     metadata: Metadata
-
-
-def _unwrap_pointer_type(
-    typ: t.Type[t.Any], *, level: int = 0
-) -> t.Tuple[t.Type[t.Any], int]:
-    # todo: support slice, map
-    # value = 0, pointer = 1, pointer of pointer = 2, ...
-    if not hasattr(typ, "__origin__"):
-        return typ, level
-
-    if typ.__origin__ == GoPointer:
-        return _unwrap_pointer_type(t.get_args(typ)[0], level=level + 1)
-    return typ, level
 
 
 def parse(fn: t.Callable[..., t.Any]) -> AddNodeParamsDict:
