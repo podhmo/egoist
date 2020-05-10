@@ -4,6 +4,7 @@ import inspect
 from prestring.go import goname
 from prestring.naming import untitleize
 import metashape.typeinfo as typeinfo
+from egoist.go.types import _unwrap_pointer_type
 from ._context import Context, Item
 from . import runtime
 
@@ -36,12 +37,13 @@ def emit_struct(ctx: Context, item: Item) -> runtime.Definition:
     m.stmt(f"type {typename} struct {{")
     with m.scope():
         for name, info, metadata in item.fields:
-            if info.raw in ctx.pseudo_item_map:
-                gotype: str = ctx.pseudo_item_map[info.raw].name
+            raw_type = ctx.raw_type_map.get(info) or info.raw
+
+            if raw_type in ctx.pseudo_item_map:
+                gotype: str = ctx.pseudo_item_map[raw_type].name
             else:
-                gotype = resolver.resolve_gotype(
-                    ctx.raw_type_map.get(info) or info.raw,
-                )
+                gotype = resolver.resolve_gotype(raw_type)
+
             # handling field (private field?, embedded?)
             if metadata.get("inline", False):
                 m.append(gotype)
@@ -204,11 +206,12 @@ def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
                 if name.startswith("_"):
                     continue  # xxx:
 
+                raw_type = ctx.raw_type_map.get(info) or info.raw
                 if has_reference(info):
                     json_pkg = m.import_("encoding/json")
                     gotype = str(json_pkg.RawMessage)
                 else:
-                    gotype = resolver.resolve_gotype(info.raw)
+                    gotype = resolver.resolve_gotype(raw_type)
 
                 m.append(f'{goname(name)} *{gotype} `json:"{name}"`')
                 m.stmt("// required" if metadata["required"] else "")
@@ -236,8 +239,30 @@ def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
                 with m.if_(f"{inner}.{field} != nil"):
                     if has_reference(info):
                         if info.is_optional or info in ctx.raw_type_map:  # pointer
+                            raw_type = ctx.raw_type_map.get(info) or info.raw
+                            level = max(1, _unwrap_pointer_type(raw_type)[1])
                             gotype = resolver.resolve_gotype(info.type_)
-                            m.stmt(f"{this}.{goname(name)} = &{gotype}{{}}")
+
+                            # NOTE: tricky code
+                            #
+                            # when *X   (1 level), generated code:
+                            #     ob.<attr> = &X{}
+                            # when **X  (2 level), generated code:
+                            #     v0 := &X{}
+                            #     ob.<attr> = &v0
+                            # when ***X (3 level), generated code:
+                            #     v0 := &X{}
+                            #     v1 := &v0
+                            #     ob.<attr> = &v1
+                            syms = [(":=", f"{gotype}{{}}")]
+                            for i in range(level - 1):
+                                syms.append((":=", f"v{i}"))
+                            syms.append(("=", f"{this}.{goname(name)}"))
+                            for i in range(1, len(syms)):
+                                _, rhs = syms[i - 1]
+                                op, lhs = syms[i]
+                                m.stmt(f"{lhs} {op} &{rhs}")
+
                             ref = f"{this}.{field}"
                         elif (
                             info.is_container
