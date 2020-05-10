@@ -37,10 +37,12 @@ def emit_struct(ctx: Context, item: Item) -> runtime.Definition:
     m.stmt(f"type {typename} struct {{")
     with m.scope():
         for name, info, metadata in item.fields:
-            gotype: str = resolver.resolve_gotype(
-                ctx.raw_type_map.get(info) or info.raw,
-            )
-
+            if info.raw in ctx.pseudo_item_map:
+                gotype: str = ctx.pseudo_item_map[info.raw].name
+            else:
+                gotype: str = resolver.resolve_gotype(
+                    ctx.raw_type_map.get(info) or info.raw,
+                )
             # handling field (private field?, embedded?)
             if metadata.get("inline", False):
                 m.append(gotype)
@@ -203,9 +205,7 @@ def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
                 if name.startswith("_"):
                     continue  # xxx:
 
-                if info.type_ in ctx.pseudo_item_map:  # for enum's discriminator
-                    gotype: str = ctx.pseudo_item_map[info.type_].name
-                elif has_reference(info):
+                if has_reference(info):
                     json_pkg = m.import_("encoding/json")
                     gotype = str(json_pkg.RawMessage)
                 else:
@@ -240,7 +240,11 @@ def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
                             gotype = resolver.resolve_gotype(info.type_)
                             m.stmt(f"{this}.{goname(name)} = &{gotype}{{}}")
                             ref = f"{this}.{field}"
-                        elif info.is_container and info.args:
+                        elif (
+                            info.is_container
+                            and info.args
+                            and info.container_type != "union"
+                        ):
                             gotype = resolver.resolve_gotype(info.type_)
                             m.stmt(f"{this}.{goname(name)} = {gotype}{{}}")
                             ref = f"&{this}.{field}"

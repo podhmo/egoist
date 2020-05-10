@@ -86,6 +86,10 @@ class Context:
             args=[],
         )
         self.pseudo_item_map[item.type_] = pseudo_item
+        # hack: temporary
+        self.pseudo_item_map[t.Optional[item.type_]] = dataclasses.replace(
+            pseudo_item, name=f"*{pseudo_item.name}", type_=t.Optional[item.type_]
+        )
         return pseudo_item
 
 
