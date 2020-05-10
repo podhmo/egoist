@@ -54,6 +54,9 @@ class Resolver:
             prefix = f"{self.m.import_(pkg)}."
 
         py_clsname = getattr(typ, "__qualname__", typ.__name__)
+        if "<locals>" in py_clsname:  # HACK: for the type defined in closure. (e.g. t.NewType)
+            py_clsname = typ.__name__
+
         if "." in py_clsname:
             typename = "_".join([goname(x) for x in py_clsname.split(".")])
         else:

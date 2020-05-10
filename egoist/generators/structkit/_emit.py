@@ -86,7 +86,7 @@ def emit_union(ctx: Context, item: Item) -> runtime.Definition:
     m.sep()
 
     # UnmarshalJSON
-    pseudo_item = ctx.create_pseudo_item(item, name=kind_typename)
+    pseudo_item = ctx.create_pseudo_item(item, discriminator_name=kind_typename)
     unmarshalJSON_definition = emit_unmarshalJSON(ctx, pseudo_item)
     m.sep()
 

@@ -60,12 +60,16 @@ class Context:
         )
         return get_walker(classes, config=config)
 
-    def create_pseudo_item(self, item: Item, *, name: str) -> Item:
+    def create_pseudo_item(self, item: Item, *, discriminator_name: str) -> Item:
         pseudo_item = self.pseudo_item_map.get(item.type_)
         if pseudo_item is not None:
             return pseudo_item
 
-        discriminator_field = ("$kind", typeinfo.typeinfo(str), runtime.metadata())
+        discriminator_field = (
+            "$kind",
+            typeinfo.typeinfo(t.NewType(discriminator_name, str)),
+            runtime.metadata(),
+        )
         pseudo_fields = [
             (
                 sub_type.__name__,
@@ -76,7 +80,7 @@ class Context:
         ]
 
         pseudo_item = Item(
-            name=name,
+            name=item.type_.__name__,  # fixme
             type_=item.type_,
             fields=[discriminator_field] + pseudo_fields,
             args=[],
