@@ -16,6 +16,7 @@ class Person:
 
     memo: t.Optional[t.Optional[Memo]]  # treated as *Memo
     memo2: GoPointer[GoPointer[Memo]]  # treated as **Memo
+    memo3: GoPointer[GoPointer[GoPointer[Memo]]]  # treated as **Memo
 
 
 class Memo:
