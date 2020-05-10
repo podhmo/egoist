@@ -38,7 +38,7 @@ def emit_struct(ctx: Context, item: Item) -> runtime.Definition:
     with m.scope():
         for name, info, metadata in item.fields:
             gotype: str = resolver.resolve_gotype(
-                metadata.get("_raw_type") or info.raw,
+                ctx.raw_type_map.get(info) or info.raw,
             )
 
             # handling field (private field?, embedded?)
@@ -86,22 +86,7 @@ def emit_union(ctx: Context, item: Item) -> runtime.Definition:
     m.sep()
 
     # UnmarshalJSON
-    discriminator_field = ("$kind", typeinfo.typeinfo(str), runtime.metadata())
-    discriminator_field[-1]["_override_type"] = kind_typename
-
-    pseudo_fields = [
-        (
-            sub_type.__name__,
-            typeinfo.typeinfo(t.Optional[sub_type]),
-            runtime.metadata(required=False),
-        )
-        for sub_type in item.args
-    ]
-
-    pseudo_item = Item(
-        type_=item.type_, fields=[discriminator_field] + pseudo_fields, args=[],
-    )
-
+    pseudo_item = ctx.create_pseudo_item(item, name=kind_typename)
     unmarshalJSON_definition = emit_unmarshalJSON(ctx, pseudo_item)
     m.sep()
 
@@ -251,7 +236,7 @@ def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
                 field = m.symbol(goname(name))
                 with m.if_(f"{inner}.{field} != nil"):
                     if has_reference(info):
-                        if info.is_optional or "_raw_type" in metadata:  # pointer
+                        if info.is_optional or info in ctx.raw_type_map:  # pointer
                             gotype = resolver.resolve_gotype(info.type_)
                             m.stmt(f"{this}.{goname(name)} = &{gotype}{{}}")
                             ref = f"{this}.{field}"

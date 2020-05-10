@@ -29,7 +29,7 @@ class Context:
     )
 
     # for GoPointer
-    raw_type_map: t.Dict[t.Type[t.Any], t.Type[t.Any]] = dataclasses.field(
+    raw_type_map: t.Dict[typeinfo.TypeInfo, t.Type[t.Any]] = dataclasses.field(
         default_factory=dict
     )
 
@@ -45,16 +45,43 @@ class Context:
         def _typeinfo_on_default(raw_type: t.Type[t.Any]) -> typeinfo.TypeInfo:
             typ, _ = _unwrap_pointer_type(raw_type)
             resolved = typeinfo.typeinfo(typ)
-            self.raw_type_mapping[resolved] = raw_type
+            self.raw_type_map[resolved] = raw_type
             return resolved
 
         return _typeinfo_on_default
 
-    def get_walker(self, classes: t.List[t.Type[t.Any]]) -> MetashapeWalker:
+    ########################################
+    # actions
+    ########################################
+
+    def get_metashape_walker(self, classes: t.List[t.Type[t.Any]]) -> MetashapeWalker:
         config = MetashapeConfig(
             typeinfo_unexpected_handler=self.unexpected_type_handler
         )
         return get_walker(classes, config=config)
+
+    def create_pseudo_item(self, item: Item, *, name: str) -> Item:
+        pseudo_item = self.pseudo_item_map.get(item.type_)
+        if pseudo_item is not None:
+            return pseudo_item
+
+        discriminator_field = ("$kind", typeinfo.typeinfo(str), runtime.metadata())
+        discriminator_field[-1]["_override_type"] = name
+
+        pseudo_fields = [
+            (
+                sub_type.__name__,
+                typeinfo.typeinfo(t.Optional[sub_type]),
+                runtime.metadata(required=False),
+            )
+            for sub_type in item.args
+        ]
+
+        pseudo_item = Item(
+            type_=item.type_, fields=[discriminator_field] + pseudo_fields, args=[],
+        )
+        self.pseudo_item_map[item.type_] = pseudo_item
+        return pseudo_item
 
 
 @dataclasses.dataclass

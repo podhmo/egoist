@@ -14,7 +14,7 @@ def walk(
 ) -> t.Iterator[Item]:
     metadata_handler = ctx.metadata_handler
 
-    w = ctx.get_walker(classes)
+    w = ctx.get_metashape_walker(classes)
     for cls in w.walk(kinds=["object", None]):
         origin = getattr(cls, "__origin__", None)
         if origin is not None:
