@@ -203,8 +203,8 @@ def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
                 if name.startswith("_"):
                     continue  # xxx:
 
-                if "_override_type" in metadata:  # for enum's discriminator
-                    gotype: str = metadata["_override_type"]
+                if info.type_ in ctx.pseudo_item_map:  # for enum's discriminator
+                    gotype: str = ctx.pseudo_item_map[info.type_].name
                 elif has_reference(info):
                     json_pkg = m.import_("encoding/json")
                     gotype = str(json_pkg.RawMessage)

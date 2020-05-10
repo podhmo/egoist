@@ -20,12 +20,16 @@ def walk(
         if origin is not None:
             args = list(t.get_args(cls))
             if origin == t.Union and _nonetype not in args:  # union
-                yield Item(type_=cls, fields=[], args=args, origin=origin)
+                yield Item(
+                    name="<union>", type_=cls, fields=[], args=args, origin=origin
+                )  # fixme
                 for subtype in get_flatten_args(cls):
                     w.append(subtype)
                 continue
             elif origin == t.Literal:  # literal
-                yield Item(type_=cls, fields=[], args=args, origin=origin)
+                yield Item(
+                    name="<literal>", type_=cls, fields=[], args=args, origin=origin
+                )  # fixme name
                 continue
             else:
                 raise RuntimeError("unexpected type {cls!r}")
@@ -51,7 +55,7 @@ def walk(
             for subtype in get_flatten_args(info.type_):
                 w.append(subtype)
 
-        yield Item(type_=cls, fields=fields, args=[])
+        yield Item(name=cls.__name__, type_=cls, fields=fields, args=[])
 
 
 @lru_cache(maxsize=256)

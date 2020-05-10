@@ -37,7 +37,6 @@ class Metadata(tx.TypedDict, total=False):
     comment: str
     default: t.Any
     tags: t.Dict[str, t.List[str]]
-    _override_type: str  # hack
 
 
 Row = t.Tuple[str, t.Any, Metadata]

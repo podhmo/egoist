@@ -66,8 +66,6 @@ class Context:
             return pseudo_item
 
         discriminator_field = ("$kind", typeinfo.typeinfo(str), runtime.metadata())
-        discriminator_field[-1]["_override_type"] = name
-
         pseudo_fields = [
             (
                 sub_type.__name__,
@@ -78,7 +76,10 @@ class Context:
         ]
 
         pseudo_item = Item(
-            type_=item.type_, fields=[discriminator_field] + pseudo_fields, args=[],
+            name=name,
+            type_=item.type_,
+            fields=[discriminator_field] + pseudo_fields,
+            args=[],
         )
         self.pseudo_item_map[item.type_] = pseudo_item
         return pseudo_item
@@ -86,10 +87,11 @@ class Context:
 
 @dataclasses.dataclass
 class Item:
+    name: str
     type_: t.Type[t.Any]
-    fields: t.List[runtime.Row]
-    args: t.List[t.Type[t.Any]]
-    origin: t.Optional[t.Type[t.Any]] = None
+    fields: t.List[runtime.Row] = dataclasses.field(repr=False)
+    args: t.List[t.Type[t.Any]] = dataclasses.field(repr=False)
+    origin: t.Optional[t.Type[t.Any]] = dataclasses.field(repr=False, default=None)
 
     @property
     def is_object(self) -> bool:
