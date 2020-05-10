@@ -4,9 +4,9 @@ import inspect
 from prestring.go.codeobject import Module
 from prestring.go import goname
 from prestring.naming import untitleize
+import metashape.typeinfo as typeinfo
 from egoist.go.resolver import Resolver
-from metashape.analyze import typeinfo
-from ._walk import Item, get_flatten_args
+from ._walk import Item
 from . import runtime
 
 
@@ -15,9 +15,7 @@ def build_tag_string(tags: t.Dict[str, t.List[str]]) -> str:
 
 
 def has_reference(info: typeinfo.TypeInfo) -> bool:
-    if not hasattr(info, "args"):  # xxx
-        return typeinfo.get_custom(info) is not None
-    return len(get_flatten_args(info.normalized)) > 0
+    return info.user_defined_type is not None
 
 
 def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
@@ -247,11 +245,11 @@ def emit_unmarshalJSON(
                     if has_reference(info):
                         # pointer
                         if info.is_optional:
-                            gotype = resolver.resolve_gotype(info.normalized)
+                            gotype = resolver.resolve_gotype(info.type_)
                             m.stmt(f"{this}.{goname(name)} = &{gotype}{{}}")
                             ref = f"{this}.{field}"
-                        elif hasattr(info, "args"):  # xxx
-                            gotype = resolver.resolve_gotype(info.normalized)
+                        elif info.is_container and info.args:
+                            gotype = resolver.resolve_gotype(info.type_)
                             m.stmt(f"{this}.{goname(name)} = {gotype}{{}}")
                             ref = f"&{this}.{field}"
                         else:
