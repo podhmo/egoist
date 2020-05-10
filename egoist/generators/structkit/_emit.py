@@ -4,8 +4,8 @@ import inspect
 from prestring.go.codeobject import Module
 from prestring.go import goname
 from prestring.naming import untitleize
+import metashape.typeinfo as typeinfo
 from egoist.go.resolver import Resolver
-from metashape.analyze import typeinfo
 from ._walk import Item, get_flatten_args
 from . import runtime
 
