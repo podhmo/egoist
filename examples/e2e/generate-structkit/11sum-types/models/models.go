@@ -130,7 +130,7 @@ func (l *Leaf) UnmarshalJSON(b []byte) error {
 
 type Node struct {
 	Left Tree `json:"left"`
-	Right Tree `json:"right"`
+	Right *Tree `json:"right"`
 }
 
 func (n *Node) UnmarshalJSON(b []byte) error {
@@ -139,7 +139,7 @@ func (n *Node) UnmarshalJSON(b []byte) error {
 	// loading internal data
 	var inner struct {
 		Left *json.RawMessage `json:"left"`// required
-		Right *json.RawMessage `json:"right"`// required
+		Right *json.RawMessage `json:"right"`
 	}
 	if rawErr := json.Unmarshal(b, &inner); rawErr != nil  {
 		return err.AddSummary(rawErr.Error())
@@ -155,11 +155,10 @@ func (n *Node) UnmarshalJSON(b []byte) error {
 			err = err.Add("left", maperr.Message{Text: "required"})
 		}
 		if inner.Right != nil  {
-			if rawerr := json.Unmarshal(*inner.Right, &n.Right); rawerr != nil  {
+			n.Right = &Tree{}
+			if rawerr := json.Unmarshal(*inner.Right, n.Right); rawerr != nil  {
 				err = err.Add("right", maperr.Message{Error: rawerr})
 			}
-		} else  {
-			err = err.Add("right", maperr.Message{Text: "required"})
 		}
 	}
 
