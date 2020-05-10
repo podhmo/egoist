@@ -4,7 +4,6 @@ import inspect
 from prestring.go import goname
 from prestring.naming import untitleize
 import metashape.typeinfo as typeinfo
-from egoist.go.resolver import Resolver
 from ._context import Context, Item
 from . import runtime
 
@@ -40,7 +39,7 @@ def emit_struct(ctx: Context, item: Item) -> runtime.Definition:
             if info.raw in ctx.pseudo_item_map:
                 gotype: str = ctx.pseudo_item_map[info.raw].name
             else:
-                gotype: str = resolver.resolve_gotype(
+                gotype = resolver.resolve_gotype(
                     ctx.raw_type_map.get(info) or info.raw,
                 )
             # handling field (private field?, embedded?)
