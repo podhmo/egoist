@@ -30,19 +30,6 @@ class Item:
         )
 
 
-@lru_cache(maxsize=1024)
-def get_flatten_args(typ: t.Type[t.Any]) -> t.Tuple[t.Type[t.Any]]:
-    if not hasattr(typ, "__args__"):
-        if typ.__module__ != "builtins":
-            return (typ,)
-        return ()  # type: ignore
-
-    r: t.Set[t.Type[t.Any]] = set()
-    for subtype in typ.__args__:
-        r.update(get_flatten_args(subtype))
-    return tuple(sorted(r, key=id))  # type: ignore
-
-
 def walk(
     classes: t.List[t.Type[t.Any]],
     *,
@@ -88,3 +75,16 @@ def walk(
                 w.append(subtype)
 
         yield Item(type_=cls, fields=fields, args=[])
+
+
+@lru_cache(maxsize=256)
+def get_flatten_args(typ: t.Type[t.Any]) -> t.Tuple[t.Type[t.Any]]:
+    if not hasattr(typ, "__args__"):
+        if typ.__module__ != "builtins":
+            return (typ,)
+        return ()  # type: ignore
+
+    r: t.Set[t.Type[t.Any]] = set()
+    for subtype in typ.__args__:
+        r.update(get_flatten_args(subtype))
+    return tuple(sorted(r, key=id))  # type: ignore

@@ -6,7 +6,7 @@ from prestring.go import goname
 from prestring.naming import untitleize
 import metashape.typeinfo as typeinfo
 from egoist.go.resolver import Resolver
-from ._walk import Item, get_flatten_args
+from ._walk import Item
 from . import runtime
 
 
@@ -15,9 +15,7 @@ def build_tag_string(tags: t.Dict[str, t.List[str]]) -> str:
 
 
 def has_reference(info: typeinfo.TypeInfo) -> bool:
-    if not info.is_container:
-        return info.user_defined_type is not None
-    return len(get_flatten_args(info.type_)) > 0
+    return info.user_defined_type is not None
 
 
 def emit_struct(m: Module, item: Item, *, resolver: Resolver) -> runtime.Definition:
