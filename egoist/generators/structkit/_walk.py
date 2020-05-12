@@ -2,6 +2,7 @@ from __future__ import annotations
 import typing as t
 from functools import lru_cache
 from metashape.declarative import MISSING
+from metashape.types import Kind as NodeKind
 from . import runtime
 from ._context import Context, Item
 
@@ -11,11 +12,13 @@ def walk(
     classes: t.List[t.Type[t.Any]],
     *,
     _nonetype: t.Type[t.Any] = type(None),
+    kinds: t.Optional[t.List[t.Optional[NodeKind]]] = None,
 ) -> t.Iterator[Item]:
     metadata_handler = ctx.metadata_handler
-
     w = ctx.get_metashape_walker(classes)
-    for cls in w.walk(kinds=["object", None]):
+
+    kinds = kinds or ["object", None, "enum"]
+    for cls in w.walk(kinds=kinds):
         origin = getattr(cls, "__origin__", None)
         if origin is not None:
             args = list(t.get_args(cls))

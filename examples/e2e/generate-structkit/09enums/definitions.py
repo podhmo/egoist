@@ -1,13 +1,13 @@
 import typing_extensions as tx
 from egoist.app import App, SettingsDict
+from egoist.typing import NewNamedType
 
 settings: SettingsDict = {"rootdir": "", "here": __file__}
 app = App(settings)
 
 app.include("egoist.directives.define_struct_set")
 
-Op = tx.Literal["add", "sub", "mul"]
-Op.__name__ = "Op"  # TODO: remove
+Op = NewNamedType("Op", tx.Literal["add", "sub", "mul"])
 
 
 @app.define_struct_set("egoist.generators.structkit:walk")

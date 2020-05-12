@@ -5,6 +5,7 @@ from prestring.utils import UnRepr
 from prestring.go import goname
 from prestring.go.codeobject import Module
 from .types import GoPointer, get_gopackage
+from metashape.name import resolve_maybe as resolve_name_maybe
 
 
 class Resolver:
@@ -39,9 +40,10 @@ class Resolver:
             ):
                 v = self.resolve_gotype(args[0])
                 return f"*{v}"
-            elif hasattr(typ, "__name__"):
-                return typ.__name__  # TODO: prefix
             else:
+                name = resolve_name_maybe(typ)
+                if name is not None:
+                    return name
                 raise RuntimeError(f"unexpected origin {origin!r}")
 
         gotype = self.gotype_map.get(typ)
@@ -54,7 +56,9 @@ class Resolver:
             prefix = f"{self.m.import_(pkg)}."
 
         py_clsname = getattr(typ, "__qualname__", typ.__name__)
-        if "<locals>" in py_clsname:  # HACK: for the type defined in closure. (e.g. t.NewType)
+        if (
+            "<locals>" in py_clsname
+        ):  # HACK: for the type defined in closure. (e.g. t.NewType)
             py_clsname = typ.__name__
 
         if "." in py_clsname:
