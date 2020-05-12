@@ -3,6 +3,7 @@ import typing as t
 from functools import lru_cache
 from metashape.declarative import MISSING
 from metashape.types import Kind as NodeKind
+from egoist.typing import resolve_name, guess_name
 from . import runtime
 from ._context import Context, Item
 
@@ -24,14 +25,18 @@ def walk(
             args = list(t.get_args(cls))
             if origin == t.Union and _nonetype not in args:  # union
                 yield Item(
-                    name="<union>", type_=cls, fields=[], args=args, origin=origin
+                    name=guess_name(cls), type_=cls, fields=[], args=args, origin=origin
                 )  # fixme
                 for subtype in get_flatten_args(cls):
                     w.append(subtype)
                 continue
             elif origin == t.Literal:  # literal
                 yield Item(
-                    name="<literal>", type_=cls, fields=[], args=args, origin=origin
+                    name=resolve_name(cls),
+                    type_=cls,
+                    fields=[],
+                    args=args,
+                    origin=origin,
                 )  # fixme name
                 continue
             else:
@@ -58,7 +63,7 @@ def walk(
             for subtype in get_flatten_args(info.type_):
                 w.append(subtype)
 
-        yield Item(name=cls.__name__, type_=cls, fields=fields, args=[])
+        yield Item(name=resolve_name(cls), type_=cls, fields=fields, args=[])
 
 
 @lru_cache(maxsize=256)

@@ -4,8 +4,8 @@ from egoist import types
 from prestring.utils import UnRepr
 from prestring.go import goname
 from prestring.go.codeobject import Module
+from egoist.typing import resolve_name_maybe
 from .types import GoPointer, get_gopackage
-from metashape.name import resolve_maybe as resolve_name_maybe
 
 
 class Resolver:
