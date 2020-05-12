@@ -1,7 +1,7 @@
 export CHECK ?=
 BUILD_FILE := ./x
 
-default: 00 01 02 03 04 05 06 07 08 09 10 11 12
+default: 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14
 strict:
 	CHECK=1 $(MAKE)
 
@@ -73,6 +73,11 @@ strict:
 
 # more pointer ****x
 13:
+	$(MAKE) -C $(shell echo $@*/)
+	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
+
+# define emitter by yourself
+14:
 	$(MAKE) -C $(shell echo $@*/)
 	test -z "${CHECK}" || go build -o ${BUILD_FILE} ./$(shell echo $@*/)models
 
