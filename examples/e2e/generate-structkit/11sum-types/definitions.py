@@ -1,6 +1,7 @@
 from __future__ import annotations
 import typing as t
 from egoist.app import App, SettingsDict
+from egoist.typing import NewNamedType
 
 settings: SettingsDict = {"rootdir": "", "here": __file__}
 app = App(settings)
@@ -21,8 +22,7 @@ class Node:
     right: t.Optional[Tree]
 
 
-Tree = t.Union[Empty, Leaf, Node]
-Tree.__name__ = "Tree" # todo: remove
+Tree = NewNamedType("Tree", t.Union[Empty, Leaf, Node])
 
 
 @app.define_struct_set("egoist.generators.structkit:walk")

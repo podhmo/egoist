@@ -2,6 +2,8 @@ from __future__ import annotations
 import typing as t
 from functools import lru_cache
 from metashape.declarative import MISSING
+from metashape.types import Kind as NodeKind
+from egoist.typing import resolve_name, guess_name
 from . import runtime
 from ._context import Context, Item
 
@@ -11,24 +13,30 @@ def walk(
     classes: t.List[t.Type[t.Any]],
     *,
     _nonetype: t.Type[t.Any] = type(None),
+    kinds: t.Optional[t.List[t.Optional[NodeKind]]] = None,
 ) -> t.Iterator[Item]:
     metadata_handler = ctx.metadata_handler
-
     w = ctx.get_metashape_walker(classes)
-    for cls in w.walk(kinds=["object", None]):
+
+    kinds = kinds or ["object", None, "enum"]
+    for cls in w.walk(kinds=kinds):
         origin = getattr(cls, "__origin__", None)
         if origin is not None:
             args = list(t.get_args(cls))
             if origin == t.Union and _nonetype not in args:  # union
                 yield Item(
-                    name="<union>", type_=cls, fields=[], args=args, origin=origin
+                    name=guess_name(cls), type_=cls, fields=[], args=args, origin=origin
                 )  # fixme
                 for subtype in get_flatten_args(cls):
                     w.append(subtype)
                 continue
             elif origin == t.Literal:  # literal
                 yield Item(
-                    name="<literal>", type_=cls, fields=[], args=args, origin=origin
+                    name=resolve_name(cls),
+                    type_=cls,
+                    fields=[],
+                    args=args,
+                    origin=origin,
                 )  # fixme name
                 continue
             else:
@@ -55,7 +63,7 @@ def walk(
             for subtype in get_flatten_args(info.type_):
                 w.append(subtype)
 
-        yield Item(name=cls.__name__, type_=cls, fields=fields, args=[])
+        yield Item(name=resolve_name(cls), type_=cls, fields=fields, args=[])
 
 
 @lru_cache(maxsize=256)

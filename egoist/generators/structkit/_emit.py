@@ -70,7 +70,7 @@ def emit_union(ctx: Context, item: Item) -> runtime.Definition:
     m = ctx.m
     resolver = ctx.resolver
 
-    typename = goname(item.type_.__name__)
+    typename = goname(item.name)
     kind_typename = typename + "Kind"
 
     # type <typename> {
@@ -95,7 +95,7 @@ def emit_union(ctx: Context, item: Item) -> runtime.Definition:
 
     # one-of validation
     assert unmarshalJSON_definition.code_module is not None
-    this = m.symbol(f"{item.type_.__name__[0].lower()}")
+    this = m.symbol(f"{item.name[0].lower()}")
     maperr_pkg = m.import_("github.com/podhmo/maperr")
 
     sm = unmarshalJSON_definition.code_module
@@ -180,7 +180,7 @@ def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
     m = ctx.m
     resolver = ctx.resolver
 
-    this = m.symbol(f"{item.type_.__name__[0].lower()}")
+    this = m.symbol(f"{item.name[0].lower()}")
     this_type = f"{resolver.resolve_gotype(item.type_)}"
     this_type_pointer = f"*{this_type}"
 

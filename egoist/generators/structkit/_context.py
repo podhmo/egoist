@@ -80,7 +80,7 @@ class Context:
         ]
 
         pseudo_item = Item(
-            name=item.type_.__name__,  # fixme
+            name=item.name,
             type_=item.type_,
             fields=[discriminator_field] + pseudo_fields,
             args=[],
