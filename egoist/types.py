@@ -10,9 +10,9 @@ Command = t.Callable[..., t.Any]
 # configuration
 ########################################
 
-ComponentType = tx.Literal["actual", "dryrun"]
+ComponentType = tx.Literal["actual", "dry-run"]
 ACTUAL_COMPONENT: ComponentType = "actual"
-DRYRUN_COMPONENT: ComponentType = "dryrun"
+DRYRUN_COMPONENT: ComponentType = "dry-run"
 
 
 ########################################
