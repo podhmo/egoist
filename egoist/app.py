@@ -19,7 +19,7 @@ class SettingsDict(tx.TypedDict):
 
 @dataclasses.dataclass
 class Registry:
-    generate_settings: t.Dict[str, t.List[t.Callable[..., t.Any]]] = dataclasses.field(
+    generators: t.Dict[str, t.List[t.Callable[..., t.Any]]] = dataclasses.field(
         default_factory=lambda: defaultdict(list)
     )
 
@@ -55,7 +55,7 @@ class App(_Configurator):
         import inspect
 
         defs = {}
-        for kit, fns in self.registry.generate_settings.items():
+        for kit, fns in self.registry.generators.items():
             for fn in fns:
                 name = f"{fn.__module__}.{fn.__name__}".replace("__main__.", "")
                 summary = (inspect.getdoc(fn) or "").strip().split("\n", 1)[0]
@@ -80,7 +80,7 @@ class App(_Configurator):
             rootdir = self.settings["rootdir"]
             root_path = pathlib.Path(here).parent / rootdir
 
-        for kit, fns in self.registry.generate_settings.items():
+        for kit, fns in self.registry.generators.items():
             walk_or_module = self.maybe_dotted(kit)
             if callable(walk_or_module):
                 walk = walk_or_module
@@ -121,7 +121,7 @@ class App(_Configurator):
         sub_parser.add_argument(
             "targets",
             nargs="*",
-            choices=[[]] + list(fn.__name__ for fns in self.registry.generate_settings.values() for fn in fns),  # type: ignore
+            choices=[[]] + list(fn.__name__ for fns in self.registry.generators.values() for fn in fns),  # type: ignore
         )
         sub_parser.set_defaults(subcommand=fn)
 

@@ -9,7 +9,7 @@ def define_cli(app: App) -> None:
 
     def _register_cli(app: App, kit: str) -> AnyFunction:
         def _register(fn: AnyFunction) -> AnyFunction:
-            app.registry.generate_settings[kit].append(fn)
+            app.registry.generators[kit].append(fn)
             return fn
 
         return _register
@@ -25,7 +25,7 @@ def define_struct_set(app: App) -> None:
 
     def _register_struct_set(app: App, kit: str) -> AnyFunction:
         def _register(fn: AnyFunction) -> AnyFunction:
-            app.registry.generate_settings[kit].append(fn)
+            app.registry.generators[kit].append(fn)
             return fn
 
         return _register
