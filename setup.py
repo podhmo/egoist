@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 
-install_requires = ["miniconfig", "metashape"]
+install_requires = ["miniconfig>=0.5.1", "metashape", "prestring>=0.9.0"]
 dev_requires = ["black", "flake8", "mypy"]
-tests_requires = ["pytest"]
+tests_requires = ["pytest", "pytest-cov"]
 
 setup(
     classifiers=[
