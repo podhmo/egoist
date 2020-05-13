@@ -4,3 +4,9 @@
 
 - [getting started](./docs/00getting-started.md)
 - [ja](./docs/ja/README.md)
+
+## installing
+
+```console
+$ pip install egoist
+```
