@@ -6,7 +6,7 @@ if t.TYPE_CHECKING:
     from egoist.internal.prestringutil import Module, output
 
 
-def get_output(*, root: t.Union[str, pathlib.Path]) -> output[Module]:
+def open_fs(*, root: t.Union[str, pathlib.Path]) -> output[Module]:
     from egoist.registry import get_global_registry
 
     registry = get_global_registry()

@@ -33,7 +33,7 @@ class App(_Configurator):
 
     def default_setup(self) -> None:
         logger.debug("default setup")
-        self.include("egoist.components.output")
+        self.include("egoist.components.fs")
 
     def commit(self) -> None:
         # only once
