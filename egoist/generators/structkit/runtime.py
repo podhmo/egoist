@@ -75,7 +75,7 @@ def set_metadata_handler(handler: MetadataHandlerFunction) -> MetadataHandlerFun
     return handler
 
 
-_default_metadata_handler: MetadataHandlerFunction = add_jsontag_metadata_handler
+_default_metadata_handler = add_jsontag_metadata_handler
 
 
 @dataclasses.dataclass(frozen=True)
