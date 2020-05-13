@@ -21,6 +21,7 @@ setup(
     extras_require={"testing": tests_requires, "dev": dev_requires},
     tests_require=tests_requires,
     test_suite="egoist.tests",
+    package_data={"egoist": ["py.typed"]},
     entry_points="""
       [console_scripts]
       egoist = egoist.cli:main
