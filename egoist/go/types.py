@@ -1,4 +1,5 @@
 import typing as t
+import typing_inspect as ti
 from prestring.go.codeobject import Module, Symbol  # noqa F401
 
 T = t.TypeVar("T")
@@ -83,5 +84,5 @@ def _unwrap_pointer_type(
         return typ, level
 
     if typ.__origin__ == GoPointer:
-        return _unwrap_pointer_type(t.get_args(typ)[0], level=level + 1)
+        return _unwrap_pointer_type(ti.get_args(typ)[0], level=level + 1)
     return typ, level

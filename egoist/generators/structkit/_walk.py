@@ -1,5 +1,6 @@
 from __future__ import annotations
 import typing as t
+import typing_inspect as ti
 from functools import lru_cache
 from metashape.declarative import MISSING
 from metashape.types import Kind as NodeKind
@@ -22,7 +23,7 @@ def walk(
     for cls in w.walk(kinds=kinds):
         origin = getattr(cls, "__origin__", None)
         if origin is not None:
-            args = list(t.get_args(cls))
+            args = list(ti.get_args(cls))
             if origin == t.Union and _nonetype not in args:  # union
                 yield Item(
                     name=guess_name(cls), type_=cls, fields=[], args=args, origin=origin
