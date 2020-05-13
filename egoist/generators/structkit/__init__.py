@@ -21,7 +21,7 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
 
             fpath = get_path_from_function_name(name)
 
-            with fs.open(str(pathlib.Path(fpath)) + ".go", "w") as m:  # type: Module
+            with fs.open(f"{fpath}.go", "w") as m:  # type: Module
                 env = runtime.Env(m=m, fn=fn)  # xxx:
                 c.stack.append(env)
                 fn()
