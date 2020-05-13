@@ -148,9 +148,9 @@ def inject(
                 if level_diff == 0:
                     pass
                 elif level_diff > 0:
-                    sym = Symbol(f"&" * level_diff + str(sym))
+                    sym = Symbol("&" * level_diff + str(sym))
                 else:
-                    sym = Symbol(f"*" * -level_diff + str(sym))
+                    sym = Symbol("*" * -level_diff + str(sym))
                 args.append(sym)
             levels[node.uid] = metadata["levels"]["return"]
 

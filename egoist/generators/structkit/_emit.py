@@ -168,7 +168,7 @@ def emit_enums(
     # func (v <enum>) UnmarshalJSON(b []byte) error {
     # ...
     # }
-    with m.method(f"{this} *{go_type}", "UnmarshalJSON", f"b []byte", returns="error"):
+    with m.method(f"{this} *{go_type}", "UnmarshalJSON", "b []byte", returns="error"):
         strings_pkg = m.import_("strings")
         m.stmt(f'*{this} = {go_type}({strings_pkg}.Trim(string(b), `"`))')
         m.return_(this.Valid())
