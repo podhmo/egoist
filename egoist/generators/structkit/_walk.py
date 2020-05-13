@@ -1,5 +1,6 @@
 from __future__ import annotations
 import typing as t
+import typing_extensions as tx
 import typing_inspect as ti
 from functools import lru_cache
 from metashape.declarative import MISSING
@@ -31,7 +32,7 @@ def walk(
                 for subtype in get_flatten_args(cls):
                     w.append(subtype)
                 continue
-            elif origin == t.Literal:  # literal
+            elif origin == tx.Literal:  # literal
                 yield Item(
                     name=resolve_name(cls),
                     type_=cls,
