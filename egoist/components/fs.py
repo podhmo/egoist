@@ -3,7 +3,7 @@ import typing as t
 import typing_extensions as tx
 import pathlib
 from egoist.app import App
-from egoist.runtime import get_components
+from egoist.runtime import get_component
 
 
 NAME = "fs_factory"
@@ -17,7 +17,7 @@ class FSFactory(tx.Protocol):
 
 
 def open_fs(*, root: t.Union[str, pathlib.Path]) -> output[Module]:
-    factory = get_components(NAME)
+    factory = get_component(NAME)
     return factory(root=root)  # type: ignore
 
 

@@ -89,5 +89,5 @@ def set_self(c: RuntimeContext) -> None:
     _context = c
 
 
-def get_components(name: str) -> object:
+def get_component(name: str) -> object:
     return get_global_registry().components[name][0]
