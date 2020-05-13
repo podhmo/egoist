@@ -32,3 +32,13 @@ jobs:
     - name: run
       run: |
         make ci
+    - name: Test with pytest
+      run: |
+        make test
+    - name: Type check with mypy
+      run: |
+        make typing
+    - name: run examples
+      run: |
+        make examples
+        git diff
