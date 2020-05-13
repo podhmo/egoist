@@ -81,15 +81,15 @@ class App(_Configurator):
             root_path = pathlib.Path(here).parent / rootdir
 
         for kit, fns in self.registry.generate_settings.items():
-            generate_or_module = self.maybe_dotted(kit)
-            if callable(generate_or_module):
-                generate = generate_or_module
-            elif hasattr(generate_or_module, "generate"):
-                generate = generate_or_module.generate  # type: ignore
+            walk_or_module = self.maybe_dotted(kit)
+            if callable(walk_or_module):
+                walk = walk_or_module
+            elif hasattr(walk_or_module, "walk"):
+                walk = walk_or_module.walk  # type: ignore
             else:
                 # TODO: genetle error message
                 raise ConfigurationError("{kit!r} is not callable")
-            generate({fn.__name__: fn for fn in fns}, root=root_path)
+            walk({fn.__name__: fn for fn in fns}, root=root_path)
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
