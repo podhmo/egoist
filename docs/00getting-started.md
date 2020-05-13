@@ -92,15 +92,13 @@ app.include("egoist.directives.define_cli")
 
 
 @app.define_cli("egoist.generators.clikit:walk")
-def hello(*, name: str = "foo") -> None:
+def hello(*, name: str = "World") -> None:
     """hello message"""
     from egoist.generators.clikit import runtime, clikit
 
-    options = runtime.get_cli_options()
-    options.name.help = "name of person"
-
-    with runtime.generate(clikit):
-        runtime.printf("hello %s\n", name)
+    with runtime.generate(clikit) as m:
+        hello = m.import_("m/hello")
+        m.stmt(hello.Hello(name))
 
 
 if __name__ == "__main__":
