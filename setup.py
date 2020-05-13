@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-install_requires = ["miniconfig>=0.5.1", "metashape>=0.0.1", "prestring>=0.9.0"]
+install_requires = ["miniconfig>=0.5.1", "metashape>=0.0.2", "prestring>=0.9.0"]
 dev_requires = ["black", "flake8", "mypy"]
 tests_requires = ["pytest", "pytest-cov"]
 
