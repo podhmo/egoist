@@ -4,9 +4,10 @@ import inspect
 import logging
 import pathlib
 from egoist import types
+from egoist.components.output import get_output
 from egoist.go.resolver import get_resolver, Resolver
 from egoist.langhelpers import get_path_from_function_name
-from egoist.internal.prestringutil import output, Module, goname, Symbol
+from egoist.internal.prestringutil import Module, goname, Symbol
 from egoist.runtime import _REST_ARGS_NAME
 from . import runtime
 
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
-    with output(root=str(root), opener=Module, verbose=True) as fs:
+    with get_output(root=root) as fs:
         c = runtime.get_self()
 
         for name, fn in fns.items():

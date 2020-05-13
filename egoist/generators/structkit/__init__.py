@@ -3,17 +3,17 @@ import logging
 import pathlib
 import contextlib
 from egoist import types
-from egoist.internal.prestringutil import output, Module
+from egoist.components.output import get_output
+from egoist.internal.prestringutil import Module
 from egoist.go.resolver import Resolver, get_resolver
 from egoist.langhelpers import get_path_from_function_name
-
-from egoist.generators.structkit import runtime
+from . import runtime
 
 logger = logging.getLogger(__name__)
 
 
 def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
-    with output(root=str(root), opener=Module, verbose=True) as fs:
+    with get_output(root=root) as fs:
         c = runtime.get_self()
 
         for name, fn in fns.items():
