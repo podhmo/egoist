@@ -1,13 +1,12 @@
 from __future__ import annotations
 import typing as t
 import typing_extensions as tx
-import dataclasses
-from collections import defaultdict
 import logging
 from miniconfig import Configurator as _Configurator
 from miniconfig import Context as _Context
 from miniconfig.exceptions import ConfigurationError
 from .langhelpers import reify
+from .registry import Registry, set_global_registry
 
 logger = logging.getLogger(__name__)
 
@@ -15,13 +14,6 @@ logger = logging.getLogger(__name__)
 class SettingsDict(tx.TypedDict):
     rootdir: str
     here: str
-
-
-@dataclasses.dataclass
-class Registry:
-    generators: t.Dict[str, t.List[t.Callable[..., t.Any]]] = dataclasses.field(
-        default_factory=lambda: defaultdict(list)
-    )
 
 
 class Context(_Context):
@@ -39,14 +31,21 @@ class App(_Configurator):
     def registry(self) -> Registry:
         return self.context.registry  # type: ignore
 
+    def default_setup(self) -> None:
+        logger.debug("default setup")
+        self.include("egoist.components.output")
+
     def commit(self) -> None:
         # only once
         if self.context.committed:  # type: ignore
             return
 
         self.context.committed = True  # type: ignore
+        self.default_setup()
+
         logger.debug("commit")
         super().commit()
+        set_global_registry(self.registry)
 
     def describe(self) -> None:
         self.commit()
