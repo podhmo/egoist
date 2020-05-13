@@ -9,6 +9,9 @@ class Registry:
     generators: t.Dict[str, t.List[t.Callable[..., t.Any]]] = dataclasses.field(
         default_factory=lambda: defaultdict(list)
     )
+    components: t.Dict[str, t.List[object]] = dataclasses.field(
+        default_factory=lambda: defaultdict(list)
+    )
 
 
 _global_registry = None

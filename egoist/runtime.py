@@ -2,10 +2,10 @@ from __future__ import annotations
 import typing as t
 import dataclasses
 
-from egoist.langhelpers import reify
-from egoist.types import Command
 from egoist.internal.prestringutil import Module
-
+from .langhelpers import reify
+from . import types
+from .registry import get_global_registry
 
 if t.TYPE_CHECKING:
     from .internal._fnspec import Fnspec
@@ -44,7 +44,7 @@ class Arg:
 @dataclasses.dataclass
 class Env:
     m: Module
-    fn: Command
+    fn: types.Command
     prefix: str = ""
 
     @reify
@@ -87,3 +87,7 @@ def get_self() -> RuntimeContext:
 def set_self(c: RuntimeContext) -> None:
     global _context
     _context = c
+
+
+def get_components(name: str) -> object:
+    return get_global_registry().components[name][0]

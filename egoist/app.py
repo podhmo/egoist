@@ -5,8 +5,10 @@ import logging
 from miniconfig import Configurator as _Configurator
 from miniconfig import Context as _Context
 from miniconfig.exceptions import ConfigurationError
+from . import types
 from .langhelpers import reify
 from .registry import Registry, set_global_registry
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,18 @@ class App(_Configurator):
     def registry(self) -> Registry:
         return self.context.registry  # type: ignore
 
+    # default directives
+    def register_component(
+        self,
+        name: str,
+        component: object,
+        *,
+        type_: types.ComponentType = types.ACTUAL_COMPONENT,
+    ) -> None:
+        self.registry.components[name].append(component)
+        self.action((name, type_), _noop)
+
+    # commands
     def default_setup(self) -> None:
         logger.debug("default setup")
         self.include("egoist.components.fs")
@@ -130,3 +144,7 @@ class App(_Configurator):
         activate(params)
         subcommand = params.pop("subcommand")
         return subcommand(**params)
+
+
+def _noop() -> None:
+    pass

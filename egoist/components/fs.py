@@ -1,27 +1,25 @@
 from __future__ import annotations
 import typing as t
 import pathlib
+from egoist.app import App
+from egoist.runtime import get_components
 
+
+NAME = "fs_factory"
 if t.TYPE_CHECKING:
     from egoist.internal.prestringutil import Module, output
 
 
 def open_fs(*, root: t.Union[str, pathlib.Path]) -> output[Module]:
-    from egoist.registry import get_global_registry
-
-    registry = get_global_registry()
-    return registry._create_output(root=root)  # type: ignore
+    return get_components(NAME)  # type: ignore
 
 
-def includeme(app: t.Any) -> None:
-    from egoist.registry import Registry
+def create_fs(self: t.Any, *, root: t.Union[pathlib.Path, str]) -> output[Module]:
+    """actual component"""
+    from egoist.internal.prestringutil import output, Module
 
-    # define method (todo: typing)
-    def create_output(
-        self: t.Any, *, root: t.Union[pathlib.Path, str]
-    ) -> output[Module]:
-        from egoist.internal.prestringutil import output, Module
+    return output(root=str(root), opener=Module, verbose=True)
 
-        return output(root=str(root), opener=Module, verbose=True)
 
-    Registry._create_output = create_output  # type: ignore
+def includeme(app: App) -> None:
+    app.register_component(NAME, create_fs)
