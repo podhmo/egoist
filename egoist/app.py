@@ -6,7 +6,7 @@ from miniconfig import Configurator as _Configurator
 from miniconfig import Context as _Context
 from miniconfig.exceptions import ConfigurationError
 from . import types
-from .langhelpers import reify
+from .langhelpers import reify, fullname
 from .registry import Registry, set_global_registry
 
 
@@ -73,7 +73,12 @@ class App(_Configurator):
                 name = f"{fn.__module__}.{fn.__name__}".replace("__main__.", "")
                 summary = (inspect.getdoc(fn) or "").strip().split("\n", 1)[0]
                 defs[name] = {"doc": summary, "generator": kit}
-        d = {"definitions": defs}
+
+        components = {
+            name: [fullname(x) for x in xs]
+            for name, xs in self.registry.components.items()
+        }
+        d = {"definitions": defs, "components": components}
         print(json.dumps(d, indent=2, ensure_ascii=False))
 
     def generate(
