@@ -16,7 +16,7 @@ $ tree
 0 directories, 1 file
 ```
 
-generate `cmd/{hello}/main.go` by definitions.py. (this is generated [main.go](../examples/e2e/generate/00simple/cmd/hello/main.go))
+generate `cmd/{hello}/main.go` by definitions.py. (this is generated [main.go](../examples/e2e/generate-clikit/00simple/cmd/hello/main.go))
 
 ```console
 $ python definitions.py generate
@@ -48,7 +48,7 @@ $ go run cmd/hello/main.go -name foo
 hello foo
 ```
 
-more details is [here](../examples/e2e/generate/00simple).
+more details is [here](../examples/e2e/generate-clikit/00simple).
 
 ### defnitions.py
 
@@ -156,9 +156,9 @@ func Hello(name string) {
 }
 ```
 
-[cmd/hello/main.go](../examples/e2e/generate/03use-import/cmd/hello/main.go)
+[cmd/hello/main.go](../examples/e2e/generate-clikit/03use-import/cmd/hello/main.go)
 
-More details is [here](../examples/e2e/generate/03use-import).
+More details is [here](../examples/e2e/generate-clikit/03use-import).
 
 ## using DI in main.go
 
@@ -284,13 +284,17 @@ def NewEvent(g: Greeter) -> t.Tuple[Event, GoError]:
     pass
 ```
 
-[internal/components.go](../examples/e2e/generate/04use-di/internal/components.go)
-[cmd/wire_example/main.go](../examples/e2e/generate/04use-di/cmd/wire_example/main.go)
+[internal/components.go](../examples/e2e/generate-clikit/04use-di/internal/components.go)
+[cmd/wire_example/main.go](../examples/e2e/generate-clikit/04use-di/cmd/wire_example/main.go)
 
-more details is [here](../examples/e2e/generate/04use-di).
+more details is [here](../examples/e2e/generate-clikit/04use-di).
 
 ## todo
 
-- adding help message is [here](../examples/e2e/generate/01fullset)
-- using cli rest args is [here](../examples/e2e/generate/05use-rest-args)
+- adding help message is [here](../examples/e2e/generate-clikit/01fullset)
+- using cli rest args is [here](../examples/e2e/generate-clikit/05use-rest-args)
+
+## todo
+
+- [structkit](../examples/e2e/generate-structkit)
 
