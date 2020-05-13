@@ -14,4 +14,5 @@
 ## 記事
 
 - [goはランタイムという発想のミニフレームワークを作り始めた](https://pod.hatenablog.com/entry/2020/04/30/224205)
+- [initial release, hello world](https://pod.hatenablog.com/entry/2020/05/13/175220)
 - [hello worldについての詳しい解説](https://pod.hatenablog.com/entry/2020/05/13/183014)
