@@ -24,26 +24,17 @@ def walk(
     root: t.Union[str, pathlib.Path],
     option_prefix: str = runtime._PREFIX_DEFAULT,
 ) -> None:
-    _fake = Module()
-
     with open_fs(root=root) as fs:
-        c = runtime.get_self()
-
         for name, fn in fns.items():
             logger.debug("walk %s", name)
 
-            fpath = get_path_from_function_name(name)
-
-            env = runtime.Env(m=_fake, fn=fn)
-            c.stack.append(env)
-            with fs.open(pathlib.Path(fpath) / "main.go", "w") as m:  # type: Module
-                env.m = m
+            fpath = pathlib.Path(get_path_from_function_name(name)) / "main.go"
+            with fs.open_with_tracking(fpath, "w", target=fn) as env:
                 kwargs = {
                     name: Symbol(f"{option_prefix}.{goname(name)}")
                     for name, _, _ in env.fnspec.parameters
                 }
                 fn(**kwargs)
-                c.stack.pop()
 
 
 @contextlib.contextmanager

@@ -13,20 +13,12 @@ logger = logging.getLogger(__name__)
 
 
 def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
-    _fake = Module()
     with open_fs(root=root) as fs:
-        c = runtime.get_self()
-
         for name, fn in fns.items():
             logger.debug("walk %s", name)
-
-            fpath = get_path_from_function_name(name)
-            env = runtime.Env(m=_fake, fn=fn)
-            c.stack.append(env)
-            with fs.open(f"{fpath}.go", "w") as m:  # type: Module
-                env.m = m
+            fpath = f"{get_path_from_function_name(name)}.go"
+            with fs.open_with_tracking(fpath, "w", target=fn):
                 fn()
-                c.stack.pop()
 
 
 @contextlib.contextmanager

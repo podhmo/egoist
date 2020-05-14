@@ -8,41 +8,63 @@ from egoist import runtime
 
 
 if t.TYPE_CHECKING:
-    from egoist.internal.prestringutil import Module, output
+    from egoist.internal.prestringutil import Module
+    from .runtimecontext import Env
 
-
+T_co = t.TypeVar("T_co", covariant=True)
 NAME = __name__
 
+Mode = tx.Literal["w"]  # support only "w", yet
 
-class FSFactory(tx.Protocol):
-    def __call__(self, *, root: t.Union[str, pathlib.Path]) -> output[Module]:
+
+class FSFactory(tx.Protocol[T_co]):
+    def __call__(
+        self, *, root: t.Union[str, pathlib.Path]
+    ) -> t.ContextManager[FS[T_co]]:
         ...
 
 
-def open_fs(*, root: t.Union[str, pathlib.Path]) -> output[Module]:
-    factory = t.cast(FSFactory, runtime.get_component(NAME))
+class FS(tx.Protocol[T_co]):
+    def open(
+        self, filename: t.Union[str, pathlib.Path], mode: str
+    ) -> t.ContextManager[T_co]:
+        ...
+
+    def open_with_tracking(
+        self, filename: t.Union[str, pathlib.Path], mode: str, *, target: object
+    ) -> t.ContextManager[Env]:
+        ...
+
+
+def open_fs(*, root: t.Union[str, pathlib.Path]) -> t.ContextManager[FS[Module]]:
+    from egoist.internal.prestringutil import Module
+    factory = t.cast(FSFactory[Module], runtime.get_component(NAME))
     return factory(root=root)
 
 
-def create_fs(*, root: t.Union[pathlib.Path, str]) -> output[Module]:
+def create_fs(*, root: t.Union[pathlib.Path, str]) -> t.ContextManager[FS[Module]]:
     """actual component"""
-    from egoist.internal.prestringutil import output, Module
+    from egoist.internal.prestringutil import Module
+    from .fs_tracked_ import _TrackedOutput
 
-    return output(root=str(root), opener=Module, verbose=True)
+    return _TrackedOutput(root=str(root), opener=Module, verbose=True)
 
 
-def create_dummy_fs(*, root: t.Union[pathlib.Path, str]) -> output[Module]:
+def create_dummy_fs(
+    *, root: t.Union[pathlib.Path, str]
+) -> t.ContextManager[FS[Module]]:
     """dry-run component"""
-    from egoist.internal.prestringutil import output, Module
+    from egoist.internal.prestringutil import Module
+    from .fs_tracked_ import _TrackedOutput
 
-    return output(
+    return _TrackedOutput(
         root=str(root), opener=Module, verbose=False, use_console=True, nocheck=False
     )
 
 
 def includeme(app: App) -> None:
-    actual: FSFactory = create_fs
+    actual: FSFactory[Module] = create_fs
     app.register_component(NAME, actual)
 
-    for_dry_run: FSFactory = create_dummy_fs
+    for_dry_run: FSFactory[Module] = create_dummy_fs
     app.register_dryurn_component(NAME, for_dry_run)
