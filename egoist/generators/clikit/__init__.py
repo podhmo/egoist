@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
+    _fake = Module()
+
     with open_fs(root=root) as fs:
         c = runtime.get_self()
 
@@ -27,9 +29,10 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
 
             fpath = get_path_from_function_name(name)
 
+            env = runtime.Env(m=_fake, fn=fn, prefix="opt")
+            c.stack.append(env)
             with fs.open(pathlib.Path(fpath) / "main.go", "w") as m:  # type: Module
-                env = runtime.Env(m=m, fn=fn, prefix="opt")  # xxx:
-                c.stack.append(env)
+                env.m = m
                 kwargs = {
                     name: Symbol(f"{env.prefix}.{goname(name)}")
                     for name, _, _ in env.fnspec.parameters
