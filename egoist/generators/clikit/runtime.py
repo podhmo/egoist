@@ -29,9 +29,11 @@ def get_cli_options() -> ArgsAttr:
     return get_self().stack[-1].args
 
 
-def get_cli_rest_args() -> Symbol:
+_PREFIX_DEFAULT = "opt"
+
+
+def get_cli_rest_args(*, prefix: str = _PREFIX_DEFAULT) -> Symbol:
     from egoist.components.runtimecontext import _REST_ARGS_NAME
 
-    prefix = get_self().stack[-1].prefix
     name = _REST_ARGS_NAME
     return Symbol(f"{prefix}.{goname(name)}")

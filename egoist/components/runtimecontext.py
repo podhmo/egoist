@@ -44,7 +44,6 @@ class Arg:
 class Env:
     m: Module
     fn: types.Command
-    prefix: str = ""
 
     @reify
     def fnspec(self) -> Fnspec:

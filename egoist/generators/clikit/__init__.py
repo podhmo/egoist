@@ -18,7 +18,12 @@ from . import runtime
 logger = logging.getLogger(__name__)
 
 
-def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
+def walk(
+    fns: t.Dict[str, types.Command],
+    *,
+    root: t.Union[str, pathlib.Path],
+    option_prefix: str = runtime._PREFIX_DEFAULT,
+) -> None:
     _fake = Module()
 
     with open_fs(root=root) as fs:
@@ -29,12 +34,12 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
 
             fpath = get_path_from_function_name(name)
 
-            env = runtime.Env(m=_fake, fn=fn, prefix="opt")
+            env = runtime.Env(m=_fake, fn=fn)
             c.stack.append(env)
             with fs.open(pathlib.Path(fpath) / "main.go", "w") as m:  # type: Module
                 env.m = m
                 kwargs = {
-                    name: Symbol(f"{env.prefix}.{goname(name)}")
+                    name: Symbol(f"{option_prefix}.{goname(name)}")
                     for name, _, _ in env.fnspec.parameters
                 }
                 fn(**kwargs)
@@ -43,13 +48,17 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
 
 @contextlib.contextmanager
 def clikit(
-    env: runtime.Env, *, resolver: t.Optional[Resolver] = None
+    env: runtime.Env,
+    *,
+    resolver: t.Optional[Resolver] = None,
+    option_prefix: str = runtime._PREFIX_DEFAULT,
 ) -> t.Iterator[Module]:
     m = env.m
     fn = env.fn
     spec = env.fnspec
 
     resolver = resolver or get_resolver(m)
+    opt = m.symbol(option_prefix)
 
     description = None
     doc = inspect.getdoc(fn)
@@ -72,7 +81,7 @@ def clikit(
     m.sep()
 
     with m.func("main"):
-        m.stmt("opt := &Option{}")
+        m.stmt(f"{opt} := &Option{{}}")
 
         m.import_("flag")  # import:
         m.stmt(
@@ -99,7 +108,7 @@ def clikit(
             default = resolver.resolve_default(typ, arg.default)
 
             m.stmt(
-                f'cmd.{parse_method}(&opt.{goname(name)}, "{name}", {default}, {help_usage})'
+                f'cmd.{parse_method}(&{opt}.{goname(name)}, "{name}", {default}, {help_usage})'
             )
 
         m.sep()
@@ -113,14 +122,14 @@ def clikit(
             m.stmt("}")
             m.stmt("os.Exit(1)")
         m.stmt("}")
-        m.stmt("opt.Args = cmd.Args()")
-        m.stmt("if err := run(opt); err != nil {")
+        m.stmt(f"{opt}.Args = cmd.Args()")
+        m.stmt(f"if err := run({opt}); err != nil {{")
         with m.scope():
             m.import_("log")  # import:
             m.stmt('log.Fatalf("!!%+v", err)')
         m.stmt("}")
 
-    with m.func("run", "opt *Option", returns="error"):
+    with m.func("run", f"{opt} *Option", returns="error"):
         yield m
         if spec.return_type == type(None):  # noqa: E721
             m.return_("nil")
