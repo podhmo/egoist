@@ -1,7 +1,10 @@
+from __future__ import annotations
 import typing as t
-from egoist.runtime import ArgsAttr, _REST_ARGS_NAME
 from egoist.runtime import get_self, printf, Env
 from egoist.internal.prestringutil import goname, Symbol, Module
+
+if t.TYPE_CHECKING:
+    from egoist.components.runtimecontext import ArgsAttr
 
 __all__ = [
     "get_self",
@@ -27,6 +30,8 @@ def get_cli_options() -> ArgsAttr:
 
 
 def get_cli_rest_args() -> Symbol:
+    from egoist.components.runtimecontext import _REST_ARGS_NAME
+
     prefix = get_self().stack[-1].prefix
     name = _REST_ARGS_NAME
     return Symbol(f"{prefix}.{goname(name)}")
