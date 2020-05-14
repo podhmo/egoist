@@ -34,13 +34,13 @@ class App(_Configurator):
         return self.context.registry  # type: ignore
 
     # default directives
-    def register_component(
-        self,
-        name: str,
-        component: object,
-        *,
-        type_: types.ComponentType = types.ACTUAL_COMPONENT,
-    ) -> None:
+    def register_component(self, name: str, component: object,) -> None:
+        type_ = types.ACTUAL_COMPONENT
+        self.registry.components[name].append(component)
+        self.action((name, type_), _noop)
+
+    def register_dryurn_component(self, name: str, component: object,) -> None:
+        type_ = types.DRYRUN_COMPONENT
         self.registry.components[name].append(component)
         self.action((name, type_), _noop)
 
@@ -75,7 +75,7 @@ class App(_Configurator):
                 defs[name] = {"doc": summary, "generator": kit}
 
         components = {
-            name: [fullname(x) for x in xs]
+            name: [fullname(x) for x in xs]  # type: ignore
             for name, xs in self.registry.components.items()
         }
         d = {"definitions": defs, "components": components}
