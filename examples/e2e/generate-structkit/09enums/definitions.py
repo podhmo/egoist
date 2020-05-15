@@ -1,5 +1,5 @@
 import typing_extensions as tx
-from egoist.app import App, SettingsDict
+from egoist.app import App, SettingsDict, parse_args
 from egoist.typing import NewNamedType
 
 settings: SettingsDict = {"rootdir": "", "here": __file__}
@@ -19,4 +19,5 @@ def models__models() -> None:
 
 
 if __name__ == "__main__":
-    app.run()
+    for argv in parse_args(sep="-"):
+        app.run(argv)

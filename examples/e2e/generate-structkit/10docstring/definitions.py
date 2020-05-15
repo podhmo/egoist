@@ -1,4 +1,4 @@
-from egoist.app import App, SettingsDict
+from egoist.app import App, SettingsDict, parse_args
 from egoist.generators.structkit.runtime import metadata, field
 
 
@@ -29,4 +29,5 @@ def models__models() -> None:
 
 
 if __name__ == "__main__":
-    app.run()
+    for argv in parse_args(sep="-"):
+        app.run(argv)

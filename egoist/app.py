@@ -1,6 +1,7 @@
 from __future__ import annotations
 import typing as t
 import typing_extensions as tx
+
 import logging
 from miniconfig import Configurator as _Configurator
 from miniconfig import Context as _Context
@@ -24,6 +25,7 @@ class Context(_Context):
         return Registry()
 
     committed: t.ClassVar[bool] = False
+    run: t.Optional[t.Callable[[t.Optional[t.List[str]]], t.Any]] = None
 
 
 class App(_Configurator):
@@ -92,8 +94,6 @@ class App(_Configurator):
         rootdir: t.Optional[str] = None,
         targets: t.Optional[t.List[str]] = None,
     ) -> None:
-        self.commit(dry_run=False)
-
         import pathlib
 
         if rootdir is not None:
@@ -102,6 +102,8 @@ class App(_Configurator):
             here = self.settings["here"]
             rootdir = self.settings["rootdir"]
             root_path = pathlib.Path(here).parent / rootdir
+
+        self.commit(dry_run=False)
 
         for kit, fns in self.registry.generators.items():
             walk_or_module = self.maybe_dotted(kit)
@@ -112,7 +114,12 @@ class App(_Configurator):
             else:
                 # TODO: genetle error message
                 raise ConfigurationError("{kit!r} is not callable")
-            walk({fn.__name__: fn for fn in fns}, root=root_path)
+
+            if not targets:
+                sources = {fn.__name__: fn for fn in fns}
+            else:
+                sources = {fn.__name__: fn for fn in fns if fn.__name__ in targets}
+            walk(sources, root=root_path)
 
     def scan(self, *, targets: t.Optional[t.List[str]] = None) -> None:
         from egoist.components.tracker import get_tracker
@@ -126,6 +133,10 @@ class App(_Configurator):
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
         from egoist.internal.logutil import logging_setup
+
+        run_ = self.context.run  # type: ignore
+        if run_ is not None:
+            return run_(argv)
 
         # todo: scan modules in show_help only
         target_choices = [
@@ -168,11 +179,33 @@ class App(_Configurator):
         sub_parser.set_defaults(subcommand=fn)
 
         activate = logging_setup(parser)
-        args = parser.parse_args(argv)
-        params = vars(args).copy()
-        activate(params)
-        subcommand = params.pop("subcommand")
-        return subcommand(**params)
+
+        def _run(argv: t.Optional[t.List[str]] = None) -> t.Any:
+            args = parser.parse_args(argv)
+            params = vars(args).copy()
+            activate(params)
+            subcommand = params.pop("subcommand")
+            return subcommand(**params)
+
+        self.context.run = _run  # type:ignore
+        return _run(argv)
+
+
+def parse_args(
+    argv: t.Optional[t.List[str]] = None, *, sep: str = "-"
+) -> t.Iterator[t.List[str]]:
+    """for bulk action"""
+    import sys
+    import itertools
+
+    argv = argv or sys.argv[1:]
+    itr = iter(argv)
+    while True:
+        argv = list(itertools.takewhile(lambda x: x != sep, itr))
+        if len(argv) == 0:
+            break
+        yield argv
+    assert not argv
 
 
 def _noop() -> None:
