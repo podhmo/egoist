@@ -1,6 +1,7 @@
 from __future__ import annotations
 import typing as t
 import typing_extensions as tx
+
 import logging
 from miniconfig import Configurator as _Configurator
 from miniconfig import Context as _Context
@@ -24,6 +25,7 @@ class Context(_Context):
         return Registry()
 
     committed: t.ClassVar[bool] = False
+    run: t.Optional[[t.Optional[t.List[str]]], t.Any] = None
 
 
 class App(_Configurator):
@@ -127,6 +129,9 @@ class App(_Configurator):
         import argparse
         from egoist.internal.logutil import logging_setup
 
+        if self.context.run is not None:
+            return self.context.run(argv)
+
         # todo: scan modules in show_help only
         target_choices = [
             fn.__name__ for fns in self.registry.generators.values() for fn in fns
@@ -168,11 +173,31 @@ class App(_Configurator):
         sub_parser.set_defaults(subcommand=fn)
 
         activate = logging_setup(parser)
-        args = parser.parse_args(argv)
-        params = vars(args).copy()
-        activate(params)
-        subcommand = params.pop("subcommand")
-        return subcommand(**params)
+
+        def _run(argv: t.Optional[t.List[str]] = None) -> t.Any:
+            args = parser.parse_args(argv)
+            params = vars(args).copy()
+            activate(params)
+            subcommand = params.pop("subcommand")
+            return subcommand(**params)
+
+        self.context.run = _run
+        return _run(argv)
+
+
+def parse_args(argv: t.Optional[t.List[str]] = None, *, sep="-"):
+    """for bulk action"""
+    import sys
+    import itertools
+
+    argv = argv or sys.argv[1:]
+    itr = iter(argv)
+    while True:
+        argv = list(itertools.takewhile(lambda x: x != sep, itr))
+        if len(argv) == 0:
+            break
+        yield argv
+    assert not argv
 
 
 def _noop() -> None:
