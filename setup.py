@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-install_requires = ["miniconfig>=0.5.1", "metashape>=0.0.2", "prestring>=0.9.0"]
+install_requires = ["miniconfig>=0.5.2", "metashape>=0.0.2", "prestring>=0.9.0"]
 tests_requires = ["pytest", "pytest-cov"]
 extras_require = {
     "testing": tests_requires,

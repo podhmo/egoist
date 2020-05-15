@@ -3,29 +3,22 @@ import logging
 import pathlib
 import contextlib
 from egoist import types
-from egoist.internal.prestringutil import output, Module
+from egoist.components.fs import open_fs
+from egoist.internal.prestringutil import Module
 from egoist.go.resolver import Resolver, get_resolver
 from egoist.langhelpers import get_path_from_function_name
-
-from egoist.generators.structkit import runtime
+from . import runtime
 
 logger = logging.getLogger(__name__)
 
 
 def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
-    with output(root=str(root), opener=Module, verbose=True) as fs:
-        c = runtime.get_self()
-
+    with open_fs(root=root) as fs:
         for name, fn in fns.items():
             logger.debug("walk %s", name)
-
-            fpath = get_path_from_function_name(name)
-
-            with fs.open(str(pathlib.Path(fpath)) + ".go", "w") as m:  # type: Module
-                env = runtime.Env(m=m, fn=fn)  # xxx:
-                c.stack.append(env)
+            fpath = f"{get_path_from_function_name(name)}.go"
+            with fs.open_with_tracking(fpath, "w", target=fn):
                 fn()
-                c.stack.pop()
 
 
 @contextlib.contextmanager

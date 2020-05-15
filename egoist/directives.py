@@ -1,5 +1,5 @@
 import typing as t
-from .app import App
+from .app import App, _noop
 
 AnyFunction = t.Callable[..., t.Any]
 
@@ -34,7 +34,3 @@ def define_struct_set(app: App) -> None:
 
     # for conflict check
     app.action(name, _noop)
-
-
-def _noop() -> None:
-    pass

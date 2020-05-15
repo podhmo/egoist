@@ -2,20 +2,22 @@ from __future__ import annotations
 import typing as t
 import dataclasses
 
-from egoist.langhelpers import reify
-from egoist.types import Command
-from egoist.internal.prestringutil import Module
-
+from . import types
+from .langhelpers import reify
+from .registry import get_global_registry
 
 if t.TYPE_CHECKING:
-    from .internal._fnspec import Fnspec
+    from egoist.internal.prestringutil import Module
+    from egoist.internal._fnspec import Fnspec
 
 
 class RuntimeContext:
     stack: t.List[Env]
+    _component_instances: t.Dict[str, object]
 
     def __init__(self) -> None:
         self.stack = []
+        self._component_instances = {}
 
 
 _REST_ARGS_NAME = "args"
@@ -44,12 +46,11 @@ class Arg:
 @dataclasses.dataclass
 class Env:
     m: Module
-    fn: Command
-    prefix: str = ""
+    fn: types.Command
 
     @reify
     def fnspec(self) -> Fnspec:
-        from .internal._fnspec import fnspec
+        from egoist.internal._fnspec import fnspec
 
         return fnspec(self.fn)
 
@@ -66,24 +67,39 @@ class Env:
 _context = None
 
 
-def printf(fmt_str: str, *args: t.Any) -> None:
-    from prestring.utils import UnRepr
-    import json
-
-    m = get_self().stack[-1].m
-    fmt = m.import_("fmt")
-    # fixme: remove Unrepr and json.dumps
-    m.stmt(fmt.Printf(UnRepr(json.dumps(fmt_str)), *args))
-
-
-def get_self() -> RuntimeContext:
+def get_current_context() -> RuntimeContext:
     global _context
     if _context is None:
-        set_self(RuntimeContext())
+        set_context(RuntimeContext())
     assert _context is not None
     return _context
 
 
-def set_self(c: RuntimeContext) -> None:
+def set_context(c: RuntimeContext) -> None:
     global _context
     _context = c
+
+
+def get_component_factory(name: str) -> types.ComponentFactory:
+    return get_global_registry().factories[name][0]
+
+
+def get_component(name: str, *args: t.Any, **kwargs: t.Any) -> object:
+    c = get_current_context()
+    ob = c._component_instances.get(name)
+    if ob is not None:
+        return ob
+
+    factory = get_component_factory(name)
+    ob = c._component_instances[name] = factory(*args, **kwargs)
+    return ob
+
+
+def printf(fmt_str: str, *args: t.Any) -> None:
+    from prestring.utils import UnRepr
+    import json
+
+    m = get_current_context().stack[-1].m
+    fmt = m.import_("fmt")
+    # fixme: remove Unrepr and json.dumps
+    m.stmt(fmt.Printf(UnRepr(json.dumps(fmt_str)), *args))
