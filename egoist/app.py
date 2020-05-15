@@ -13,7 +13,7 @@ from .registry import Registry, set_global_registry
 logger = logging.getLogger(__name__)
 
 
-class SettingsDict(tx.TypedDict):
+class SettingsDict(tx.TypedDict, total=False):
     rootdir: str
     here: str
 
@@ -36,14 +36,14 @@ class App(_Configurator):
     # default directives
     def register_factory(self, name: str, factory: types.ComponentFactory) -> None:
         type_ = types.ACTUAL_COMPONENT
-        self.registry.factories[name].append(factory)
+        self.registry._factories[name].append(factory)
         self.action((name, type_), _noop)
 
     def register_dryurn_factory(
         self, name: str, factory: types.ComponentFactory
     ) -> None:
         type_ = types.DRYRUN_COMPONENT
-        self.registry.factories[name].append(factory)
+        self.registry._dryrun_factories[name].append(factory)
         self.action((name, type_), _noop)
 
     # commands
@@ -51,7 +51,7 @@ class App(_Configurator):
         logger.debug("default setup")
         self.include("egoist.components.fs")
 
-    def commit(self) -> None:
+    def commit(self, *, dry_run: bool = False) -> None:
         # only once
         if self.context.committed:  # type: ignore
             return
@@ -61,10 +61,11 @@ class App(_Configurator):
 
         logger.debug("commit")
         super().commit()
+        self.registry.configure(dry_run=dry_run)
         set_global_registry(self.registry)
 
     def describe(self) -> None:
-        self.commit()
+        self.commit(dry_run=False)
 
         import json
         import inspect
@@ -89,7 +90,7 @@ class App(_Configurator):
         rootdir: t.Optional[str] = None,
         targets: t.Optional[t.List[str]] = None,
     ) -> None:
-        self.commit()
+        self.commit(dry_run=False)
 
         import pathlib
 
@@ -111,9 +112,23 @@ class App(_Configurator):
                 raise ConfigurationError("{kit!r} is not callable")
             walk({fn.__name__: fn for fn in fns}, root=root_path)
 
+    def scan(self, *, targets: t.Optional[t.List[str]] = None) -> None:
+        from egoist.components.tracker import get_tracker
+
+        self.include("egoist.components.tracker")
+        self.commit(dry_run=True)
+
+        self.generate(targets=targets)
+        print(get_tracker().get_dependencies())
+
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
         from egoist.internal.logutil import logging_setup
+
+        # todo: scan modules in show_help only
+        target_choices = [[]] + list(
+            fn.__name__ for fns in self.registry.generators.values() for fn in fns
+        )
 
         parser = argparse.ArgumentParser(
             formatter_class=type(
@@ -126,23 +141,28 @@ class App(_Configurator):
         subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
         subparsers.required = True
 
+        # describe (todo: rename to info? or inspect?)
         fn = self.describe
         sub_parser = subparsers.add_parser(
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
         sub_parser.set_defaults(subcommand=fn)
 
+        # generate
         fn = self.generate
         sub_parser = subparsers.add_parser(
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
         sub_parser.add_argument("--rootdir", required=False, help="-")
-        # todo: scan modules in show_help only
-        sub_parser.add_argument(
-            "targets",
-            nargs="*",
-            choices=[[]] + list(fn.__name__ for fns in self.registry.generators.values() for fn in fns),  # type: ignore
+        sub_parser.add_argument("targets", nargs="*", choices=target_choices)  # type: ignore
+        sub_parser.set_defaults(subcommand=fn)
+
+        # scan
+        fn = self.scan
+        sub_parser = subparsers.add_parser(
+            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
+        sub_parser.add_argument("targets", nargs="*", choices=target_choices)  # type: ignore
         sub_parser.set_defaults(subcommand=fn)
 
         activate = logging_setup(parser)
