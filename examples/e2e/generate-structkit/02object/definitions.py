@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing as t
-from egoist.app import App, SettingsDict
+from egoist.app import App, SettingsDict, parse_args
 
 settings: SettingsDict = {"rootdir": "", "here": __file__}
 app = App(settings)
@@ -29,4 +29,5 @@ def models__models() -> None:
 
 
 if __name__ == "__main__":
-    app.run()
+    for argv in parse_args(sep="-"):
+        app.run(argv)

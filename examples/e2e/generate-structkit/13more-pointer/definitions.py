@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing as t
-from egoist.app import App, SettingsDict
+from egoist.app import App, SettingsDict, parse_args
 from egoist.go.types import GoPointer
 
 
@@ -32,4 +32,5 @@ def models__models() -> None:
 
 
 if __name__ == "__main__":
-    app.run()
+    for argv in parse_args(sep="-"):
+        app.run(argv)
