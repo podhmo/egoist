@@ -28,17 +28,3 @@ class Registry:
 
     def configure(self, *, dry_run: bool = False) -> None:
         self.dry_run = dry_run
-
-
-_global_registry = None
-
-
-def set_global_registry(r: Registry) -> None:
-    global _global_registry
-    _global_registry = r
-
-
-def get_global_registry() -> Registry:
-    global _global_registry
-    assert _global_registry is not None
-    return _global_registry

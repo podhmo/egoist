@@ -7,7 +7,7 @@ from miniconfig import Context as _Context
 from miniconfig.exceptions import ConfigurationError
 from . import types
 from .langhelpers import reify, fullname
-from .registry import Registry, set_global_registry
+from .registry import Registry
 
 
 logger = logging.getLogger(__name__)
@@ -52,6 +52,8 @@ class App(_Configurator):
         self.include("egoist.components.fs")
 
     def commit(self, *, dry_run: bool = False) -> None:
+        from . import runtime
+
         # only once
         if self.context.committed:  # type: ignore
             return
@@ -62,7 +64,7 @@ class App(_Configurator):
         logger.debug("commit")
         super().commit()
         self.registry.configure(dry_run=dry_run)
-        set_global_registry(self.registry)
+        runtime.set_context(runtime.RuntimeContext(self.registry))
 
     def describe(self) -> None:
         self.commit(dry_run=False)
