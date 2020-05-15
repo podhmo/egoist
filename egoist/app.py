@@ -126,9 +126,9 @@ class App(_Configurator):
         from egoist.internal.logutil import logging_setup
 
         # todo: scan modules in show_help only
-        target_choices = [[]] + list(
+        target_choices = [
             fn.__name__ for fns in self.registry.generators.values() for fn in fns
-        )
+        ]
 
         parser = argparse.ArgumentParser(
             formatter_class=type(
@@ -154,7 +154,7 @@ class App(_Configurator):
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
         sub_parser.add_argument("--rootdir", required=False, help="-")
-        sub_parser.add_argument("targets", nargs="*", choices=target_choices)  # type: ignore
+        sub_parser.add_argument("targets", nargs="*", choices=[[]] + target_choices)  # type: ignore
         sub_parser.set_defaults(subcommand=fn)
 
         # scan
@@ -162,7 +162,7 @@ class App(_Configurator):
         sub_parser = subparsers.add_parser(
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
-        sub_parser.add_argument("targets", nargs="*", choices=target_choices)  # type: ignore
+        sub_parser.add_argument("targets", nargs="*", choices=[[]] + target_choices)  # type: ignore
         sub_parser.set_defaults(subcommand=fn)
 
         activate = logging_setup(parser)
