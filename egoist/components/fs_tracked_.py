@@ -6,8 +6,7 @@ import contextlib
 from prestring.minifs import T, MiniFS
 from egoist.internal.prestringutil import output, Module
 from egoist.langhelpers import reify
-
-from .runtimecontext import get_self, Env
+from egoist import runtime
 
 
 class _TrackedOutput(output[Module]):
@@ -29,10 +28,10 @@ class _TrackedFS(MiniFS[Module]):
         *,
         target: object,
         opener: t.Optional[t.Callable[[], T]] = None,
-    ) -> t.Iterator[Env]:
+    ) -> t.Iterator[runtime.Env]:
         with self.open(name, mode, opener=opener) as m:
-            c = get_self()
-            env = Env(m=m, fn=target)  # type: ignore
+            c = runtime.get_self()
+            env = runtime.Env(m=m, fn=target)  # type: ignore
             c.stack.append(env)
             yield env
         c.stack.pop()

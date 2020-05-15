@@ -9,7 +9,6 @@ from egoist import runtime
 
 if t.TYPE_CHECKING:
     from egoist.internal.prestringutil import Module
-    from .runtimecontext import Env
 
 T_co = t.TypeVar("T_co", covariant=True)
 NAME = __name__
@@ -32,12 +31,13 @@ class FS(tx.Protocol[T_co]):
 
     def open_with_tracking(
         self, filename: t.Union[str, pathlib.Path], mode: str, *, target: object
-    ) -> t.ContextManager[Env]:
+    ) -> t.ContextManager[runtime.Env]:
         ...
 
 
 def open_fs(*, root: t.Union[str, pathlib.Path]) -> t.ContextManager[FS[Module]]:
     from egoist.internal.prestringutil import Module
+
     factory = t.cast(FSFactory[Module], runtime.get_component(NAME))
     return factory(root=root)
 

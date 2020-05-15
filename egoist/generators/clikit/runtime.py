@@ -1,10 +1,7 @@
 from __future__ import annotations
 import typing as t
-from egoist.runtime import get_self, printf, Env
+from egoist.runtime import get_self, printf, Env, ArgsAttr
 from egoist.internal.prestringutil import goname, Symbol, Module
-
-if t.TYPE_CHECKING:
-    from egoist.components.runtimecontext import ArgsAttr
 
 __all__ = [
     "get_self",

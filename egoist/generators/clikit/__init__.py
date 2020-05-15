@@ -8,7 +8,7 @@ from egoist.components.fs import open_fs
 from egoist.go.resolver import get_resolver, Resolver
 from egoist.langhelpers import get_path_from_function_name
 from egoist.internal.prestringutil import Module, goname, Symbol
-from egoist.components.runtimecontext import _REST_ARGS_NAME  # xxx
+from egoist.runtime import _REST_ARGS_NAME  # xxx
 from . import runtime
 
 # todo: separate "parse, setup component, run action"
