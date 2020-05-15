@@ -94,8 +94,6 @@ class App(_Configurator):
         rootdir: t.Optional[str] = None,
         targets: t.Optional[t.List[str]] = None,
     ) -> None:
-        self.commit(dry_run=False)
-
         import pathlib
 
         if rootdir is not None:
@@ -104,6 +102,8 @@ class App(_Configurator):
             here = self.settings["here"]
             rootdir = self.settings["rootdir"]
             root_path = pathlib.Path(here).parent / rootdir
+
+        self.commit(dry_run=False)
 
         for kit, fns in self.registry.generators.items():
             walk_or_module = self.maybe_dotted(kit)
@@ -114,7 +114,12 @@ class App(_Configurator):
             else:
                 # TODO: genetle error message
                 raise ConfigurationError("{kit!r} is not callable")
-            walk({fn.__name__: fn for fn in fns}, root=root_path)
+
+            if not targets:
+                sources = {fn.__name__: fn for fn in fns}
+            else:
+                sources = {fn.__name__: fn for fn in fns if fn.__name__ in targets}
+            walk(sources, root=root_path)
 
     def scan(self, *, targets: t.Optional[t.List[str]] = None) -> None:
         from egoist.components.tracker import get_tracker
