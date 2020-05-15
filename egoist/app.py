@@ -34,14 +34,16 @@ class App(_Configurator):
         return self.context.registry  # type: ignore
 
     # default directives
-    def register_component(self, name: str, component: object,) -> None:
+    def register_factory(self, name: str, factory: types.ComponentFactory) -> None:
         type_ = types.ACTUAL_COMPONENT
-        self.registry.components[name].append(component)
+        self.registry.factories[name].append(factory)
         self.action((name, type_), _noop)
 
-    def register_dryurn_component(self, name: str, component: object,) -> None:
+    def register_dryurn_factory(
+        self, name: str, factory: types.ComponentFactory
+    ) -> None:
         type_ = types.DRYRUN_COMPONENT
-        self.registry.components[name].append(component)
+        self.registry.factories[name].append(factory)
         self.action((name, type_), _noop)
 
     # commands
@@ -74,11 +76,11 @@ class App(_Configurator):
                 summary = (inspect.getdoc(fn) or "").strip().split("\n", 1)[0]
                 defs[name] = {"doc": summary, "generator": kit}
 
-        components = {
+        factories = {
             name: [fullname(x) for x in xs]  # type: ignore
-            for name, xs in self.registry.components.items()
+            for name, xs in self.registry.factories.items()
         }
-        d = {"definitions": defs, "components": components}
+        d = {"definitions": defs, "factories": factories}
         print(json.dumps(d, indent=2, ensure_ascii=False))
 
     def generate(

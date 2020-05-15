@@ -2,6 +2,7 @@ from __future__ import annotations
 import typing as t
 import dataclasses
 from collections import defaultdict
+from . import types
 
 
 @dataclasses.dataclass
@@ -9,7 +10,7 @@ class Registry:
     generators: t.Dict[str, t.List[t.Callable[..., t.Any]]] = dataclasses.field(
         default_factory=lambda: defaultdict(list)
     )
-    components: t.Dict[str, t.List[object]] = dataclasses.field(
+    factories: t.Dict[str, t.List[types.ComponentFactory]] = dataclasses.field(
         default_factory=lambda: defaultdict(list)
     )
 

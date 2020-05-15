@@ -13,9 +13,11 @@ if t.TYPE_CHECKING:
 
 class RuntimeContext:
     stack: t.List[Env]
+    _component_instances: t.Dict[str, object]
 
     def __init__(self) -> None:
         self.stack = []
+        self._component_instances = {}
 
 
 _REST_ARGS_NAME = "args"
@@ -78,6 +80,21 @@ def set_context(c: RuntimeContext) -> None:
     _context = c
 
 
+def get_component_factory(name: str) -> types.ComponentFactory:
+    return get_global_registry().factories[name][0]
+
+
+def get_component(name: str, *args: t.Any, **kwargs: t.Any) -> object:
+    c = get_current_context()
+    ob = c._component_instances.get(name)
+    if ob is not None:
+        return ob
+
+    factory = get_component_factory(name)
+    ob = c._component_instances[name] = factory(*args, **kwargs)
+    return ob
+
+
 def printf(fmt_str: str, *args: t.Any) -> None:
     from prestring.utils import UnRepr
     import json
@@ -86,7 +103,3 @@ def printf(fmt_str: str, *args: t.Any) -> None:
     fmt = m.import_("fmt")
     # fixme: remove Unrepr and json.dumps
     m.stmt(fmt.Printf(UnRepr(json.dumps(fmt_str)), *args))
-
-
-def get_component(name: str) -> object:
-    return get_global_registry().components[name][0]

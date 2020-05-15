@@ -14,6 +14,7 @@ ComponentType = tx.Literal["actual", "dry-run"]
 ACTUAL_COMPONENT: ComponentType = "actual"
 DRYRUN_COMPONENT: ComponentType = "dry-run"
 
+ComponentFactory = t.Callable[..., t.Any]
 
 ########################################
 # primitives

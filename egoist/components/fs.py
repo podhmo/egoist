@@ -38,7 +38,7 @@ class FS(tx.Protocol[T_co]):
 def open_fs(*, root: t.Union[str, pathlib.Path]) -> t.ContextManager[FS[Module]]:
     from egoist.internal.prestringutil import Module
 
-    factory = t.cast(FSFactory[Module], runtime.get_component(NAME))
+    factory = t.cast(FSFactory[Module], runtime.get_component_factory(NAME))
     return factory(root=root)
 
 
@@ -63,8 +63,10 @@ def create_dummy_fs(
 
 
 def includeme(app: App) -> None:
+    app.include(".tracker")
+
     actual: FSFactory[Module] = create_fs
-    app.register_component(NAME, actual)
+    app.register_factory(NAME, actual)
 
     for_dry_run: FSFactory[Module] = create_dummy_fs
-    app.register_dryurn_component(NAME, for_dry_run)
+    app.register_dryurn_factory(NAME, for_dry_run)
