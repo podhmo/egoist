@@ -25,7 +25,7 @@ class Context(_Context):
         return Registry()
 
     committed: t.ClassVar[bool] = False
-    run: t.Optional[[t.Optional[t.List[str]]], t.Any] = None
+    run: t.Optional[t.Callable[[t.Optional[t.List[str]]], t.Any]] = None
 
 
 class App(_Configurator):
@@ -134,8 +134,9 @@ class App(_Configurator):
         import argparse
         from egoist.internal.logutil import logging_setup
 
-        if self.context.run is not None:
-            return self.context.run(argv)
+        run_ = self.context.run  # type: ignore
+        if run_ is not None:
+            return run_(argv)
 
         # todo: scan modules in show_help only
         target_choices = [
@@ -186,11 +187,13 @@ class App(_Configurator):
             subcommand = params.pop("subcommand")
             return subcommand(**params)
 
-        self.context.run = _run
+        self.context.run = _run  # type:ignore
         return _run(argv)
 
 
-def parse_args(argv: t.Optional[t.List[str]] = None, *, sep="-"):
+def parse_args(
+    argv: t.Optional[t.List[str]] = None, *, sep: str = "-"
+) -> t.Iterator[t.List[str]]:
     """for bulk action"""
     import sys
     import itertools
