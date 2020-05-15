@@ -1,0 +1,3 @@
+['first', 'foo', '--bar']
+['second', 'boo', '-n', '1']
+['third', '-v', '--level=info']
