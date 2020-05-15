@@ -1,10 +1,10 @@
 from __future__ import annotations
 import typing as t
-from egoist.runtime import get_self, printf, Env, ArgsAttr
+from egoist.runtime import get_current_context, printf, Env, ArgsAttr
 from egoist.internal.prestringutil import goname, Symbol, Module
 
 __all__ = [
-    "get_self",
+    "get_current_context",
     "printf",
     "Env",
     # defined in this module
@@ -17,13 +17,13 @@ __all__ = [
 def generate(
     visit: t.Callable[[Env], t.ContextManager[Module]]
 ) -> t.ContextManager[t.Any]:
-    c = get_self()
+    c = get_current_context()
     env = c.stack[-1]
     return visit(env)
 
 
 def get_cli_options() -> ArgsAttr:
-    return get_self().stack[-1].args
+    return get_current_context().stack[-1].args
 
 
 _PREFIX_DEFAULT = "opt"

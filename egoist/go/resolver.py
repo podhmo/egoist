@@ -164,9 +164,9 @@ def setup_resolver(resolver: Resolver) -> None:
 
     def default_duration(v: t.Optional[t.Any]) -> str:
         # xxx:
-        from egoist.runtime import get_self
+        from egoist.runtime import get_current_context
 
-        m = get_self().stack[-1].m
+        m = get_current_context().stack[-1].m
         m.import_("time")
         return f"{str(v or 0)}*time.Second"
 

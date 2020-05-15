@@ -3,11 +3,11 @@ import typing_extensions as tx
 import dataclasses
 from prestring.go.codeobject import Module
 from metashape.declarative import field  # noqa: F401
-from egoist.runtime import get_self, printf, Env
+from egoist.runtime import get_current_context, printf, Env
 
 
 __all__ = [
-    "get_self",
+    "get_current_context",
     "printf",
     "Env",
     # from other library
@@ -26,7 +26,7 @@ def generate(
     *,
     classes: t.List[t.Type[t.Any]],
 ) -> t.ContextManager[Module]:
-    c = get_self()
+    c = get_current_context()
     env = c.stack[-1]
     return visit(env, classes)
 

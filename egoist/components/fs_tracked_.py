@@ -30,7 +30,7 @@ class _TrackedFS(MiniFS[Module]):
         opener: t.Optional[t.Callable[[], T]] = None,
     ) -> t.Iterator[runtime.Env]:
         with self.open(name, mode, opener=opener) as m:
-            c = runtime.get_self()
+            c = runtime.get_current_context()
             env = runtime.Env(m=m, fn=target)  # type: ignore
             c.stack.append(env)
             yield env

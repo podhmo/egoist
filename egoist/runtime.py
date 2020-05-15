@@ -65,15 +65,15 @@ class Env:
 _context = None
 
 
-def get_self() -> RuntimeContext:
+def get_current_context() -> RuntimeContext:
     global _context
     if _context is None:
-        set_self(RuntimeContext())
+        set_context(RuntimeContext())
     assert _context is not None
     return _context
 
 
-def set_self(c: RuntimeContext) -> None:
+def set_context(c: RuntimeContext) -> None:
     global _context
     _context = c
 
@@ -82,7 +82,7 @@ def printf(fmt_str: str, *args: t.Any) -> None:
     from prestring.utils import UnRepr
     import json
 
-    m = get_self().stack[-1].m
+    m = get_current_context().stack[-1].m
     fmt = m.import_("fmt")
     # fixme: remove Unrepr and json.dumps
     m.stmt(fmt.Printf(UnRepr(json.dumps(fmt_str)), *args))
