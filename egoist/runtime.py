@@ -4,7 +4,7 @@ import dataclasses
 
 from . import types
 from .langhelpers import reify
-from .registry import get_global_registry
+from .registry import Registry
 
 if t.TYPE_CHECKING:
     from egoist.internal.prestringutil import Module
@@ -13,11 +13,13 @@ if t.TYPE_CHECKING:
 
 class RuntimeContext:
     stack: t.List[Env]
+    registry: Registry
     _component_instances: t.Dict[str, object]
 
-    def __init__(self) -> None:
+    def __init__(self, registry: Registry) -> None:
         self.stack = []
         self._component_instances = {}
+        self.registry = registry
 
 
 _REST_ARGS_NAME = "args"
@@ -69,9 +71,7 @@ _context = None
 
 def get_current_context() -> RuntimeContext:
     global _context
-    if _context is None:
-        set_context(RuntimeContext())
-    assert _context is not None
+    assert _context is not None, "please set_context(), before using it"
     return _context
 
 
@@ -81,7 +81,7 @@ def set_context(c: RuntimeContext) -> None:
 
 
 def get_component_factory(name: str) -> types.ComponentFactory:
-    return get_global_registry().factories[name][0]
+    return get_current_context().registry.factories[name][0]
 
 
 def get_component(name: str, *args: t.Any, **kwargs: t.Any) -> object:
