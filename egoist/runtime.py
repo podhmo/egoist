@@ -49,8 +49,9 @@ class Arg:
 
 @dataclasses.dataclass
 class Env:
-    m: Module
+    name: str
     fn: types.Command
+    m: Module = dataclasses.field(repr=False)
 
     @reify
     def fnspec(self) -> Fnspec:

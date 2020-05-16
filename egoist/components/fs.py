@@ -3,6 +3,7 @@ import typing as t
 import typing_extensions as tx
 
 import pathlib
+import os
 from egoist.app import App
 from egoist import runtime
 from egoist import types
@@ -30,7 +31,12 @@ class FS(tx.Protocol[T_co]):
         ...
 
     def open_with_tracking(
-        self, filename: t.Union[str, pathlib.Path], mode: str, *, target: types.Command
+        self,
+        filename: t.Union[str, pathlib.Path],
+        mode: str,
+        *,
+        target: types.Command,
+        opener: t.Optional[t.Callable[[], Module]] = None,  # TODO Module -> T
     ) -> t.ContextManager[runtime.Env]:
         ...
 
@@ -47,7 +53,11 @@ def create_fs(*, root: t.Union[pathlib.Path, str]) -> t.ContextManager[FS[Module
     from egoist.internal.prestringutil import Module
     from .fs_tracked_ import _TrackedOutput
 
-    return _TrackedOutput(root=str(root), opener=Module, verbose=True)
+    if "VERBOSE" in os.environ:
+        verbose = bool(os.environ["VERBOSE"])
+    else:
+        verbose = True
+    return _TrackedOutput(root=str(root), opener=Module, verbose=verbose)
 
 
 def create_dummy_fs(
@@ -57,8 +67,12 @@ def create_dummy_fs(
     from egoist.internal.prestringutil import Module
     from .fs_tracked_ import _TrackedOutput
 
+    if "VERBOSE" in os.environ:
+        verbose = bool(os.environ["VERBOSE"])
+    else:
+        verbose = False
     return _TrackedOutput(
-        root=str(root), opener=Module, verbose=False, use_console=True, nocheck=False
+        root=str(root), opener=Module, verbose=verbose, use_console=True, nocheck=False
     )
 
 
