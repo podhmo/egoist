@@ -15,11 +15,11 @@ __all__ = [
 
 
 def generate(
-    visit: t.Callable[[Env], t.ContextManager[Module]]
+    visit: t.Callable[[Env, bool], t.ContextManager[Module]]
 ) -> t.ContextManager[t.Any]:
     c = get_current_context()
     env = c.stack[-1]
-    return visit(env)
+    return visit(env, c.dry_run)
 
 
 def get_cli_options() -> ArgsAttr:

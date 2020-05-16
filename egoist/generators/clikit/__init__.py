@@ -40,10 +40,16 @@ def walk(
 @contextlib.contextmanager
 def clikit(
     env: runtime.Env,
+    dry_run: bool,
     *,
     resolver: t.Optional[Resolver] = None,
     option_prefix: str = runtime._PREFIX_DEFAULT,
 ) -> t.Iterator[Module]:
+    if dry_run:
+        logger.debug("dry run, %s skipped", __name__)
+        yield env.m
+        return
+
     m = env.m
     fn = env.fn
     spec = env.fnspec

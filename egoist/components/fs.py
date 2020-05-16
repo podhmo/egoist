@@ -5,7 +5,7 @@ import typing_extensions as tx
 import pathlib
 from egoist.app import App
 from egoist import runtime
-
+from egoist import types
 
 if t.TYPE_CHECKING:
     from egoist.internal.prestringutil import Module
@@ -30,7 +30,7 @@ class FS(tx.Protocol[T_co]):
         ...
 
     def open_with_tracking(
-        self, filename: t.Union[str, pathlib.Path], mode: str, *, target: object
+        self, filename: t.Union[str, pathlib.Path], mode: str, *, target: types.Command
     ) -> t.ContextManager[runtime.Env]:
         ...
 
