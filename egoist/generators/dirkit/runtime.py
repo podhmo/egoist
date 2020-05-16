@@ -17,7 +17,7 @@ __all__ = [
 def create_file(filename: str) -> t.IO[str]:
     c = get_current_context()
     _env = c.stack[-1]
-    fpath = str(pathlib.Path(_env.name) / filename)
+    fpath = str(pathlib.Path(_env.fpath) / filename)
     with _env.fs.open_file_with_tracking(
         fpath, "w", target=create_file, opener=StringIO
     ) as env:

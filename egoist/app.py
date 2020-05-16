@@ -3,12 +3,13 @@ import typing as t
 import typing_extensions as tx
 
 import logging
+import dataclasses
+from collections import defaultdict
 from miniconfig import Configurator as _Configurator
 from miniconfig import Context as _Context
 from miniconfig.exceptions import ConfigurationError
 from . import types
 from .langhelpers import reify, fullname
-from .registry import Registry
 
 
 logger = logging.getLogger(__name__)
@@ -19,10 +20,36 @@ class SettingsDict(tx.TypedDict, total=False):
     here: str
 
 
+@dataclasses.dataclass
+class Registry:
+    settings: SettingsDict
+
+    generators: t.Dict[str, t.List[t.Callable[..., t.Any]]] = dataclasses.field(
+        default_factory=lambda: defaultdict(list), hash=False
+    )
+    _factories: t.Dict[str, t.List[types.ComponentFactory]] = dataclasses.field(
+        default_factory=lambda: defaultdict(list), hash=False
+    )
+    _dryrun_factories: t.Dict[str, t.List[types.ComponentFactory]] = dataclasses.field(
+        default_factory=lambda: defaultdict(list), hash=False
+    )
+
+    dry_run: t.Optional[bool] = None
+
+    @reify
+    def factories(self) -> t.Dict[str, t.List[types.ComponentFactory]]:
+        if self.dry_run is None:
+            raise RuntimeError("this registry is not configured")
+        return self._dryrun_factories if self.dry_run else self._factories
+
+    def configure(self, *, dry_run: bool = False) -> None:
+        self.dry_run = dry_run
+
+
 class Context(_Context):
     @reify
     def registry(self) -> Registry:
-        return Registry()
+        return Registry(settings=self.settings)
 
     committed: t.ClassVar[bool] = False
     run: t.Optional[t.Callable[[t.Optional[t.List[str]]], t.Any]] = None
@@ -115,14 +142,26 @@ class App(_Configurator):
                 sources = {fn.__name__: fn for fn in fns if fn.__name__ in targets}
             walk(sources, root=root_path)
 
-    def scan(self, *, targets: t.Optional[t.List[str]] = None) -> None:
+    def scan(
+        self,
+        *,
+        targets: t.Optional[t.List[str]] = None,
+        out: t.Optional[str] = None,
+        relative: bool = True,
+    ) -> None:
+        import contextlib
         from egoist.components.tracker import get_tracker
 
         self.include("egoist.components.tracker")
         self.commit(dry_run=True)
 
         self.generate(targets=targets)
-        print(get_tracker().get_dependencies())
+
+        with contextlib.ExitStack() as s:
+            out_port: t.IO[str] = None
+            if out is not None:
+                out_port = s.enter_context(open(out, "w"))
+            print(get_tracker().get_dependencies(relative=relative), file=out_port)
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
@@ -170,6 +209,7 @@ class App(_Configurator):
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
         sub_parser.add_argument("targets", nargs="*", choices=[[]] + target_choices)  # type: ignore
+        sub_parser.add_argument("--out")
         sub_parser.set_defaults(subcommand=fn)
 
         activate = logging_setup(parser)

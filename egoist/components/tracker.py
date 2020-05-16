@@ -30,8 +30,20 @@ class Tracker:
         if depends_on:
             dependency["depends"].update(depends_on)
 
-    def get_dependencies(self) -> t.Dict[str, t.List[str]]:
-        return {dep["name"]: list(dep["depends"]) for dep in self.deps_map.values()}
+    def get_dependencies(self, relative: bool = False) -> t.Dict[str, t.List[str]]:
+        if not relative:
+            return {dep["name"]: list(dep["depends"]) for dep in self.deps_map.values()}
+
+        cwd_path = pathlib.Path().absolute()
+        root_path = pathlib.Path(
+            runtime.get_current_context().registry.settings["rootdir"]
+        ).absolute()
+        return {
+            str((root_path / name).relative_to(cwd_path)): [
+                str((root_path / x).relative_to(cwd_path)) for x in dep["depends"]
+            ]
+            for name, dep in self.deps_map.items()
+        }
 
 
 def get_tracker() -> Tracker:
