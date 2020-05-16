@@ -6,8 +6,8 @@ app = App(settings)
 app.include("egoist.directives.define_file")
 
 
-@app.define_file("egoist.generators.filekit:walk")
-def hello_txt() -> None:
+@app.define_file("egoist.generators.filekit:walk", suffix=".txt")
+def hello() -> None:
     from egoist.generators.filekit import runtime
 
     with runtime.create_file():

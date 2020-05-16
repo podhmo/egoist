@@ -30,13 +30,18 @@ class FS(tx.Protocol[T_co]):
     ) -> t.ContextManager[T_co]:
         ...
 
-    def open_with_tracking(
+    def open_file_with_tracking(
         self,
         filename: t.Union[str, pathlib.Path],
         mode: str,
         *,
         target: types.Command,
         opener: t.Optional[t.Callable[[], Module]] = None,  # TODO Module -> T
+    ) -> t.ContextManager[runtime.Env]:
+        ...
+
+    def open_dir_with_tracking(
+        self, filename: t.Union[str, pathlib.Path], *, target: types.Command,
     ) -> t.ContextManager[runtime.Env]:
         ...
 

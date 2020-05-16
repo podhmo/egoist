@@ -38,10 +38,30 @@ def define_struct_set(app: App) -> None:
 
 def define_file(app: App) -> None:
     name = "define_file"
-    # TODO: handling suffix
-    # TODO: define_directory
 
     def _register_file(
+        app: App, kit: str, *, rename: t.Optional[str] = None, suffix: str = "",
+    ) -> AnyFunction:
+        def _register(fn: AnyFunction) -> AnyFunction:
+            if rename is not None:
+                fn._rename = rename  # xxx
+            elif suffix:
+                fn._rename = f"{fn.__name__}{suffix}"
+            app.registry.generators[kit].append(fn)
+            return fn
+
+        return _register
+
+    app.add_directive(name, _register_file)
+
+    # for conflict check
+    app.action(name, _noop)
+
+
+def define_dir(app: App) -> None:
+    name = "define_dir"
+
+    def _register_dir(
         app: App, kit: str, *, rename: t.Optional[str] = None
     ) -> AnyFunction:
         def _register(fn: AnyFunction) -> AnyFunction:
@@ -52,7 +72,7 @@ def define_file(app: App) -> None:
 
         return _register
 
-    app.add_directive(name, _register_file)
+    app.add_directive(name, _register_dir)
 
     # for conflict check
     app.action(name, _noop)

@@ -4,7 +4,7 @@ import typing as t
 import pathlib
 import contextlib
 
-from prestring.minifs import MiniFS, T
+from prestring.minifs import MiniFS
 from egoist.internal.prestringutil import output, Module
 from egoist.langhelpers import reify
 from egoist import runtime
@@ -24,7 +24,7 @@ class _TrackedOutput(output[Module]):
 
 class _TrackedFS(MiniFS[Module]):
     @contextlib.contextmanager
-    def open_with_tracking(
+    def open_file_with_tracking(
         self,
         fpath: t.Union[str, pathlib.Path],
         mode: str,
@@ -37,7 +37,22 @@ class _TrackedFS(MiniFS[Module]):
 
         with self.open(fpath, mode, opener=opener) as m:
             c = runtime.get_current_context()
-            env = runtime.Env(m=m, fn=target, name=str(fpath))
+            env = runtime.Env(m=m, fn=target, name=str(fpath), fs=self)
             c.stack.append(env)
             yield env
+        c.stack.pop()
+
+    @contextlib.contextmanager
+    def open_dir_with_tracking(
+        self,
+        fpath: t.Union[str, pathlib.Path],
+        *,
+        target: types.Command,
+        depends_on: t.Optional[t.Collection[str]] = None
+    ) -> t.Iterator[runtime.Env]:
+        # get_tracker().track(fpath, depends_on=depends_on)
+        c = runtime.get_current_context()
+        env = runtime.Env(m=None, fn=target, name=str(fpath), fs=self)
+        c.stack.append(env)
+        yield env
         c.stack.pop()

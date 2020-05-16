@@ -29,7 +29,7 @@ def walk(
             logger.debug("walk %s", name)
 
             fpath = pathlib.Path(get_path_from_function_name(name)) / "main.go"
-            with fs.open_with_tracking(fpath, "w", target=fn) as env:
+            with fs.open_file_with_tracking(fpath, "w", target=fn) as env:
                 kwargs = {
                     name: Symbol(f"{option_prefix}.{goname(name)}")
                     for name, _, _ in env.fnspec.parameters
