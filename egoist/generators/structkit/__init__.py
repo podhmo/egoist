@@ -4,24 +4,22 @@ import typing as t
 import logging
 import pathlib
 import contextlib
+from egoist.app import App
 from egoist import types
-from egoist.components.fs import open_fs
 from egoist.langhelpers import get_path_from_function_name
 
-logger = logging.getLogger(__name__)
 
 if t.TYPE_CHECKING:
-    from egoist.app import App
     from egoist.runtime import Env
     from egoist.internal.prestringutil import Module
     from egoist.go.resolver import Resolver
 
-
-def includeme(app: App) -> None:
-    app.include("egoist.components.fs")
+logger = logging.getLogger(__name__)
 
 
 def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
+    from egoist.components.fs import open_fs
+
     with open_fs(root=root) as fs:
         for name, fn in fns.items():
             logger.debug("walk %s", name)
@@ -75,3 +73,7 @@ def structkit(
             if item.fields:
                 _emit.emit_unmarshalJSON(ctx, item)
             m.sep()
+
+
+def includeme(app: App) -> None:
+    app.include("egoist.components.fs")
