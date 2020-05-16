@@ -7,11 +7,13 @@ import logging
 import pathlib
 from egoist import types
 from egoist.components.fs import open_fs
-from egoist.go.resolver import get_resolver, Resolver
 from egoist.langhelpers import get_path_from_function_name
-from egoist.internal.prestringutil import Module, goname, Symbol
-from egoist.runtime import _REST_ARGS_NAME  # xxx
-from . import runtime
+
+
+if t.TYPE_CHECKING:
+    from egoist.runtime import Env
+    from egoist.internal.prestringutil import Module
+    from egoist.go.resolver import Resolver
 
 # todo: separate "parse, setup component, run action"
 # todo: support other types
@@ -19,6 +21,7 @@ from . import runtime
 
 
 logger = logging.getLogger(__name__)
+_PREFIX_DEFAULT = "opt"
 
 if t.TYPE_CHECKING:
     from egoist.app import App
@@ -32,16 +35,19 @@ def walk(
     fns: t.Dict[str, types.Command],
     *,
     root: t.Union[str, pathlib.Path],
-    option_prefix: str = runtime._PREFIX_DEFAULT,
+    option_prefix: str = _PREFIX_DEFAULT,
 ) -> None:
+    from egoist.internal.prestringutil import goname
+
     with open_fs(root=root) as fs:
         for name, fn in fns.items():
             logger.debug("walk %s", name)
 
             fpath = pathlib.Path(get_path_from_function_name(name)) / "main.go"
             with fs.open_file_with_tracking(fpath, "w", target=fn) as env:
+                m = env.m
                 kwargs = {
-                    name: Symbol(f"{option_prefix}.{goname(name)}")
+                    name: m.symbol(f"{option_prefix}.{goname(name)}")
                     for name, _, _ in env.fnspec.parameters
                 }
                 fn(**kwargs)
@@ -49,16 +55,20 @@ def walk(
 
 @contextlib.contextmanager
 def clikit(
-    env: runtime.Env,
+    env: Env,
     dry_run: bool,
     *,
     resolver: t.Optional[Resolver] = None,
-    option_prefix: str = runtime._PREFIX_DEFAULT,
+    option_prefix: str = _PREFIX_DEFAULT,
 ) -> t.Iterator[Module]:
     if dry_run:
         logger.debug("dry run, %s skipped", __name__)
         yield env.m
         return
+
+    from egoist.runtime import _REST_ARGS_NAME  # xxx
+    from egoist.internal.prestringutil import goname
+    from egoist.go.resolver import get_resolver
 
     m = env.m
     fn = env.fn

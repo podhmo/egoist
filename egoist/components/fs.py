@@ -65,6 +65,7 @@ def create_fs(*, root: t.Union[pathlib.Path, str]) -> t.ContextManager[FS]:
 
 def create_dummy_fs(*, root: t.Union[pathlib.Path, str]) -> t.ContextManager[FS]:
     """dry-run component"""
+    from egoist.internal.prestringutil import Module
     from .fs_tracked_ import _TrackedOutput
 
     if "VERBOSE" in os.environ:

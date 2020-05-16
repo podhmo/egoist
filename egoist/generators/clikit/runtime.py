@@ -2,6 +2,7 @@ from __future__ import annotations
 import typing as t
 from egoist.runtime import get_current_context, printf, Env, ArgsAttr
 from egoist.internal.prestringutil import goname, Symbol, Module
+from . import _PREFIX_DEFAULT
 
 __all__ = [
     "get_current_context",
@@ -26,11 +27,8 @@ def get_cli_options() -> ArgsAttr:
     return get_current_context().stack[-1].args
 
 
-_PREFIX_DEFAULT = "opt"
-
-
 def get_cli_rest_args(*, prefix: str = _PREFIX_DEFAULT) -> Symbol:
-    from egoist.components.runtimecontext import _REST_ARGS_NAME
+    from egoist.runtime import _REST_ARGS_NAME
 
     name = _REST_ARGS_NAME
     return Symbol(f"{prefix}.{goname(name)}")
