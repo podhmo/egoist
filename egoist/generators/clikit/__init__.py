@@ -6,7 +6,7 @@ import inspect
 import logging
 import pathlib
 from egoist import types
-from egoist.components.fs import open_fs
+from egoist.app import App
 from egoist.langhelpers import get_path_from_function_name
 
 
@@ -23,13 +23,6 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 _PREFIX_DEFAULT = "opt"
 
-if t.TYPE_CHECKING:
-    from egoist.app import App
-
-
-def includeme(app: App) -> None:
-    app.include("egoist.components.fs")
-
 
 def walk(
     fns: t.Dict[str, types.Command],
@@ -38,6 +31,7 @@ def walk(
     option_prefix: str = _PREFIX_DEFAULT,
 ) -> None:
     from egoist.internal.prestringutil import goname
+    from egoist.components.fs import open_fs
 
     with open_fs(root=root) as fs:
         for name, fn in fns.items():
@@ -150,3 +144,7 @@ def clikit(
         yield m
         if spec.return_type == type(None):  # noqa: E721
             m.return_("nil")
+
+
+def includeme(app: App) -> None:
+    app.include("egoist.components.fs")
