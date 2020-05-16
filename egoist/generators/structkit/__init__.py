@@ -4,24 +4,22 @@ import typing as t
 import logging
 import pathlib
 import contextlib
+from egoist.app import App
 from egoist import types
-from egoist.components.fs import open_fs
-from egoist.internal.prestringutil import Module
-from egoist.go.resolver import Resolver, get_resolver
 from egoist.langhelpers import get_path_from_function_name
-from . import runtime
+
+
+if t.TYPE_CHECKING:
+    from egoist.runtime import Env
+    from egoist.internal.prestringutil import Module
+    from egoist.go.resolver import Resolver
 
 logger = logging.getLogger(__name__)
 
-if t.TYPE_CHECKING:
-    from egoist.app import App
-
-
-def includeme(app: App) -> None:
-    app.include("egoist.components.fs")
-
 
 def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
+    from egoist.components.fs import open_fs
+
     with open_fs(root=root) as fs:
         for name, fn in fns.items():
             logger.debug("walk %s", name)
@@ -32,7 +30,7 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
 
 @contextlib.contextmanager
 def structkit(
-    env: runtime.Env,
+    env: Env,
     classes: t.List[t.Type[t.Any]],
     dry_run: bool,
     *,
@@ -44,6 +42,7 @@ def structkit(
         return
 
     from egoist.go.types import get_gopackage
+    from egoist.go.resolver import get_resolver
     from egoist.generators.structkit import _walk
     from egoist.generators.structkit import _emit
     from egoist.generators.structkit import _context
@@ -74,3 +73,7 @@ def structkit(
             if item.fields:
                 _emit.emit_unmarshalJSON(ctx, item)
             m.sep()
+
+
+def includeme(app: App) -> None:
+    app.include("egoist.components.fs")

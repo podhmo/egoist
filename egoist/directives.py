@@ -1,5 +1,5 @@
 import typing as t
-from .app import App, _noop
+from .app import App
 
 AnyFunction = t.Callable[..., t.Any]
 
@@ -12,7 +12,6 @@ def define_cli(app: App) -> None:
         nonlocal seen
         if not seen:
             seen = True
-            app.include("egoist.generators.clikit")
 
         def _register(fn: AnyFunction) -> AnyFunction:
             app.registry.generators[kit].append(fn)
@@ -22,8 +21,13 @@ def define_cli(app: App) -> None:
 
     app.add_directive(name, _register_cli)
 
+    def _include() -> None:
+        nonlocal seen
+        if seen:
+            app.include("egoist.generators.clikit")
+
     # for conflict check
-    app.action(name, _noop)
+    app.action(name, _include)
 
 
 def define_struct_set(app: App) -> None:
@@ -34,7 +38,6 @@ def define_struct_set(app: App) -> None:
         nonlocal seen
         if not seen:
             seen = True
-            app.include("egoist.generators.structkit")
 
         def _register(fn: AnyFunction) -> AnyFunction:
             app.registry.generators[kit].append(fn)
@@ -44,8 +47,13 @@ def define_struct_set(app: App) -> None:
 
     app.add_directive(name, _register_struct_set)
 
+    def _include() -> None:
+        nonlocal seen
+        if seen:
+            app.include("egoist.generators.structkit")
+
     # for conflict check
-    app.action(name, _noop)
+    app.action(name, _include)
 
 
 def define_file(app: App) -> None:
@@ -58,7 +66,6 @@ def define_file(app: App) -> None:
         nonlocal seen
         if not seen:
             seen = True
-            app.include("egoist.generators.filekit")
 
         def _register(fn: AnyFunction) -> AnyFunction:
             if rename is not None:
@@ -72,8 +79,13 @@ def define_file(app: App) -> None:
 
     app.add_directive(name, _register_file)
 
+    def _include() -> None:
+        nonlocal seen
+        if seen:
+            app.include("egoist.generators.filekit")
+
     # for conflict check
-    app.action(name, _noop)
+    app.action(name, _include)
 
 
 def define_dir(app: App) -> None:
@@ -86,7 +98,6 @@ def define_dir(app: App) -> None:
         nonlocal seen
         if not seen:
             seen = True
-            app.include("egoist.generators.dirkit")
 
         def _register(fn: AnyFunction) -> AnyFunction:
             if rename is not None:
@@ -98,5 +109,10 @@ def define_dir(app: App) -> None:
 
     app.add_directive(name, _register_dir)
 
+    def _include() -> None:
+        nonlocal seen
+        if seen:
+            app.include("egoist.generators.dirkit")
+
     # for conflict check
-    app.action(name, _noop)
+    app.action(name, _include)
