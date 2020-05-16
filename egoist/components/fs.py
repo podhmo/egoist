@@ -8,13 +8,17 @@ from egoist.app import App
 from egoist import runtime
 from egoist import types
 
-if t.TYPE_CHECKING:
-    from egoist.internal.prestringutil import Module
 
 NAME = __name__
 
+if t.TYPE_CHECKING:
+    from egoist.internal.prestringutil import Module
+
+    Content = t.Union[str, Module, t.IO[str]]
+else:
+    Content = t.Union[str, "Module", t.IO[str]]
+
 T_co = t.TypeVar("T_co", covariant=True)
-Content = t.Union[str, "Module", t.IO[str]]
 T = t.TypeVar("T", bound=Content)
 Mode = tx.Literal["w"]  # support only "w", yet
 
