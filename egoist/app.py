@@ -48,11 +48,6 @@ class App(_Configurator):
         self.registry._dryrun_factories[name].append(factory)
         self.action((name, type_), _noop)
 
-    # commands
-    def default_setup(self) -> None:
-        logger.debug("default setup")
-        self.include("egoist.components.fs")
-
     def commit(self, *, dry_run: bool = False) -> None:
         from . import runtime
 
@@ -61,7 +56,6 @@ class App(_Configurator):
             return
 
         self.context.committed = True  # type: ignore
-        self.default_setup()
 
         logger.debug("commit")
         super().commit()

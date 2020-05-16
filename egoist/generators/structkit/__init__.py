@@ -1,4 +1,6 @@
+from __future__ import annotations
 import typing as t
+
 import logging
 import pathlib
 import contextlib
@@ -10,6 +12,13 @@ from egoist.langhelpers import get_path_from_function_name
 from . import runtime
 
 logger = logging.getLogger(__name__)
+
+if t.TYPE_CHECKING:
+    from egoist.app import App
+
+
+def includeme(app: App):
+    app.include("egoist.components.fs")
 
 
 def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
