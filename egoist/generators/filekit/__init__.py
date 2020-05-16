@@ -15,6 +15,6 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
     with open_fs(root=root) as fs:
         for name, fn in fns.items():
             logger.debug("walk %s", name)
-            fpath = get_path_from_function_name(name)
+            fpath = get_path_from_function_name(getattr(fn, "_rename", None) or name)
             with fs.open_with_tracking(fpath, "w", target=fn, opener=StringIO):
                 fn()

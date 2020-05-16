@@ -41,8 +41,12 @@ def define_file(app: App) -> None:
     # TODO: handling suffix
     # TODO: define_directory
 
-    def _register_file(app: App, kit: str, *, suffix: str = "") -> AnyFunction:
+    def _register_file(
+        app: App, kit: str, *, rename: t.Optional[str] = None
+    ) -> AnyFunction:
         def _register(fn: AnyFunction) -> AnyFunction:
+            if rename is not None:
+                fn._rename = rename  # xxx
             app.registry.generators[kit].append(fn)
             return fn
 
