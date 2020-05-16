@@ -51,7 +51,7 @@ class Registry:
 class Context(_Context):
     @reify
     def registry(self) -> Registry:
-        return Registry(settings=self.settings)
+        return Registry(settings=t.cast(SettingsDict, self.settings))
 
     committed: t.ClassVar[bool] = False
     run: t.Optional[t.Callable[[t.Optional[t.List[str]]], t.Any]] = None
@@ -154,7 +154,7 @@ class App(_Configurator):
         root_path = get_root_path(self.settings, root=rootdir)
 
         with contextlib.ExitStack() as s:
-            out_port: t.IO[str] = None
+            out_port: t.Optional[t.IO[str]] = None
             if out is not None:
                 out_port = s.enter_context(open(out, "w"))
             print(

@@ -62,9 +62,9 @@ def define_file(app: App) -> None:
 
         def _register(fn: AnyFunction) -> AnyFunction:
             if rename is not None:
-                fn._rename = rename  # xxx
+                fn._rename = rename  # type: ignore
             elif suffix:
-                fn._rename = f"{fn.__name__}{suffix}"
+                fn._rename = f"{fn.__name__}{suffix}"  # type: ignore
             app.registry.generators[kit].append(fn)
             return fn
 
@@ -90,7 +90,7 @@ def define_dir(app: App) -> None:
 
         def _register(fn: AnyFunction) -> AnyFunction:
             if rename is not None:
-                fn._rename = rename  # xxx
+                fn._rename = rename  # type: ignore
             app.registry.generators[kit].append(fn)
             return fn
 

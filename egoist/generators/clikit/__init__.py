@@ -24,7 +24,7 @@ if t.TYPE_CHECKING:
     from egoist.app import App
 
 
-def includeme(app: App):
+def includeme(app: App) -> None:
     app.include("egoist.components.fs")
 
 

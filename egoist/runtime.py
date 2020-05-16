@@ -53,7 +53,15 @@ class Env:
     fpath: str
     fn: types.Command
     fs: _TrackedFS = dataclasses.field(repr=False, hash=False)  # xxx
-    m: Module = dataclasses.field(repr=False)
+    _content: t.Union[Module, t.IO[str], str] = dataclasses.field(repr=False)
+
+    @property
+    def m(self) -> Module:
+        return self._content  # type: ignore
+
+    @property
+    def io(self) -> t.IO[str]:
+        return self._content  # type: ignore
 
     @reify
     def fnspec(self) -> Fnspec:

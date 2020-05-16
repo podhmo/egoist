@@ -11,8 +11,11 @@ from egoist import runtime
 from egoist import types
 from .tracker import get_tracker
 
+Content = t.Union[str, Module, t.IO[str]]
+T = t.TypeVar("T", bound=Content)
 
-class _TrackedOutput(output[Module]):
+
+class _TrackedOutput(output[Content]):
     @reify
     def fs(self) -> _TrackedFS:  # type: ignore
         assert self.opener is not None
@@ -22,7 +25,7 @@ class _TrackedOutput(output[Module]):
         return self.fs
 
 
-class _TrackedFS(MiniFS[Module]):
+class _TrackedFS(MiniFS[Content]):
     @contextlib.contextmanager
     def open_file_with_tracking(
         self,
@@ -30,7 +33,7 @@ class _TrackedFS(MiniFS[Module]):
         mode: str,
         *,
         target: types.Command,
-        opener: t.Optional[t.Callable[[], Module]] = None,
+        opener: t.Optional[t.Callable[[], T]] = None,
         depends_on: t.Optional[t.Collection[str]] = None
     ) -> t.Iterator[runtime.Env]:
         fpath = str(fpath)
@@ -38,7 +41,7 @@ class _TrackedFS(MiniFS[Module]):
 
         with self.open(fpath, mode, opener=opener) as m:
             c = runtime.get_current_context()
-            env = runtime.Env(m=m, fn=target, fpath=fpath, fs=self)
+            env = runtime.Env(_content=m, fn=target, fpath=fpath, fs=self)
 
             c.stack.append(env)
             yield env
@@ -56,7 +59,7 @@ class _TrackedFS(MiniFS[Module]):
         # get_tracker().track(fpath, depends_on=depends_on)
 
         c = runtime.get_current_context()
-        env = runtime.Env(m=None, fn=target, fpath=fpath, fs=self)
+        env = runtime.Env(_content="", fn=target, fpath=fpath, fs=self)
 
         c.stack.append(env)
         yield env

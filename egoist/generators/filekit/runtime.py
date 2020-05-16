@@ -14,4 +14,4 @@ __all__ = [
 def create_file() -> t.Iterator[t.IO[str]]:
     c = get_current_context()
     env = c.stack[-1]
-    yield env.m
+    yield env.io
