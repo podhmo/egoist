@@ -20,7 +20,11 @@ def models__models() -> None:
     from egoist.go.resolver import get_resolver
 
     @contextlib.contextmanager
-    def emit(env: runtime.Env, classes: t.List[t.Type[t.Any]]) -> t.Iterator[Module]:
+    def emit(env: runtime.Env, classes: t.List[t.Type[t.Any]], dry_run:bool) -> t.Iterator[Module]:
+        if dry_run:
+            yield env.m
+            return
+
         from egoist.go.types import get_gopackage
         from egoist.generators.structkit import _walk
         from egoist.generators.structkit import _emit

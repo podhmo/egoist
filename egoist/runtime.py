@@ -14,12 +14,14 @@ if t.TYPE_CHECKING:
 class RuntimeContext:
     stack: t.List[Env]
     registry: Registry
+    dry_run: bool
     _component_instances: t.Dict[str, object]
 
-    def __init__(self, registry: Registry) -> None:
+    def __init__(self, registry: Registry, *, dry_run: bool) -> None:
         self.stack = []
         self._component_instances = {}
         self.registry = registry
+        self.dry_run = dry_run
 
 
 _REST_ARGS_NAME = "args"

@@ -22,13 +22,14 @@ __all__ = [
 
 
 def generate(
-    visit: t.Callable[[Env, t.List[t.Type[t.Any]]], t.ContextManager[Module]],
+    visit: t.Callable[[Env, t.List[t.Type[t.Any]], bool], t.ContextManager[Module]],
     *,
+    dry_run: bool = False,
     classes: t.List[t.Type[t.Any]],
 ) -> t.ContextManager[Module]:
     c = get_current_context()
     env = c.stack[-1]
-    return visit(env, classes)
+    return visit(env, classes, c.dry_run)
 
 
 class Metadata(tx.TypedDict, total=False):

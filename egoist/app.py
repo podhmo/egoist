@@ -66,7 +66,7 @@ class App(_Configurator):
         logger.debug("commit")
         super().commit()
         self.registry.configure(dry_run=dry_run)
-        runtime.set_context(runtime.RuntimeContext(self.registry))
+        runtime.set_context(runtime.RuntimeContext(self.registry, dry_run=dry_run))
 
     def describe(self) -> None:
         self.commit(dry_run=False)

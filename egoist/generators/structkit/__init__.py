@@ -25,9 +25,15 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
 def structkit(
     env: runtime.Env,
     classes: t.List[t.Type[t.Any]],
+    dry_run: bool,
     *,
     resolver: t.Optional[Resolver] = None,
 ) -> t.Iterator[Module]:
+    if dry_run:
+        logger.debug("dry run, %s skipped", __name__)
+        yield env.m
+        return
+
     from egoist.go.types import get_gopackage
     from egoist.generators.structkit import _walk
     from egoist.generators.structkit import _emit
