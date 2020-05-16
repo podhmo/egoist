@@ -1,0 +1,19 @@
+{
+  "definitions": {
+    "season": {
+      "type": "string",
+      "enum": [
+        "spring",
+        "summer",
+        "autumn",
+        "winter"
+      ],
+      "x-ja-enum": [
+        "春",
+        "夏",
+        "秋",
+        "冬"
+      ]
+    }
+  }
+}
