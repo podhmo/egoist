@@ -12,13 +12,18 @@ __all__ = [
     "create_file",
 ]
 
-# TODO: depends_on
+
 @contextlib.contextmanager
-def create_file(filename: str) -> t.IO[str]:
+def create_file(
+    filename: str, *, depends_on: t.Optional[t.List[str]] = None
+) -> t.IO[str]:
     c = get_current_context()
     _env = c.stack[-1]
-    fpath = str(pathlib.Path(_env.fpath) / filename)
     with _env.fs.open_file_with_tracking(
-        fpath, "w", target=create_file, opener=StringIO
+        pathlib.Path(_env.fpath) / filename,
+        "w",
+        target=create_file,
+        opener=StringIO,
+        depends_on=depends_on,
     ) as env:
         yield env.m

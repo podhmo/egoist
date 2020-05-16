@@ -11,6 +11,8 @@ from miniconfig.exceptions import ConfigurationError
 from . import types
 from .langhelpers import reify, fullname
 
+if t.TYPE_CHECKING:
+    import pathlib
 
 logger = logging.getLogger(__name__)
 
@@ -112,18 +114,10 @@ class App(_Configurator):
     def generate(
         self,
         *,
-        rootdir: t.Optional[str] = None,
         targets: t.Optional[t.List[str]] = None,
+        rootdir: t.Optional[str] = None,
     ) -> None:
-        import pathlib
-
-        if rootdir is not None:
-            root_path: pathlib.Path = pathlib.Path(rootdir)
-        else:
-            here = self.settings["here"]
-            rootdir = self.settings["rootdir"]
-            root_path = pathlib.Path(here).parent / rootdir
-
+        root_path = get_root_path(self.settings, root=rootdir)
         self.commit(dry_run=False)
 
         for kit, fns in self.registry.generators.items():
@@ -146,6 +140,7 @@ class App(_Configurator):
         self,
         *,
         targets: t.Optional[t.List[str]] = None,
+        rootdir: t.Optional[str] = None,
         out: t.Optional[str] = None,
         relative: bool = True,
     ) -> None:
@@ -155,13 +150,17 @@ class App(_Configurator):
         self.include("egoist.components.tracker")
         self.commit(dry_run=True)
 
-        self.generate(targets=targets)
+        self.generate(targets=targets, rootdir=rootdir)
+        root_path = get_root_path(self.settings, root=rootdir)
 
         with contextlib.ExitStack() as s:
             out_port: t.IO[str] = None
             if out is not None:
                 out_port = s.enter_context(open(out, "w"))
-            print(get_tracker().get_dependencies(relative=relative), file=out_port)
+            print(
+                get_tracker().get_dependencies(root=root_path, relative=relative),
+                file=out_port,
+            )
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
@@ -208,6 +207,7 @@ class App(_Configurator):
         sub_parser = subparsers.add_parser(
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
+        sub_parser.add_argument("--rootdir", required=False, help="-")
         sub_parser.add_argument("targets", nargs="*", choices=[[]] + target_choices)  # type: ignore
         sub_parser.add_argument("--out")
         sub_parser.set_defaults(subcommand=fn)
@@ -240,6 +240,19 @@ def parse_args(
             break
         yield argv
     assert not argv
+
+
+def get_root_path(
+    settings: SettingsDict, *, root: t.Optional[str] = None
+) -> pathlib.Path:
+    import pathlib
+
+    if root is not None:
+        return pathlib.Path(root)
+
+    here = settings["here"]
+    rootdir = settings["rootdir"]
+    return pathlib.Path(here).parent / rootdir
 
 
 def _noop() -> None:
