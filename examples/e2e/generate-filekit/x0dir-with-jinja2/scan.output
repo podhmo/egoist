@@ -1,0 +1,1 @@
+{'output/fizzbuzz.txt': ['templates/fizzbuzz.j2'], 'output/inputs.html': ['templates/inputs.j2']}
