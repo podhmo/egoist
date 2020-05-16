@@ -1,4 +1,6 @@
+from __future__ import annotations
 import typing as t
+
 import contextlib
 import inspect
 import logging
@@ -15,7 +17,15 @@ from . import runtime
 # todo: support other types
 # todo: separate from clikit
 
+
 logger = logging.getLogger(__name__)
+
+if t.TYPE_CHECKING:
+    from egoist.app import App
+
+
+def includeme(app: App):
+    app.include("egoist.components.fs")
 
 
 def walk(
