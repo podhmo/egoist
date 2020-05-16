@@ -121,14 +121,22 @@ class App(_Configurator):
                 sources = {fn.__name__: fn for fn in fns if fn.__name__ in targets}
             walk(sources, root=root_path)
 
-    def scan(self, *, targets: t.Optional[t.List[str]] = None) -> None:
+    def scan(
+        self, *, targets: t.Optional[t.List[str]] = None, out: t.Optional[str] = None
+    ) -> None:
+        import contextlib
         from egoist.components.tracker import get_tracker
 
         self.include("egoist.components.tracker")
         self.commit(dry_run=True)
 
         self.generate(targets=targets)
-        print(get_tracker().get_dependencies())
+
+        with contextlib.ExitStack() as s:
+            out_port: t.IO[str] = None
+            if out is not None:
+                out_port = s.enter_context(open(out, "w"))
+            print(get_tracker().get_dependencies(), file=out_port)
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
@@ -176,6 +184,7 @@ class App(_Configurator):
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
         )
         sub_parser.add_argument("targets", nargs="*", choices=[[]] + target_choices)  # type: ignore
+        sub_parser.add_argument("--out")
         sub_parser.set_defaults(subcommand=fn)
 
         activate = logging_setup(parser)
