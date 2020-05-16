@@ -2,6 +2,9 @@
 from __future__ import annotations
 import typing as t
 import typing_extensions as tx
+
+import sys
+import pathlib
 import inspect
 import dataclasses
 from functools import update_wrapper
@@ -13,10 +16,10 @@ from egoist.langhelpers import reify
 @dataclasses.dataclass
 class Fnspec:
     body: t.Callable[..., t.Any]
-    argspec: inspect.FullArgSpec
-    _module: t.Optional[str] = None
+    argspec: inspect.FullArgSpec = dataclasses.field(hash=False)
+    _module: t.Optional[str] = dataclasses.field(default=None, hash=False, repr=False)
     _aliases: t.Dict[str, str] = dataclasses.field(
-        default_factory=lambda: {"typing": "t"}  # xxx:
+        hash=False, repr=False, default_factory=lambda: {"typing": "t"},  # xxx:
     )
 
     @property
@@ -89,6 +92,10 @@ class Fnspec:
             ):
                 defaults[name] = val
         return defaults
+
+    @reify
+    def here(self) -> pathlib.Path:
+        return pathlib.Path(sys.modules[self.body.__module__].__file__).absolute()
 
 
 def fnspec(fn: t.Callable[..., t.Any]) -> Fnspec:

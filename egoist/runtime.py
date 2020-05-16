@@ -50,7 +50,7 @@ class Arg:
 
 @dataclasses.dataclass
 class Env:
-    name: str
+    fpath: str
     fn: types.Command
     fs: _TrackedFS = dataclasses.field(repr=False, hash=False)  # xxx
     m: Module = dataclasses.field(repr=False)

@@ -122,7 +122,11 @@ class App(_Configurator):
             walk(sources, root=root_path)
 
     def scan(
-        self, *, targets: t.Optional[t.List[str]] = None, out: t.Optional[str] = None
+        self,
+        *,
+        targets: t.Optional[t.List[str]] = None,
+        out: t.Optional[str] = None,
+        relative: bool = True,
     ) -> None:
         import contextlib
         from egoist.components.tracker import get_tracker
@@ -136,7 +140,7 @@ class App(_Configurator):
             out_port: t.IO[str] = None
             if out is not None:
                 out_port = s.enter_context(open(out, "w"))
-            print(get_tracker().get_dependencies(), file=out_port)
+            print(get_tracker().get_dependencies(relative=relative), file=out_port)
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
