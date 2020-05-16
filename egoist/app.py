@@ -3,12 +3,13 @@ import typing as t
 import typing_extensions as tx
 
 import logging
+import dataclasses
+from collections import defaultdict
 from miniconfig import Configurator as _Configurator
 from miniconfig import Context as _Context
 from miniconfig.exceptions import ConfigurationError
 from . import types
 from .langhelpers import reify, fullname
-from .registry import Registry
 
 
 logger = logging.getLogger(__name__)
@@ -19,10 +20,36 @@ class SettingsDict(tx.TypedDict, total=False):
     here: str
 
 
+@dataclasses.dataclass
+class Registry:
+    settings: SettingsDict
+
+    generators: t.Dict[str, t.List[t.Callable[..., t.Any]]] = dataclasses.field(
+        default_factory=lambda: defaultdict(list), hash=False
+    )
+    _factories: t.Dict[str, t.List[types.ComponentFactory]] = dataclasses.field(
+        default_factory=lambda: defaultdict(list), hash=False
+    )
+    _dryrun_factories: t.Dict[str, t.List[types.ComponentFactory]] = dataclasses.field(
+        default_factory=lambda: defaultdict(list), hash=False
+    )
+
+    dry_run: t.Optional[bool] = None
+
+    @reify
+    def factories(self) -> t.Dict[str, t.List[types.ComponentFactory]]:
+        if self.dry_run is None:
+            raise RuntimeError("this registry is not configured")
+        return self._dryrun_factories if self.dry_run else self._factories
+
+    def configure(self, *, dry_run: bool = False) -> None:
+        self.dry_run = dry_run
+
+
 class Context(_Context):
     @reify
     def registry(self) -> Registry:
-        return Registry()
+        return Registry(settings=self.settings)
 
     committed: t.ClassVar[bool] = False
     run: t.Optional[t.Callable[[t.Optional[t.List[str]]], t.Any]] = None

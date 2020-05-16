@@ -4,12 +4,12 @@ import dataclasses
 
 from . import types
 from .langhelpers import reify
-from .registry import Registry
 
 if t.TYPE_CHECKING:
     from egoist.internal.prestringutil import Module
     from egoist.internal._fnspec import Fnspec
     from egoist.components.fs_tracked_ import _TrackedFS  # xxx
+    from .app import Registry
 
 
 class RuntimeContext:

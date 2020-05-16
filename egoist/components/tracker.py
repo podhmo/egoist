@@ -34,10 +34,15 @@ class Tracker:
         if not relative:
             return {dep["name"]: list(dep["depends"]) for dep in self.deps_map.values()}
 
-        cwd = pathlib.Path().absolute()
+        cwd_path = pathlib.Path().absolute()
+        root_path = pathlib.Path(
+            runtime.get_current_context().registry.settings["rootdir"]
+        ).absolute()
         return {
-            dep["name"]: [str(pathlib.Path(x).relative_to(cwd)) for x in dep["depends"]]
-            for dep in self.deps_map.values()
+            str((root_path / name).relative_to(cwd_path)): [
+                str((root_path / x).relative_to(cwd_path)) for x in dep["depends"]
+            ]
+            for name, dep in self.deps_map.items()
         }
 
 
