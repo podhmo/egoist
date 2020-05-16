@@ -9,12 +9,12 @@ def define_cli(app: App) -> None:
     seen = False
 
     def _register_cli(app: App, kit: str) -> AnyFunction:
-        def _register(fn: AnyFunction) -> AnyFunction:
-            nonlocal seen
-            if not seen:
-                seen = True
-                app.include("egoist.generators.clikit")
+        nonlocal seen
+        if not seen:
+            seen = True
+            app.include("egoist.generators.clikit")
 
+        def _register(fn: AnyFunction) -> AnyFunction:
             app.registry.generators[kit].append(fn)
             return fn
 
@@ -31,12 +31,12 @@ def define_struct_set(app: App) -> None:
     seen = False
 
     def _register_struct_set(app: App, kit: str) -> AnyFunction:
-        def _register(fn: AnyFunction) -> AnyFunction:
-            nonlocal seen
-            if not seen:
-                seen = True
-                app.include("egoist.generators.structkit")
+        nonlocal seen
+        if not seen:
+            seen = True
+            app.include("egoist.generators.structkit")
 
+        def _register(fn: AnyFunction) -> AnyFunction:
             app.registry.generators[kit].append(fn)
             return fn
 
@@ -55,12 +55,12 @@ def define_file(app: App) -> None:
     def _register_file(
         app: App, kit: str, *, rename: t.Optional[str] = None, suffix: str = "",
     ) -> AnyFunction:
-        def _register(fn: AnyFunction) -> AnyFunction:
-            nonlocal seen
-            if not seen:
-                seen = True
-                app.include("egoist.generators.filekit")
+        nonlocal seen
+        if not seen:
+            seen = True
+            app.include("egoist.generators.filekit")
 
+        def _register(fn: AnyFunction) -> AnyFunction:
             if rename is not None:
                 fn._rename = rename  # xxx
             elif suffix:
@@ -83,12 +83,12 @@ def define_dir(app: App) -> None:
     def _register_dir(
         app: App, kit: str, *, rename: t.Optional[str] = None
     ) -> AnyFunction:
-        def _register(fn: AnyFunction) -> AnyFunction:
-            nonlocal seen
-            if not seen:
-                seen = True
-                app.include("egoist.generators.dirkit")
+        nonlocal seen
+        if not seen:
+            seen = True
+            app.include("egoist.generators.dirkit")
 
+        def _register(fn: AnyFunction) -> AnyFunction:
             if rename is not None:
                 fn._rename = rename  # xxx
             app.registry.generators[kit].append(fn)
