@@ -21,7 +21,7 @@ def define_cli(app: App) -> None:
 
     app.add_directive(name, _register_cli)
 
-    def _include():
+    def _include() -> None:
         nonlocal seen
         if seen:
             app.include("egoist.generators.clikit")
@@ -47,7 +47,7 @@ def define_struct_set(app: App) -> None:
 
     app.add_directive(name, _register_struct_set)
 
-    def _include():
+    def _include() -> None:
         nonlocal seen
         if seen:
             app.include("egoist.generators.structkit")
@@ -79,7 +79,7 @@ def define_file(app: App) -> None:
 
     app.add_directive(name, _register_file)
 
-    def _include():
+    def _include() -> None:
         nonlocal seen
         if seen:
             app.include("egoist.generators.filekit")
@@ -109,7 +109,7 @@ def define_dir(app: App) -> None:
 
     app.add_directive(name, _register_dir)
 
-    def _include():
+    def _include() -> None:
         nonlocal seen
         if seen:
             app.include("egoist.generators.dirkit")
