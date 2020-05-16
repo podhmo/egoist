@@ -10,11 +10,11 @@ app.include("egoist.directives.define_dir")
 def data() -> None:
     from egoist.generators.dirkit import runtime
 
-    with runtime.create_file("hello.txt"):
-        print("hello world")
+    with runtime.create_file("hello.txt") as wf:
+        print("hello world", file=wf)
 
-    with runtime.create_file("byebye.txt"):
-        print("byebye world")
+    with runtime.create_file("byebye.txt") as wf:
+        print("byebye world", file=wf)
 
 
 if __name__ == "__main__":

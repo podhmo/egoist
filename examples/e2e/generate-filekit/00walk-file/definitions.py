@@ -10,8 +10,8 @@ app.include("egoist.directives.define_file")
 def hello() -> None:
     from egoist.generators.filekit import runtime
 
-    with runtime.create_file():
-        print("hello world")
+    with runtime.create_file() as wf:
+        print("hello world", file=wf)
 
 
 if __name__ == "__main__":

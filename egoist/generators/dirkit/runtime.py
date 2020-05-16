@@ -16,10 +16,9 @@ __all__ = [
 @contextlib.contextmanager
 def create_file(filename: str) -> t.IO[str]:
     c = get_current_context()
-    env = c.stack[-1]
-    fpath = str(pathlib.Path(env.name) / filename)
-    with env.fs.open_file_with_tracking(
+    _env = c.stack[-1]
+    fpath = str(pathlib.Path(_env.name) / filename)
+    with _env.fs.open_file_with_tracking(
         fpath, "w", target=create_file, opener=StringIO
-    ):
-        with contextlib.redirect_stdout(env.m):
-            yield
+    ) as env:
+        yield env.m

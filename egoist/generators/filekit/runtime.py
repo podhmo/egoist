@@ -10,7 +10,8 @@ __all__ = [
 ]
 
 
-def create_file() -> t.IO[str]:
+@contextlib.contextmanager
+def create_file() -> t.Iterator[t.IO[str]]:
     c = get_current_context()
     env = c.stack[-1]
-    return contextlib.redirect_stdout(env.m)
+    yield env.m
