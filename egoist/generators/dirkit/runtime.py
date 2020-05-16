@@ -16,7 +16,7 @@ __all__ = [
 @contextlib.contextmanager
 def create_file(
     filename: str, *, depends_on: t.Optional[t.List[str]] = None
-) -> t.IO[str]:
+) -> t.Iterator[t.IO[str]]:
     c = get_current_context()
     _env = c.stack[-1]
     with _env.fs.open_file_with_tracking(
@@ -26,4 +26,4 @@ def create_file(
         opener=StringIO,
         depends_on=depends_on,
     ) as env:
-        yield env.m
+        yield env.io
