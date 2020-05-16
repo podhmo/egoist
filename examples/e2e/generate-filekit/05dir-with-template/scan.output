@@ -1,0 +1,1 @@
+{'output/foo.json': ['input/hello.tmpl'], 'output/bar.json': ['input/hello.tmpl'], 'output/boo.json': ['input/hello.tmpl']}
