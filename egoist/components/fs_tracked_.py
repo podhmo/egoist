@@ -24,20 +24,35 @@ class _TrackedOutput(output[Module]):
 
 class _TrackedFS(MiniFS[Module]):
     @contextlib.contextmanager
-    def open_with_tracking(
+    def open_file_with_tracking(
         self,
-        name: t.Union[str, pathlib.Path],
+        fpath: t.Union[str, pathlib.Path],
         mode: str,
         *,
         target: types.Command,
         opener: t.Optional[t.Callable[[], Module]] = None,
         depends_on: t.Optional[t.Collection[str]] = None
     ) -> t.Iterator[runtime.Env]:
-        get_tracker().track(name, depends_on=depends_on)
+        get_tracker().track(fpath, depends_on=depends_on)
 
-        with self.open(name, mode, opener=opener) as m:
+        with self.open(fpath, mode, opener=opener) as m:
             c = runtime.get_current_context()
-            env = runtime.Env(m=m, fn=target)
+            env = runtime.Env(m=m, fn=target, name=str(fpath), fs=self)
             c.stack.append(env)
             yield env
+        c.stack.pop()
+
+    @contextlib.contextmanager
+    def open_dir_with_tracking(
+        self,
+        fpath: t.Union[str, pathlib.Path],
+        *,
+        target: types.Command,
+        depends_on: t.Optional[t.Collection[str]] = None
+    ) -> t.Iterator[runtime.Env]:
+        # get_tracker().track(fpath, depends_on=depends_on)
+        c = runtime.get_current_context()
+        env = runtime.Env(m=None, fn=target, name=str(fpath), fs=self)
+        c.stack.append(env)
+        yield env
         c.stack.pop()

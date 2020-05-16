@@ -9,6 +9,7 @@ from .registry import Registry
 if t.TYPE_CHECKING:
     from egoist.internal.prestringutil import Module
     from egoist.internal._fnspec import Fnspec
+    from egoist.components.fs_tracked_ import _TrackedFS  # xxx
 
 
 class RuntimeContext:
@@ -49,8 +50,10 @@ class Arg:
 
 @dataclasses.dataclass
 class Env:
-    m: Module
+    name: str
     fn: types.Command
+    fs: _TrackedFS = dataclasses.field(repr=False, hash=False)  # xxx
+    m: Module = dataclasses.field(repr=False)
 
     @reify
     def fnspec(self) -> Fnspec:

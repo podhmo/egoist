@@ -17,7 +17,7 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
         for name, fn in fns.items():
             logger.debug("walk %s", name)
             fpath = f"{get_path_from_function_name(name)}.go"
-            with fs.open_with_tracking(fpath, "w", target=fn):
+            with fs.open_file_with_tracking(fpath, "w", target=fn):
                 fn()
 
 
@@ -65,4 +65,3 @@ def structkit(
             if item.fields:
                 _emit.emit_unmarshalJSON(ctx, item)
             m.sep()
-    return m
