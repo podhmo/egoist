@@ -1,3 +1,8 @@
+0.0.3
+
+- add filekit, dirkit
+- add shared directive
+
 0.0.2
 
 - fix package-data
