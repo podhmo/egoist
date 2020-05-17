@@ -150,17 +150,18 @@ class App(_Configurator):
         self.include("egoist.components.tracker")
         self.commit(dry_run=True)
 
+        logging.getLogger("prestring.output").setLevel(logging.WARNING)
         self.generate(targets=targets, rootdir=rootdir)
+
         root_path = get_root_path(self.settings, root=rootdir)
+        deps = get_tracker().get_dependencies(root=root_path, relative=relative)
 
         with contextlib.ExitStack() as s:
             out_port: t.Optional[t.IO[str]] = None
             if out is not None:
                 out_port = s.enter_context(open(out, "w"))
-            print(
-                get_tracker().get_dependencies(root=root_path, relative=relative),
-                file=out_port,
-            )
+
+            print(deps, file=out_port)
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
