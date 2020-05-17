@@ -45,7 +45,10 @@ def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
     )
     sub_parser.add_argument("--root", required=False, default=".", help="-")
     sub_parser.add_argument(
-        "target", nargs="?", default="clikit", choices=["clikit", "structkit"]
+        "target",
+        nargs="?",
+        default="clikit",
+        choices=["clikit", "structkit", "filekit", "dirkit"],
     )
     sub_parser.set_defaults(subcommand=fn)
 
