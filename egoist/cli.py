@@ -1,4 +1,5 @@
 import typing as t
+import sys
 
 
 def init(*, target: str = "clikit", root: str = ".") -> None:
@@ -27,7 +28,10 @@ def init(*, target: str = "clikit", root: str = ".") -> None:
             dst = str(pathlib.Path(dst).with_suffix(""))
         return shutil.copy2(src, dst, follow_symlinks=True)
 
-    shutil.copytree(src, dst, copy_function=_copy, dirs_exist_ok=True, symlinks=True)
+    kwargs: t.Dict[str, t.Any] = {}
+    if sys.version_info[:2] >= (3, 8):
+        kwargs["dirs_exist_ok"] = True
+    shutil.copytree(src, dst, copy_function=_copy, symlinks=True, **kwargs)
 
 
 def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
