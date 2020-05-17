@@ -1,6 +1,5 @@
 from __future__ import annotations
 import typing as t
-from functools import lru_cache
 from egoist.app import App, SettingsDict, parse_args
 
 if t.TYPE_CHECKING:
@@ -10,9 +9,10 @@ settings: SettingsDict = {"rootdir": "", "here": __file__}
 app = App(settings)
 
 app.include("egoist.directives.define_dir")
+app.include("egoist.directives.shared")
 
 
-@lru_cache(1)
+@app.shared
 def get_jinja2_environment() -> Jinja2Environment:
     from jinja2 import Environment, FunctionLoader, StrictUndefined
 

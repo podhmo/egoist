@@ -1,7 +1,8 @@
 import typing as t
-from .app import App
+from .app import App, _noop
 
 AnyFunction = t.Callable[..., t.Any]
+T = t.TypeVar("T")
 
 
 def define_cli(app: App) -> None:
@@ -116,3 +117,27 @@ def define_dir(app: App) -> None:
 
     # for conflict check
     app.action(name, _include)
+
+
+def shared(app: App) -> None:
+    name = "shared"
+
+    def _register_shared(app: App, fn: t.Callable[..., T]) -> AnyFunction:
+        from functools import partial
+        from prestring.codeobject import Symbol
+
+        name = f"{fn.__module__}:{fn.__name__}"
+        app.register_factory(name, fn)
+        app.register_dryurn_factory(name, partial(Symbol, name))
+
+        def cached(*args: t.Any, **kwargs: t.Any) -> T:
+            from egoist.runtime import get_component
+
+            return t.cast(T, get_component(name, *args, **kwargs))
+
+        return cached
+
+    app.add_directive(name, _register_shared)
+
+    # for conflict check
+    app.action(name, _noop)
