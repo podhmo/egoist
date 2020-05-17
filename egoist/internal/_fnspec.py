@@ -36,6 +36,10 @@ class Fnspec:
         return f"{self.module}.{self.name}"
 
     @property
+    def shortname(self) -> str:
+        return self.name.split("__", 1)[-1]
+
+    @property
     def doc(self) -> t.Optional[str]:
         return inspect.getdoc(self.body)
 

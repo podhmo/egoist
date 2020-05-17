@@ -74,7 +74,7 @@ def clikit(
     description = None
     doc = inspect.getdoc(fn)
     if doc is not None:
-        description = f"{fn.__name__} - {doc}"
+        description = f"{env.fnspec.shortname} - {doc}"
 
     # TODO: support normal arguments
     m.package("main")
@@ -96,7 +96,7 @@ def clikit(
 
         m.import_("flag")  # import:
         m.stmt(
-            'cmd := flag.NewFlagSet("{}", flag.ContinueOnError)', fn.__name__,
+            'cmd := flag.NewFlagSet("{}", flag.ContinueOnError)', env.fnspec.shortname,
         )
         if description is not None:
             m.stmt("cmd.Usage = func() {")
