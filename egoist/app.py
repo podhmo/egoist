@@ -145,12 +145,14 @@ class App(_Configurator):
         relative: bool = True,
     ) -> None:
         import contextlib
+        import os
         from egoist.components.tracker import get_tracker
 
         self.include("egoist.components.tracker")
         self.commit(dry_run=True)
 
-        logging.getLogger("prestring.output").setLevel(logging.WARNING)
+        if not bool(os.environ.get("VERBOSE", "")):
+            logging.getLogger("prestring.output").setLevel(logging.WARNING)
         self.generate(targets=targets, rootdir=rootdir)
 
         root_path = get_root_path(self.settings, root=rootdir)
