@@ -7,9 +7,8 @@ import dataclasses
 from collections import defaultdict
 from miniconfig import Configurator as _Configurator
 from miniconfig import Context as _Context
-from miniconfig.exceptions import ConfigurationError
 from . import types
-from .langhelpers import reify, fullname
+from .langhelpers import reify
 
 if t.TYPE_CHECKING:
     import pathlib
@@ -91,80 +90,6 @@ class App(_Configurator):
         self.registry.configure(dry_run=dry_run)
         runtime.set_context(runtime.RuntimeContext(self.registry, dry_run=dry_run))
 
-    def describe(self) -> None:
-        self.commit(dry_run=False)
-
-        import json
-        import inspect
-
-        defs = {}
-        for kit, fns in self.registry.generators.items():
-            for fn in fns:
-                name = f"{fn.__module__}.{fn.__name__}".replace("__main__.", "")
-                summary = (inspect.getdoc(fn) or "").strip().split("\n", 1)[0]
-                defs[name] = {"doc": summary, "generator": kit}
-
-        factories = {
-            name: [fullname(x) for x in xs]  # type: ignore
-            for name, xs in self.registry.factories.items()
-        }
-        d = {"definitions": defs, "factories": factories}
-        print(json.dumps(d, indent=2, ensure_ascii=False))
-
-    def generate(
-        self,
-        *,
-        targets: t.Optional[t.List[str]] = None,
-        rootdir: t.Optional[str] = None,
-    ) -> None:
-        root_path = get_root_path(self.settings, root=rootdir)
-        self.commit(dry_run=False)
-
-        for kit, fns in self.registry.generators.items():
-            walk_or_module = self.maybe_dotted(kit)
-            if callable(walk_or_module):
-                walk = walk_or_module
-            elif hasattr(walk_or_module, "walk"):
-                walk = walk_or_module.walk  # type: ignore
-            else:
-                # TODO: genetle error message
-                raise ConfigurationError("{kit!r} is not callable")
-
-            if not targets:
-                sources = {fn.__name__: fn for fn in fns}
-            else:
-                sources = {fn.__name__: fn for fn in fns if fn.__name__ in targets}
-            walk(sources, root=root_path)
-
-    def scan(
-        self,
-        *,
-        targets: t.Optional[t.List[str]] = None,
-        rootdir: t.Optional[str] = None,
-        out: t.Optional[str] = None,
-        relative: bool = True,
-    ) -> None:
-        import contextlib
-        import os
-        from egoist.components.tracker import get_tracker
-
-        self.include("egoist.components.tracker")
-        self.commit(dry_run=True)
-
-        if not bool(os.environ.get("VERBOSE", "")):
-            logging.getLogger("prestring.output").setLevel(logging.WARNING)
-        self.generate(targets=targets, rootdir=rootdir)
-
-        root_path = get_root_path(self.settings, root=rootdir)
-        deps = get_tracker().get_dependencies(root=root_path, relative=relative)
-
-        with contextlib.ExitStack() as s:
-            out_port: t.Optional[t.IO[str]] = None
-            if out is not None:
-                out_port = s.enter_context(open(out, "w"))
-
-            print(deps, file=out_port)
-
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         import argparse
         from egoist.internal.logutil import logging_setup
@@ -174,7 +99,7 @@ class App(_Configurator):
             return run_(argv)
 
         # todo: scan modules in show_help only
-        target_choices = [
+        self.context.cli_targets = [
             fn.__name__ for fns in self.registry.generators.values() for fn in fns
         ]
 
@@ -189,31 +114,20 @@ class App(_Configurator):
         subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
         subparsers.required = True
 
-        # describe (todo: rename to info? or inspect?)
-        fn = self.describe
-        sub_parser = subparsers.add_parser(
-            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
-        )
-        sub_parser.set_defaults(subcommand=fn)
+        # todo: remove this code
+        # todo: anyFunction, more strict typing
+        def _add_subcommand(
+            app: App, setup: t.Callable[[App], None], *, fn: types.AnyFunction
+        ) -> None:
+            sub_parser = subparsers.add_parser(
+                fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+            )
+            setup(app, sub_parser, fn)
 
-        # generate
-        fn = self.generate
-        sub_parser = subparsers.add_parser(
-            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
-        )
-        sub_parser.add_argument("--rootdir", required=False, help="-")
-        sub_parser.add_argument("targets", nargs="*", choices=[[]] + target_choices)  # type: ignore
-        sub_parser.set_defaults(subcommand=fn)
-
-        # scan
-        fn = self.scan
-        sub_parser = subparsers.add_parser(
-            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
-        )
-        sub_parser.add_argument("--rootdir", required=False, help="-")
-        sub_parser.add_argument("targets", nargs="*", choices=[[]] + target_choices)  # type: ignore
-        sub_parser.add_argument("--out")
-        sub_parser.set_defaults(subcommand=fn)
+        self.add_directive("add_subcommand", _add_subcommand)
+        self.include("egoist.commands.describe")
+        self.include("egoist.commands.generate")
+        self.include("egoist.commands.scan")
 
         activate = logging_setup(parser)
 
