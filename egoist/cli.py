@@ -22,10 +22,10 @@ def init(*, target: str = "clikit", root: str = ".") -> None:
     dst = pathlib.Path(root)
     logger.info("create %s", dst)
 
-    def _copy(src, dst, *, follow_symlinks=True):
+    def _copy(src: str, dst: str) -> t.Any:
         if src.endswith(".tmpl"):
-            dst = pathlib.Path(dst).with_suffix("")
-        return shutil.copy2(src, dst)
+            dst = str(pathlib.Path(dst).with_suffix(""))
+        return shutil.copy2(src, dst, follow_symlinks=True)
 
     shutil.copytree(src, dst, copy_function=_copy, dirs_exist_ok=True, symlinks=True)
 
