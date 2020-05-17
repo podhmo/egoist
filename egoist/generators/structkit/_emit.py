@@ -6,7 +6,7 @@ from prestring.go import goname
 from prestring.naming import untitleize
 import metashape.typeinfo as typeinfo
 from egoist.go.types import _unwrap_pointer_type
-from ._context import Context, Item
+from egoist.go import walker
 from . import runtime
 
 
@@ -18,7 +18,7 @@ def has_reference(info: typeinfo.TypeInfo) -> bool:
     return info.user_defined_type is not None
 
 
-def emit_struct(ctx: Context, item: Item) -> runtime.Definition:
+def emit_struct(ctx: walker.Context, item: walker.Item) -> runtime.Definition:
     m = ctx.m
     resolver = ctx.resolver
 
@@ -53,7 +53,7 @@ def emit_struct(ctx: Context, item: Item) -> runtime.Definition:
             else:
                 m.append(f"{goname(name)} {gotype}")
 
-            # note: metadata['tags'] is injected by _walker.walk()
+            # note: metadata['tags'] is injected by walker.walk()
             m.append(f" `{build_tag_string(metadata['tags'])}`")
 
             # handling comments
@@ -67,7 +67,7 @@ def emit_struct(ctx: Context, item: Item) -> runtime.Definition:
     return runtime.Definition(name=typename, code_module=None)
 
 
-def emit_union(ctx: Context, item: Item) -> runtime.Definition:
+def emit_union(ctx: walker.Context, item: walker.Item) -> runtime.Definition:
     m = ctx.m
     resolver = ctx.resolver
 
@@ -117,7 +117,7 @@ def emit_union(ctx: Context, item: Item) -> runtime.Definition:
 
 
 def emit_enums(
-    ctx: Context, literal_type: t.Type[t.Any], *, name: t.Optional[str] = None,
+    ctx: walker.Context, literal_type: t.Type[t.Any], *, name: t.Optional[str] = None,
 ) -> runtime.Definition:
     m = ctx.m
     resolver = ctx.resolver
@@ -177,7 +177,7 @@ def emit_enums(
     return runtime.Definition(name=go_type, code_module=None)
 
 
-def emit_unmarshalJSON(ctx: Context, item: Item) -> runtime.Definition:
+def emit_unmarshalJSON(ctx: walker.Context, item: walker.Item) -> runtime.Definition:
     m = ctx.m
     resolver = ctx.resolver
 
