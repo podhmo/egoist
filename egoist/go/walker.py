@@ -3,7 +3,6 @@ import typing as t
 import typing_extensions as tx
 import typing_inspect as ti
 
-from functools import lru_cache
 import dataclasses
 from metashape.declarative import MISSING
 from metashape import typeinfo
@@ -13,7 +12,7 @@ from metashape.runtime import get_walker as _get_metashape_walker  # xxx
 from metashape.types import Kind as NodeKind
 from egoist.typing import resolve_name, guess_name
 from egoist.langhelpers import reify
-from egoist.go.types import _unwrap_pointer_type
+from egoist.go.types import _unwrap_pointer_type, _get_flatten_args
 from egoist.go.resolver import Resolver
 from egoist.internal.prestringutil import Module
 from . import metadata as metadata_
@@ -38,7 +37,7 @@ def walk(
                 yield Item(
                     name=guess_name(cls), type_=cls, fields=[], args=args, origin=origin
                 )  # fixme
-                for subtype in get_flatten_args(cls):
+                for subtype in _get_flatten_args(cls):
                     w.append(subtype)
                 continue
             elif origin == tx.Literal:  # literal
@@ -71,23 +70,10 @@ def walk(
             fields.append((name, info, filled_metadata))
 
             # append to walker, if needed
-            for subtype in get_flatten_args(info.type_):
+            for subtype in _get_flatten_args(info.type_):
                 w.append(subtype)
 
         yield Item(name=resolve_name(cls), type_=cls, fields=fields, args=[])
-
-
-@lru_cache(maxsize=256)
-def get_flatten_args(typ: t.Type[t.Any]) -> t.Tuple[t.Type[t.Any]]:
-    if not hasattr(typ, "__args__"):
-        if typ.__module__ != "builtins":
-            return (typ,)
-        return ()  # type: ignore
-
-    r: t.Set[t.Type[t.Any]] = set()
-    for subtype in typ.__args__:
-        r.update(get_flatten_args(subtype))
-    return tuple(sorted(r, key=id))  # type: ignore
 
 
 Row = t.Tuple[str, t.Any, metadata_.Metadata]
