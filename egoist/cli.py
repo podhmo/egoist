@@ -52,6 +52,26 @@ def init(*, target: str = "clikit", root: str = ".") -> None:
     _copytree(str(src), str(dst))
 
 
+def parse(
+    *, filename: str, without_tab: bool = False, indent: t.Optional[int] = None
+) -> None:
+    """parse text"""
+    from prestring.python.cli import run_transform
+    from prestring.text.transform import transform
+    from prestring.python import Module as PyModule
+    from egoist.internal.prestringutil import Module
+
+    m = run_transform(
+        filename,
+        transform=transform,
+        name="emit",
+        indent=(" " if without_tab else "\t") * (indent or 1),
+        Module=PyModule,
+        OutModule=Module,
+    )
+    print(m)
+
+
 def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
     import argparse
     from egoist.internal.logutil import logging_setup
@@ -67,6 +87,7 @@ def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
     subparsers.required = True
 
+    # init
     fn = init
     sub_parser = subparsers.add_parser(
         fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
@@ -78,6 +99,16 @@ def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
         default="clikit",
         choices=["clikit", "structkit", "filekit", "dirkit"],
     )
+    sub_parser.set_defaults(subcommand=fn)
+
+    # parse
+    fn = parse
+    sub_parser = subparsers.add_parser(
+        fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+    )
+    sub_parser.add_argument("filename")
+    sub_parser.add_argument("--without-tab", action="store_true")
+    sub_parser.add_argument("--indent", default=None, type=int)
     sub_parser.set_defaults(subcommand=fn)
 
     activate = logging_setup(parser)
