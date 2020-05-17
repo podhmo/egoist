@@ -7,6 +7,7 @@ def init(*, target: str = "clikit", root: str = ".") -> None:
     import logging
     import pathlib
     import shutil
+    from functools import partial
     from importlib.util import find_spec
 
     logger = logging.getLogger(__name__)
@@ -28,10 +29,27 @@ def init(*, target: str = "clikit", root: str = ".") -> None:
             dst = str(pathlib.Path(dst).with_suffix(""))
         return shutil.copy2(src, dst, follow_symlinks=True)
 
-    kwargs: t.Dict[str, t.Any] = {}
     if sys.version_info[:2] >= (3, 8):
-        kwargs["dirs_exist_ok"] = True
-    shutil.copytree(src, dst, copy_function=_copy, symlinks=True, **kwargs)
+        _copytree = partial(
+            shutil.copytree, copy_function=_copy, symlinks=True, dirs_exist_ok=True
+        )
+    else:
+
+        def _copytree(src: str, dst: str) -> t.Any:
+            src_path = pathlib.Path(src)
+            dst_path = pathlib.Path(dst)
+            if src_path.is_dir():
+                if not dst_path.exists():
+                    return shutil.copytree(src, dst, symlinks=True, copy_function=_copy)
+                for item in pathlib.Path(src).glob("*"):
+                    if item.is_dir():
+                        _copytree(str(item), str(dst_path / item.relative_to(src_path)))
+                    else:
+                        _copy(str(item), str(dst_path / item.relative_to(src_path)))
+            else:
+                _copy(src, dst)
+
+    _copytree(str(src), str(dst))
 
 
 def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
