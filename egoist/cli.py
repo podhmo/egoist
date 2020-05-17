@@ -18,10 +18,16 @@ def init(*, target: str = "clikit", root: str = ".") -> None:
         return
     dirpath = pathlib.Path(locations[0]) / "data"
 
-    src = dirpath / f"{target}_definitions.py.tmpl"
-    dst = pathlib.Path(root) / "definitions.py"
+    src = dirpath / f"{target}"
+    dst = pathlib.Path(root)
     logger.info("create %s", dst)
-    shutil.copy(src, dst)
+
+    def _copy(src, dst, *, follow_symlinks=True):
+        if src.endswith(".tmpl"):
+            dst = pathlib.Path(dst).with_suffix("")
+        return shutil.copy2(src, dst)
+
+    shutil.copytree(src, dst, copy_function=_copy, dirs_exist_ok=True, symlinks=True)
 
 
 def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
