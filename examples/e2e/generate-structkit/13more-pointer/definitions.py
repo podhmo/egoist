@@ -1,11 +1,11 @@
 from __future__ import annotations
 import typing as t
-from egoist.app import App, SettingsDict, parse_args
+from egoist.app import create_app, SettingsDict, parse_args
 from egoist.go.types import GoPointer
 
 
 settings: SettingsDict = {"rootdir": "", "here": __file__}
-app = App(settings)
+app = create_app(settings)
 
 app.include("egoist.directives.define_struct_set")
 

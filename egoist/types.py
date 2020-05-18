@@ -4,7 +4,7 @@ import types
 
 ModuleType = types.ModuleType
 Command = t.Callable[..., t.Any]
-
+AnyFunction = t.Callable[..., t.Any]
 
 ########################################
 # configuration

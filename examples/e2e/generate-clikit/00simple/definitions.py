@@ -1,7 +1,7 @@
-from egoist.app import App, SettingsDict, parse_args
+from egoist.app import create_app, SettingsDict, parse_args
 
 settings: SettingsDict = {"rootdir": "cmd/", "here": __file__}
-app = App(settings)
+app = create_app(settings)
 
 app.include("egoist.directives.define_cli")
 

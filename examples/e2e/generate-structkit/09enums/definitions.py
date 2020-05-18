@@ -1,9 +1,9 @@
 import typing_extensions as tx
-from egoist.app import App, SettingsDict, parse_args
+from egoist.app import create_app, SettingsDict, parse_args
 from egoist.typing import NewNamedType
 
 settings: SettingsDict = {"rootdir": "", "here": __file__}
-app = App(settings)
+app = create_app(settings)
 
 app.include("egoist.directives.define_struct_set")
 

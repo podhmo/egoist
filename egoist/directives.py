@@ -4,6 +4,35 @@ from .app import App, _noop
 AnyFunction = t.Callable[..., t.Any]
 T = t.TypeVar("T")
 
+_has_subparser = False
+
+
+def add_subcommand(app: App) -> None:
+    """register subcommands"""
+    global _has_subparser
+    if _has_subparser:
+        return
+    _has_subparser = True
+
+    import argparse
+
+    parser = app.cli_parser
+    subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
+    subparsers.required = True
+
+    def _add_subcommand(
+        app: App,
+        setup_parser: t.Callable[[App, argparse.ArgumentParser, AnyFunction], None],
+        *,
+        fn: AnyFunction,
+    ) -> None:
+        sub_parser = subparsers.add_parser(
+            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+        )
+        setup_parser(app, sub_parser, fn)
+
+    app.add_directive("add_subcommand", _add_subcommand)
+
 
 def define_cli(app: App) -> None:
     name = "define_cli"
@@ -16,6 +45,7 @@ def define_cli(app: App) -> None:
 
         def _register(fn: AnyFunction) -> AnyFunction:
             app.registry.generators[kit].append(fn)
+            app.registry._task_list.append(fn.__name__)
             return fn
 
         return _register
@@ -42,6 +72,7 @@ def define_struct_set(app: App) -> None:
 
         def _register(fn: AnyFunction) -> AnyFunction:
             app.registry.generators[kit].append(fn)
+            app.registry._task_list.append(fn.__name__)
             return fn
 
         return _register
@@ -74,6 +105,7 @@ def define_file(app: App) -> None:
             elif suffix:
                 fn._rename = f"{fn.__name__}{suffix}"  # type: ignore
             app.registry.generators[kit].append(fn)
+            app.registry._task_list.append(fn.__name__)
             return fn
 
         return _register
@@ -104,6 +136,7 @@ def define_dir(app: App) -> None:
             if rename is not None:
                 fn._rename = rename  # type: ignore
             app.registry.generators[kit].append(fn)
+            app.registry._task_list.append(fn.__name__)
             return fn
 
         return _register
