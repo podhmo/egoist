@@ -138,6 +138,14 @@ class App(_Configurator):
         return _run(argv)
 
 
+def create_app(settings: SettingsDict) -> App:
+    app = App(t.cast(t.Dict[str, t.Any], settings))
+    app.include("egoist.commands.describe")
+    app.include("egoist.commands.generate")
+    app.include("egoist.commands.scan")
+    return app
+
+
 def parse_args(
     argv: t.Optional[t.List[str]] = None, *, sep: str = "-"
 ) -> t.Iterator[t.Optional[t.List[str]]]:
