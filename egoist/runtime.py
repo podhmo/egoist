@@ -51,7 +51,7 @@ class Arg:
 @dataclasses.dataclass
 class Env:
     fpath: str
-    fn: types.Command
+    fn: types.TaskFunction
     fs: _TrackedFS = dataclasses.field(repr=False, hash=False)  # xxx
     _content: t.Union[Module, t.IO[str], str] = dataclasses.field(repr=False)
 

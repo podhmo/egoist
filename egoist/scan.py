@@ -1,14 +1,14 @@
 import typing as t
 import inspect
-from .types import ModuleType, Command
+from .types import ModuleType, TaskFunction
 
 
 def scan_module(
     module: ModuleType,
     *,
-    is_ignored: t.Callable[[Command], bool] = inspect.isclass,
+    is_ignored: t.Callable[[TaskFunction], bool] = inspect.isclass,
     targets: t.Optional[t.List[str]] = None,
-) -> t.Dict[str, Command]:
+) -> t.Dict[str, TaskFunction]:
     targets = targets or list(module.__dict__.keys())
     defs = {}
     for name in targets:

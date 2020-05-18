@@ -25,7 +25,7 @@ _PREFIX_DEFAULT = "opt"
 
 
 def walk(
-    fns: t.Dict[str, types.Command],
+    fns: t.Dict[str, types.TaskFunction],
     *,
     root: t.Union[str, pathlib.Path],
     option_prefix: str = _PREFIX_DEFAULT,

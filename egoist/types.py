@@ -3,7 +3,7 @@ import typing_extensions as tx
 import types
 
 ModuleType = types.ModuleType
-Command = t.Callable[..., t.Any]
+TaskFunction = t.Callable[..., t.Any]
 AnyFunction = t.Callable[..., t.Any]
 
 ########################################

@@ -11,7 +11,7 @@ from egoist.langhelpers import get_path_from_function_name
 logger = logging.getLogger(__name__)
 
 
-def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
+def walk(fns: t.Dict[str, types.TaskFunction], *, root: t.Union[str, pathlib.Path]) -> None:
     from egoist.components.tracker import get_tracker
     from egoist.components.fs import open_fs
 

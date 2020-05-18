@@ -17,7 +17,7 @@ def includeme(app: App) -> None:
     app.include("egoist.components.fs")
 
 
-def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
+def walk(fns: t.Dict[str, types.TaskFunction], *, root: t.Union[str, pathlib.Path]) -> None:
     with open_fs(root=root) as fs:
         for name, fn in fns.items():
             logger.debug("walk %s", name)

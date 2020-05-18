@@ -32,7 +32,7 @@ class _TrackedFS(MiniFS[Content]):
         fpath: t.Union[str, pathlib.Path],
         mode: str,
         *,
-        target: types.Command,
+        target: types.TaskFunction,
         opener: t.Optional[t.Callable[[], T]] = None,
         depends_on: t.Optional[t.Collection[str]] = None
     ) -> t.Iterator[runtime.Env]:
@@ -52,7 +52,7 @@ class _TrackedFS(MiniFS[Content]):
         self,
         fpath: t.Union[str, pathlib.Path],
         *,
-        target: types.Command,
+        target: types.TaskFunction,
         depends_on: t.Optional[t.Collection[str]] = None
     ) -> t.Iterator[runtime.Env]:
         fpath = str(fpath)

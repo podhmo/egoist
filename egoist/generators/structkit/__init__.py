@@ -17,7 +17,7 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -> None:
+def walk(fns: t.Dict[str, types.TaskFunction], *, root: t.Union[str, pathlib.Path]) -> None:
     from egoist.components.fs import open_fs
 
     with open_fs(root=root) as fs:
