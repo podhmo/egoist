@@ -136,12 +136,16 @@ class App(_Configurator):
 
 def parse_args(
     argv: t.Optional[t.List[str]] = None, *, sep: str = "-"
-) -> t.Iterator[t.List[str]]:
+) -> t.Iterator[t.Optional[t.List[str]]]:
     """for bulk action"""
     import sys
     import itertools
 
     argv = argv or sys.argv[1:]
+    if not argv:
+        yield None
+        return
+
     itr = iter(argv)
     while True:
         argv = list(itertools.takewhile(lambda x: x != sep, itr))
