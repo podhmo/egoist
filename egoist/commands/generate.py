@@ -7,7 +7,7 @@ from egoist.types import AnyFunction
 
 
 def generate(
-    app, *, targets: t.Optional[t.List[str]] = None, rootdir: t.Optional[str] = None,
+    app, *, tasks: t.Optional[t.List[str]] = None, rootdir: t.Optional[str] = None,
 ) -> None:
     root_path = get_root_path(app.settings, root=rootdir)
     app.commit(dry_run=False)
@@ -22,18 +22,16 @@ def generate(
             # TODO: genetle error message
             raise ConfigurationError("{kit!r} is not callable")
 
-        if not targets:
+        if not tasks:
             sources = {fn.__name__: fn for fn in fns}
         else:
-            sources = {fn.__name__: fn for fn in fns if fn.__name__ in targets}
+            sources = {fn.__name__: fn for fn in fns if fn.__name__ in tasks}
         walk(sources, root=root_path)
 
 
 def setup(app: App, sub_parser, fn: AnyFunction) -> None:
-    target_choices = app.cli_targets  # ???
-
     sub_parser.add_argument("--rootdir", required=False, help="-")
-    sub_parser.add_argument("targets", nargs="*", choices=[[]] + target_choices)  # type: ignore
+    sub_parser.add_argument("tasks", nargs="*", choices=app.registry._task_list)  # type: ignore
     sub_parser.set_defaults(subcommand=partial(fn, app))
 
 

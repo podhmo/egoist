@@ -28,6 +28,10 @@ class Registry:
     generators: t.Dict[str, t.List[t.Callable[..., t.Any]]] = dataclasses.field(
         default_factory=lambda: defaultdict(list), hash=False
     )
+    _task_list: t.List[t.Union[t.List[None], str]] = dataclasses.field(
+        default_factory=lambda: [[]], hash=False
+    )
+
     _factories: t.Dict[str, t.List[types.ComponentFactory]] = dataclasses.field(
         default_factory=lambda: defaultdict(list), hash=False
     )
@@ -99,10 +103,6 @@ class App(_Configurator):
             return run_(argv)
 
         # todo: scan modules in show_help only
-        self.context.cli_targets = [
-            fn.__name__ for fns in self.registry.generators.values() for fn in fns
-        ]
-
         parser = argparse.ArgumentParser(
             formatter_class=type(
                 "_HelpFormatter",

@@ -9,7 +9,7 @@ from egoist.types import AnyFunction
 def scan(
     app: App,
     *,
-    targets: t.Optional[t.List[str]] = None,
+    tasks: t.Optional[t.List[str]] = None,
     rootdir: t.Optional[str] = None,
     out: t.Optional[str] = None,
     relative: bool = True,
@@ -23,7 +23,7 @@ def scan(
 
     if not bool(os.environ.get("VERBOSE", "")):
         logging.getLogger("prestring.output").setLevel(logging.WARNING)
-    generate(app, targets=targets, rootdir=rootdir)
+    generate(app, tasks=tasks, rootdir=rootdir)
 
     root_path = get_root_path(app.settings, root=rootdir)
     deps = get_tracker().get_dependencies(root=root_path, relative=relative)
@@ -37,10 +37,8 @@ def scan(
 
 
 def setup(app: App, sub_parser, fn: AnyFunction) -> None:
-    target_choices = app.cli_targets  # ???
-
     sub_parser.add_argument("--rootdir", required=False, help="-")
-    sub_parser.add_argument("targets", nargs="*", choices=[[]] + target_choices)  # type: ignore
+    sub_parser.add_argument("tasks", nargs="*", choices=app.registry._task_list)  # type: ignore
     sub_parser.add_argument("--out")
     sub_parser.set_defaults(subcommand=partial(fn, app))
 

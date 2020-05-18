@@ -16,6 +16,7 @@ def define_cli(app: App) -> None:
 
         def _register(fn: AnyFunction) -> AnyFunction:
             app.registry.generators[kit].append(fn)
+            app.registry._task_list.append(fn.__name__)
             return fn
 
         return _register
@@ -42,6 +43,7 @@ def define_struct_set(app: App) -> None:
 
         def _register(fn: AnyFunction) -> AnyFunction:
             app.registry.generators[kit].append(fn)
+            app.registry._task_list.append(fn.__name__)
             return fn
 
         return _register
@@ -74,6 +76,7 @@ def define_file(app: App) -> None:
             elif suffix:
                 fn._rename = f"{fn.__name__}{suffix}"  # type: ignore
             app.registry.generators[kit].append(fn)
+            app.registry._task_list.append(fn.__name__)
             return fn
 
         return _register
@@ -104,6 +107,7 @@ def define_dir(app: App) -> None:
             if rename is not None:
                 fn._rename = rename  # type: ignore
             app.registry.generators[kit].append(fn)
+            app.registry._task_list.append(fn.__name__)
             return fn
 
         return _register
