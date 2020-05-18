@@ -12,6 +12,8 @@ from .langhelpers import reify
 
 if t.TYPE_CHECKING:
     import pathlib
+    from argparse import ArgumentParser
+
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +54,27 @@ class Registry:
 
 
 class Context(_Context):
+    committed: t.ClassVar[bool] = False
+    run: t.Optional[t.Callable[[t.Optional[t.List[str]]], t.Any]] = None
+
     @reify
     def registry(self) -> Registry:
         return Registry(settings=t.cast(SettingsDict, self.settings))
 
-    committed: t.ClassVar[bool] = False
-    run: t.Optional[t.Callable[[t.Optional[t.List[str]]], t.Any]] = None
+    @reify
+    def cli_parser(self) -> ArgumentParser:
+        import argparse
+
+        # todo: scan modules in show_help only
+        parser = argparse.ArgumentParser(
+            formatter_class=type(
+                "_HelpFormatter",
+                (argparse.ArgumentDefaultsHelpFormatter, argparse.RawTextHelpFormatter),
+                {},
+            )
+        )
+        parser.print_usage = parser.print_help  # type: ignore
+        return parser
 
 
 class App(_Configurator):
@@ -95,47 +112,22 @@ class App(_Configurator):
         runtime.set_context(runtime.RuntimeContext(self.registry, dry_run=dry_run))
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
-        import argparse
         from egoist.internal.logutil import logging_setup
 
         run_ = self.context.run  # type: ignore
         if run_ is not None:
             return run_(argv)
 
-        # todo: scan modules in show_help only
-        parser = argparse.ArgumentParser(
-            formatter_class=type(
-                "_HelpFormatter",
-                (argparse.ArgumentDefaultsHelpFormatter, argparse.RawTextHelpFormatter),
-                {},
-            )
-        )
-        parser.print_usage = parser.print_help  # type: ignore
-        subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
-        subparsers.required = True
-
-        # todo: remove this code
-        # todo: anyFunction, more strict typing
-        def _add_subcommand(
-            app: App, setup: t.Callable[[App], None], *, fn: types.AnyFunction
-        ) -> None:
-            sub_parser = subparsers.add_parser(
-                fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
-            )
-            setup(app, sub_parser, fn)
-
-        self.add_directive("add_subcommand", _add_subcommand)
-        self.include("egoist.commands.describe")
-        self.include("egoist.commands.generate")
-        self.include("egoist.commands.scan")
-
-        activate = logging_setup(parser)
+        activate = logging_setup(self.context.cli_parser)
 
         def _run(argv: t.Optional[t.List[str]] = None) -> t.Any:
-            args = parser.parse_args(argv)
+            args = self.context.cli_parser.parse_args(argv)
             params = vars(args).copy()
             activate(params)
-            subcommand = params.pop("subcommand")
+            subcommand = params.pop("subcommand", None)
+            if subcommand is None:
+                print(self.context.cli_parser.format_help())
+                return
             return subcommand(**params)
 
         self.context.run = _run  # type:ignore

@@ -31,4 +31,5 @@ def setup(app: App, sub_parser, fn: AnyFunction) -> None:
 
 
 def includeme(app: App) -> None:
+    app.include("egoist.directives.add_subcommand")
     app.add_subcommand(setup, fn=describe)

@@ -4,6 +4,30 @@ from .app import App, _noop
 AnyFunction = t.Callable[..., t.Any]
 T = t.TypeVar("T")
 
+_has_subparser = False
+
+
+def add_subcommand(app: App) -> None:
+    """register subcommands"""
+    global _has_subparser
+    if _has_subparser:
+        return
+    _has_subparser = True
+
+    parser = app.context.cli_parser
+    subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
+    subparsers.required = True
+
+    def _add_subcommand(
+        app: App, setup_parser: t.Callable[[App], None], *, fn: AnyFunction
+    ) -> None:
+        sub_parser = subparsers.add_parser(
+            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
+        )
+        setup_parser(app, sub_parser, fn)
+
+    app.add_directive("add_subcommand", _add_subcommand)
+
 
 def define_cli(app: App) -> None:
     name = "define_cli"
