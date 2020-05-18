@@ -14,12 +14,17 @@ def add_subcommand(app: App) -> None:
         return
     _has_subparser = True
 
-    parser = app.context.cli_parser
+    import argparse
+
+    parser = app.cli_parser
     subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
     subparsers.required = True
 
     def _add_subcommand(
-        app: App, setup_parser: t.Callable[[App], None], *, fn: AnyFunction
+        app: App,
+        setup_parser: t.Callable[[App, argparse.ArgumentParser, AnyFunction], None],
+        *,
+        fn: AnyFunction,
     ) -> None:
         sub_parser = subparsers.add_parser(
             fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class

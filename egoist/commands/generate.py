@@ -5,9 +5,12 @@ from miniconfig.exceptions import ConfigurationError
 from egoist.app import App, get_root_path
 from egoist.types import AnyFunction
 
+if t.TYPE_CHECKING:
+    from argparse import ArgumentParser
+
 
 def generate(
-    app, *, tasks: t.Optional[t.List[str]] = None, rootdir: t.Optional[str] = None,
+    app: App, *, tasks: t.Optional[t.List[str]] = None, rootdir: t.Optional[str] = None,
 ) -> None:
     root_path = get_root_path(app.settings, root=rootdir)
     app.commit(dry_run=False)
@@ -29,9 +32,9 @@ def generate(
         walk(sources, root=root_path)
 
 
-def setup(app: App, sub_parser, fn: AnyFunction) -> None:
+def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
     sub_parser.add_argument("--rootdir", required=False, help="-")
-    sub_parser.add_argument("tasks", nargs="*", choices=app.registry._task_list)  # type: ignore
+    sub_parser.add_argument("tasks", nargs="*", choices=app.registry._task_list)
     sub_parser.set_defaults(subcommand=partial(fn, app))
 
 

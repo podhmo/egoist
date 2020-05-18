@@ -84,6 +84,10 @@ class App(_Configurator):
     def registry(self) -> Registry:
         return self.context.registry  # type: ignore
 
+    @property
+    def cli_parser(self) -> ArgumentParser:
+        return self.context.cli_parser  # type: ignore
+
     # default directives
     def register_factory(self, name: str, factory: types.ComponentFactory) -> None:
         type_ = types.ACTUAL_COMPONENT
@@ -118,15 +122,15 @@ class App(_Configurator):
         if run_ is not None:
             return run_(argv)
 
-        activate = logging_setup(self.context.cli_parser)
+        activate = logging_setup(self.cli_parser)
 
         def _run(argv: t.Optional[t.List[str]] = None) -> t.Any:
-            args = self.context.cli_parser.parse_args(argv)
+            args = self.cli_parser.parse_args(argv)
             params = vars(args).copy()
             activate(params)
             subcommand = params.pop("subcommand", None)
             if subcommand is None:
-                print(self.context.cli_parser.format_help())
+                print(self.cli_parser.format_help())
                 return
             return subcommand(**params)
 

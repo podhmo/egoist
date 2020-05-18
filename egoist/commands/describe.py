@@ -1,10 +1,14 @@
 from __future__ import annotations
+import typing as t
 from functools import partial
 from egoist.app import App
 from egoist.types import AnyFunction
 
+if t.TYPE_CHECKING:
+    from argparse import ArgumentParser
 
-def describe(app) -> None:
+
+def describe(app: App) -> None:
     import json
     import inspect
     from egoist.langhelpers import fullname
@@ -26,7 +30,7 @@ def describe(app) -> None:
     print(json.dumps(d, indent=2, ensure_ascii=False))
 
 
-def setup(app: App, sub_parser, fn: AnyFunction) -> None:
+def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
     sub_parser.set_defaults(subcommand=partial(fn, app))
 
 

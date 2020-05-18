@@ -5,6 +5,9 @@ from functools import partial
 from egoist.app import App, get_root_path
 from egoist.types import AnyFunction
 
+if t.TYPE_CHECKING:
+    from argparse import ArgumentParser
+
 
 def scan(
     app: App,
@@ -36,9 +39,9 @@ def scan(
         print(deps, file=out_port)
 
 
-def setup(app: App, sub_parser, fn: AnyFunction) -> None:
+def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
     sub_parser.add_argument("--rootdir", required=False, help="-")
-    sub_parser.add_argument("tasks", nargs="*", choices=app.registry._task_list)  # type: ignore
+    sub_parser.add_argument("tasks", nargs="*", choices=app.registry._task_list)
     sub_parser.add_argument("--out")
     sub_parser.set_defaults(subcommand=partial(fn, app))
 
