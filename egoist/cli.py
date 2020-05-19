@@ -1,5 +1,23 @@
+from __future__ import annotations
 import typing as t
+
 import sys
+
+if t.TYPE_CHECKING:
+    from pathlib import Path
+
+
+def _get_datadir(module_name: str) -> t.Optional[Path]:
+    import pathlib
+    from importlib.util import find_spec
+
+    spec = find_spec(module_name)
+    if spec is None:
+        return None
+    locations = spec.submodule_search_locations
+    if locations is None:
+        return None
+    return pathlib.Path(locations[0]) / "data"
 
 
 def init(
@@ -7,35 +25,32 @@ def init(
 ) -> None:
     """scaffold"""
     import logging
-    import pathlib
     import shutil
+    import pathlib
     from functools import partial
-    from importlib.util import find_spec
+    from prestring.output import setup_logging
 
     logger = logging.getLogger(__name__)
+    setup_logging(_logger=logger)
 
-    spec = find_spec("egoist")
-    if spec is None:
+    dirpath = _get_datadir("egoist")
+    if dirpath is None:
         return
-    locations = spec.submodule_search_locations
-    if locations is None:
-        return
-    dirpath = pathlib.Path(locations[0]) / "data"
 
     src = dirpath / f"{target}"
     dst = pathlib.Path(root)
-    name = name or "foo"  # xxx
-    logger.info("create %s", dst)
+    name = name or "hello"  # xxx
 
     def _copy(src: str, dst: str) -> t.Any:
         if src.endswith(".tmpl"):
             dst = str(pathlib.Path(dst).with_suffix("")).format(name=name)
-            if "{" in src and "}" in src:
-                with open(dst, "w") as wf:
-                    with open(src) as rf:
-                        content = rf.read().format(name=name)
-                    wf.write(content)
-                return
+        logger.info("[F]\t%s\t%s", "create", dst)
+        if "{" in src and "}" in src:
+            with open(dst, "w") as wf:
+                with open(src) as rf:
+                    content = rf.read().format(name=name)
+                wf.write(content)
+            return
         return shutil.copy2(src, dst, follow_symlinks=True)
 
     if sys.version_info[:2] >= (3, 8):
