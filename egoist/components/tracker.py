@@ -38,7 +38,7 @@ class Tracker:
 
     def get_dependencies(
         self, *, root: t.Union[str, pathlib.Path], relative: bool = False
-    ) -> t.Dict[str, t.List[str]]:
+    ) -> t.Dict[str, t.Dict[str, t.Union[str, t.List[str]]]]:
         root_path = pathlib.Path(root).absolute()
         if not relative:
             return {
