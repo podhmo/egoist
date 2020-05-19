@@ -2,7 +2,9 @@ import typing as t
 import sys
 
 
-def init(*, target: str = "clikit", root: str = ".") -> None:
+def init(
+    *, target: str = "clikit", root: str = ".", name: t.Optional[str] = None
+) -> None:
     """scaffold"""
     import logging
     import pathlib
@@ -22,11 +24,18 @@ def init(*, target: str = "clikit", root: str = ".") -> None:
 
     src = dirpath / f"{target}"
     dst = pathlib.Path(root)
+    name = name or "foo"  # xxx
     logger.info("create %s", dst)
 
     def _copy(src: str, dst: str) -> t.Any:
         if src.endswith(".tmpl"):
-            dst = str(pathlib.Path(dst).with_suffix(""))
+            dst = str(pathlib.Path(dst).with_suffix("")).format(name=name)
+            if "{" in src and "}" in src:
+                with open(dst, "w") as wf:
+                    with open(src) as rf:
+                        content = rf.read().format(name=name)
+                    wf.write(content)
+                return
         return shutil.copy2(src, dst, follow_symlinks=True)
 
     if sys.version_info[:2] >= (3, 8):
@@ -76,8 +85,9 @@ def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
         "target",
         nargs="?",
         default="clikit",
-        choices=["clikit", "structkit", "filekit", "dirkit"],
+        choices=["clikit", "structkit", "filekit", "dirkit", "new-command"],
     )
+    sub_parser.add_argument("--name", default=None, help="")
     sub_parser.set_defaults(subcommand=fn)
 
     activate = logging_setup(parser)
