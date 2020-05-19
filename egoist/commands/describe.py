@@ -26,7 +26,7 @@ def describe(app: App) -> None:
         name: [fullname(x) for x in xs]  # type: ignore
         for name, xs in app.registry.factories.items()
     }
-    d = {"definitions": defs, "factories": factories}
+    d = {"definitions": defs, "components": factories}
     print(json.dumps(d, indent=2, ensure_ascii=False))
 
 
