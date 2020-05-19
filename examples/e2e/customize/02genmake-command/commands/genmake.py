@@ -41,6 +41,11 @@ def genmake(
 def emit(deps: t.Dict[str, t.List[str]]) -> str:
     from prestring.text import Module
 
+    deps = {
+        name: {"task": x["task"], "depends": sorted(x["depends"])}
+        for name, x in deps.items()
+    }
+
     m = Module(indent="\t")
     m.stmt(f"DEP ?= {' '.join(deps.keys())}")
     m.stmt(f"PRE ?= {' '.join(['.pre/' + k.replace('/', '__') for k in deps.keys()])}")
@@ -62,7 +67,7 @@ def emit(deps: t.Dict[str, t.List[str]]) -> str:
             "( $(foreach p,$(PRE),{ test $(p) -nt $(subst __,/,$(patsubst .pre/%,%,$(p))) && cat $(p); }; ) ) | sort | uniq > $(BULK_ACTION) || exit 0"
         )
         m.stmt(
-            """test -n "$$(cat $(BULK_ACTION))" && python definitions.py $$(cat $(BULK_ACTION) | tr '\\n' ' ') || exit 0"""
+            """test -n "$$(cat $(BULK_ACTION))" && NOCHECK=1 python definitions.py $$(cat $(BULK_ACTION) | tr '\\n' ' ') || exit 0"""
         )
     m.sep()
 

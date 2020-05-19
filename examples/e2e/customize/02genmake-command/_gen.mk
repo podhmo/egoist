@@ -11,14 +11,14 @@ default:
 _gen: .pre $(DEP)
 	@echo '**' $(PRE) '**' > /dev/stderr
 	( $(foreach p,$(PRE),{ test $(p) -nt $(subst __,/,$(patsubst .pre/%,%,$(p))) && cat $(p); }; ) ) | sort | uniq > $(BULK_ACTION) || exit 0
-	test -n "$$(cat $(BULK_ACTION))" && python definitions.py $$(cat $(BULK_ACTION) | tr '\n' ' ') || exit 0
+	test -n "$$(cat $(BULK_ACTION))" && NOCHECK=1 python definitions.py $$(cat $(BULK_ACTION) | tr '\n' ' ') || exit 0
 
 # .pre files (sentinel)
-.pre/output__x.yaml: _tools/x-yaml.j2 input/x.csv _tools/gen.py
+.pre/output__x.yaml: _tools/gen.py _tools/x-yaml.j2 input/x.csv
 	echo "generate x -" > $@
-.pre/output__x.go: input/x.csv _tools/gen.py _tools/x-go.j2
+.pre/output__x.go: _tools/gen.py _tools/x-go.j2 input/x.csv
 	echo "generate x -" > $@
-.pre/output__y.go: _tools/gen.py input/root.yaml _tools/y-go.j2
+.pre/output__y.go: _tools/gen.py _tools/y-go.j2 input/root.yaml
 	echo "generate y_go -" > $@
 
 # actual dependencies

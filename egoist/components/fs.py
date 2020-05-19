@@ -64,7 +64,13 @@ def create_fs(*, root: t.Union[pathlib.Path, str]) -> t.ContextManager[FS]:
         verbose = bool(os.environ["VERBOSE"])
     else:
         verbose = True
-    return _TrackedOutput(root=str(root), opener=Module, verbose=verbose)
+    if "NOCHECK" in os.environ:
+        nocheck = bool(os.environ["NOCHECK"])
+    else:
+        nocheck = False
+    return _TrackedOutput(
+        root=str(root), opener=Module, verbose=verbose, nocheck=nocheck
+    )
 
 
 def create_dummy_fs(*, root: t.Union[pathlib.Path, str]) -> t.ContextManager[FS]:
