@@ -19,6 +19,7 @@ def scan(
 ) -> None:
     import contextlib
     import os
+    import json
     from egoist.components.tracker import get_tracker
     from .generate import generate
 
@@ -36,7 +37,7 @@ def scan(
         if out is not None:
             out_port = s.enter_context(open(out, "w"))
 
-        print(deps, file=out_port)
+        print(json.dumps(deps, indent=2, ensure_ascii=False), file=out_port)
 
 
 def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:

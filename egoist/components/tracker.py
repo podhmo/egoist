@@ -11,6 +11,7 @@ NAME = __name__
 class Dependency(tx.TypedDict):
     name: str
     depends: t.Set[t.Union[str, pathlib.Path]]
+    task: str
 
 
 class Tracker:
@@ -21,12 +22,17 @@ class Tracker:
         self,
         name_or_path: t.Union[str, pathlib.Path],
         *,
+        task: str = "",
         depends_on: t.Optional[t.Collection[t.Union[str, pathlib.Path]]]
     ) -> None:
         name = str(name_or_path)
         dependency = self.deps_map.get(name)
         if dependency is None:
-            dependency = self.deps_map[name] = {"name": name, "depends": set()}
+            dependency = self.deps_map[name] = {
+                "name": name,
+                "depends": set(),
+                "task": task,
+            }
         if depends_on:
             dependency["depends"].update(depends_on)
 
@@ -36,15 +42,21 @@ class Tracker:
         root_path = pathlib.Path(root).absolute()
         if not relative:
             return {
-                str((root_path / name)): [str(x) for x in dep["depends"]]
+                str((root_path / name)): {
+                    "task": dep.get("task", ""),
+                    "depends": [str(x) for x in dep["depends"]],
+                }
                 for name, dep in self.deps_map.items()
             }
 
         cwd_path = pathlib.Path().absolute()
         return {
-            str((root_path / name).relative_to(cwd_path)): [
-                str(pathlib.Path(x).relative_to(cwd_path)) for x in dep["depends"]
-            ]
+            str((root_path / name).relative_to(cwd_path)): {
+                "task": dep.get("task", ""),
+                "depends": [
+                    str(pathlib.Path(x).relative_to(cwd_path)) for x in dep["depends"]
+                ],
+            }
             for name, dep in self.deps_map.items()
         }
 

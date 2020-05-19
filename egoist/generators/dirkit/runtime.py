@@ -22,7 +22,7 @@ def create_file(
     with _env.fs.open_file_with_tracking(
         pathlib.Path(_env.fpath) / filename,
         "w",
-        target=create_file,
+        target=_env.fn,
         opener=StringIO,
         depends_on=depends_on,
     ) as env:
