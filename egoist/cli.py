@@ -49,6 +49,9 @@ def init(
         if dst.endswith("definitions.py") and pathlib.Path(dst).exists():
             logger.info("[F]\t%s\t%s", "no change", dst)
             return
+        if dst.endswith("__init__.py") and pathlib.Path(dst).exists():
+            logger.info("[F]\t%s\t%s", "no change", dst)
+            return
 
         logger.info("[F]\t%s\t%s", "create", dst)
         if "{" in src and "}" in src:
