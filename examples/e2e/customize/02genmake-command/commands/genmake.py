@@ -52,17 +52,17 @@ def emit(deps: t.Dict[str, t.List[str]]) -> str:
     m.stmt("# goal task")
     m.stmt("default:")
     with m.scope():
-        m.stmt('CONT="exit 0" $(MAKE) _gen')
+        m.stmt('@CONT="exit 0" $(MAKE) _gen')
     m.sep()
 
-    m.stmt("_gen: $(DEP)")
+    m.stmt("_gen: .pre $(DEP)")
     with m.scope():
         m.stmt("@echo '**' $(PRE) '**' > /dev/stderr")
         m.stmt(
             "( $(foreach p,$(PRE),{ test $(p) -nt $(subst __,/,$(patsubst .pre/%,%,$(p))) && cat $(p); }; ) ) | sort | uniq > $(BULK_ACTION) || exit 0"
         )
         m.stmt(
-            """test -n "$$(cat $(BULK_ACTION))" && python definitions.py $$(cat $(BULK_ACTION) | tr '\n' ' ') || exit 0"""
+            """test -n "$$(cat $(BULK_ACTION))" && python definitions.py $$(cat $(BULK_ACTION) | tr '\\n' ' ') || exit 0"""
         )
     m.sep()
 
