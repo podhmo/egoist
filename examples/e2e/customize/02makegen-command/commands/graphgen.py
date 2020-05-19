@@ -9,7 +9,7 @@ if t.TYPE_CHECKING:
     from argparse import ArgumentParser
 
 
-def scan(
+def graphgen(
     app: App,
     *,
     tasks: t.Optional[t.List[str]] = None,
@@ -19,9 +19,8 @@ def scan(
 ) -> None:
     import contextlib
     import os
-    import json
     from egoist.components.tracker import get_tracker
-    from .generate import generate
+    from egoist.commands.generate import generate
 
     app.commit(dry_run=True)
 
@@ -30,14 +29,25 @@ def scan(
     generate(app, tasks=tasks, rootdir=rootdir)
 
     root_path = get_root_path(app.settings, root=rootdir)
-    deps = get_tracker().get_dependencies(root=root_path, relative=relative)
+    deps_map = get_tracker().get_dependencies(root=root_path, relative=relative)
 
     with contextlib.ExitStack() as s:
         out_port: t.Optional[t.IO[str]] = None
         if out is not None:
             out_port = s.enter_context(open(out, "w"))
+        print(emit(deps_map), file=out_port)
 
-        print(json.dumps(deps, indent=2, ensure_ascii=False), file=out_port)
+
+def emit(deps_map: t.Dict[str, t.List[str]]) -> str:
+    from egoist.internal.graph import Builder
+    from egoist.internal.graph import draw
+
+    b = Builder()
+    for name, deps in deps_map.items():
+        b.add_node(deps["task"], depends=deps["depends"])
+        b.add_node(name, depends=[deps["task"]])
+    g = b.build()
+    return draw.visualize(g, unique=True)
 
 
 def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
@@ -48,6 +58,7 @@ def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
 
 
 def includeme(app: App) -> None:
+    app.include("egoist.components.tracker")
     app.include("egoist.directives.add_subcommand")
-    app.include(".generate")
-    app.add_subcommand(setup, fn=scan)
+    app.include("egoist.commands.generate")
+    app.add_subcommand(setup, fn=graphgen)
