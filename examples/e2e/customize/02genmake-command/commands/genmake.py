@@ -35,8 +35,22 @@ def genmake(
         out_port: t.Optional[t.IO[str]] = None
         if out is not None:
             out_port = s.enter_context(open(out, "w"))
+        print(emit(deps), file=out_port)
 
-        print(deps, file=out_port)
+
+def emit(deps: t.Dict[str, t.List[str]]) -> str:
+    from prestring.text import Module
+
+    m = Module(indent="\t")
+    for name, metadata in deps.items():
+        args = metadata["depends"]
+        task = metadata["task"]
+        m.stmt(f"{name}: {' '.join(args)}")
+        with m.scope():
+            # task
+            m.stmt(f"python definitions.py generate {task}")
+        m.sep()
+    return str(m)
 
 
 def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
