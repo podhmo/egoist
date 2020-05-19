@@ -1,32 +1,63 @@
+from __future__ import annotations
 import typing as t
+
 import sys
 
+if t.TYPE_CHECKING:
+    from pathlib import Path
 
-def init(*, target: str = "clikit", root: str = ".") -> None:
-    """scaffold"""
-    import logging
+
+def _get_datadir(module_name: str) -> t.Optional[Path]:
     import pathlib
-    import shutil
-    from functools import partial
     from importlib.util import find_spec
 
-    logger = logging.getLogger(__name__)
-
-    spec = find_spec("egoist")
+    spec = find_spec(module_name)
     if spec is None:
-        return
+        return None
     locations = spec.submodule_search_locations
     if locations is None:
+        return None
+    return pathlib.Path(locations[0]) / "data"
+
+
+def init(
+    *, target: str = "clikit", root: str = ".", name: t.Optional[str] = None
+) -> None:
+    """scaffold"""
+    import logging
+    import shutil
+    import pathlib
+    from functools import partial
+    from prestring.output import setup_logging
+
+    logger = logging.getLogger(__name__)
+    setup_logging(_logger=logger)
+
+    dirpath = _get_datadir("egoist")
+    if dirpath is None:
         return
-    dirpath = pathlib.Path(locations[0]) / "data"
 
     src = dirpath / f"{target}"
     dst = pathlib.Path(root)
-    logger.info("create %s", dst)
+    name = name or "foo"  # xxx
+    params: t.Dict[str, str] = {"name": name or "foo", "definitions": "definitions"}
 
     def _copy(src: str, dst: str) -> t.Any:
         if src.endswith(".tmpl"):
-            dst = str(pathlib.Path(dst).with_suffix(""))
+            dst = str(pathlib.Path(dst).with_suffix("")).format(**params)
+
+        if dst.endswith("definitions.py") and pathlib.Path(dst).exists():
+            logger.info("[F]\t%s\t%s", "no change", dst)
+            return
+
+        logger.info("[F]\t%s\t%s", "create", dst)
+        if "{" in src and "}" in src:
+            with open(dst, "w") as wf:
+                with open(src) as rf:
+                    content = rf.read().format(**params)
+                wf.write(content)
+            return
+
         return shutil.copy2(src, dst, follow_symlinks=True)
 
     if sys.version_info[:2] >= (3, 8):
@@ -76,8 +107,16 @@ def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
         "target",
         nargs="?",
         default="clikit",
-        choices=["clikit", "structkit", "filekit", "dirkit"],
+        choices=[
+            "clikit",
+            "structkit",
+            "filekit",
+            "dirkit",
+            "new-command",
+            "new-directive",
+        ],
     )
+    sub_parser.add_argument("--name", default=None, help="")
     sub_parser.set_defaults(subcommand=fn)
 
     activate = logging_setup(parser)

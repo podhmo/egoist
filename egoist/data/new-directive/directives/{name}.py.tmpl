@@ -1,0 +1,34 @@
+import typing as t
+from egoist.app import App
+from egoist.types import AnyFunction
+
+
+def define_{name}(app: App) -> None:
+    import sys
+
+    name = "define_{name}"
+    seen = False
+
+    print("** on decorator", file=sys.stderr)
+
+    def _register_{name}(app: App, {name}: t.Any) -> AnyFunction:
+        nonlocal seen
+        if not seen:
+            seen = True
+
+        def _register() -> AnyFunction:
+            name = {name}.__name__
+            print("*** {{name}}, on register".format(name=name), file=sys.stderr)
+
+        app.action((name, {name}.__name__), _register)
+        return _register
+
+    app.add_directive(name, _register_{name})
+
+    def _include() -> None:
+        nonlocal seen
+        if seen:
+            print("** on include", file=sys.stderr)
+
+    # for conflict check
+    app.action(name, _include)
