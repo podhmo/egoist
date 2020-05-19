@@ -9,7 +9,7 @@ if t.TYPE_CHECKING:
     from argparse import ArgumentParser
 
 
-def genmake(
+def makegen(
     app: App,
     *,
     tasks: t.Optional[t.List[str]] = None,
@@ -108,4 +108,4 @@ def includeme(app: App) -> None:
     app.include("egoist.components.tracker")
     app.include("egoist.directives.add_subcommand")
     app.include("egoist.commands.generate")
-    app.add_subcommand(setup, fn=genmake)
+    app.add_subcommand(setup, fn=makegen)

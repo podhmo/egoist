@@ -5,7 +5,7 @@ settings: SettingsDict = {"rootdir": "", "here": __file__}
 app = create_app(settings)
 
 
-app.include("commands.genmake")
+app.include("commands.makegen")
 app.include("egoist.directives:define_dir")
 app.include("egoist.directives:define_file")
 
