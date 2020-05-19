@@ -18,7 +18,7 @@ class Module(_Module):
         self.stmt("}")
 
 
-def visualize(g: Graph) -> Module:
+def visualize(g: Graph, *, unique: bool = False) -> Module:
     """generate dot file (graphviz)"""
     m = Module()
     with m.block(f"digraph {g.name}"):
@@ -33,8 +33,14 @@ def visualize(g: Graph) -> Module:
         m.stmt("")
 
         # edges
+        seen: t.Set[t.Tuple[int, int]] = set()
         m.stmt("// edges")
         for node in g.nodes:
             for dep in node.depends:
+                path = (dep.uid, node.uid)
+                if unique and path in seen:
+                    continue
+                seen.add(path)
                 m.stmt(f"g{dep.uid} -> g{node.uid};")
+
     return m
