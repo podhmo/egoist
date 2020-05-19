@@ -39,18 +39,25 @@ def init(
 
     src = dirpath / f"{target}"
     dst = pathlib.Path(root)
-    name = name or "hello"  # xxx
+    name = name or "foo"  # xxx
+    params: t.Dict[str, str] = {"name": name or "foo", "definitions": "definitions"}
 
     def _copy(src: str, dst: str) -> t.Any:
         if src.endswith(".tmpl"):
-            dst = str(pathlib.Path(dst).with_suffix("")).format(name=name)
+            dst = str(pathlib.Path(dst).with_suffix("")).format(**params)
+
+        if dst.endswith("definitions.py") and pathlib.Path(dst).exists():
+            logger.info("[F]\t%s\t%s", "no change", dst)
+            return
+
         logger.info("[F]\t%s\t%s", "create", dst)
         if "{" in src and "}" in src:
             with open(dst, "w") as wf:
                 with open(src) as rf:
-                    content = rf.read().format(name=name)
+                    content = rf.read().format(**params)
                 wf.write(content)
             return
+
         return shutil.copy2(src, dst, follow_symlinks=True)
 
     if sys.version_info[:2] >= (3, 8):
