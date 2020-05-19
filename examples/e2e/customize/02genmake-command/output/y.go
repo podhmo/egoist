@@ -1,1 +1,1 @@
-_tools/gen.py ['y-go', '_tools/y-go.j2', 'input/root.yaml']
+_tools/gen.py ['gen.py', 'y-go.j2', 'root.yaml']
