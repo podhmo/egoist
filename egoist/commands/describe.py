@@ -26,7 +26,20 @@ def describe(app: App) -> None:
         name: [fullname(x) for x in xs]  # type: ignore
         for name, xs in app.registry.factories.items()
     }
-    d = {"definitions": defs, "components": factories}
+
+    empty_context = app.context_factory()
+    current_directives = set(
+        name for name, attr in app.context.__dict__.items() if callable(attr)
+    )
+    append_directives = current_directives.difference(empty_context.__dict__.keys())
+    append_directives = append_directives.difference(["run"])
+    d = {
+        "definitions": defs,
+        "components": factories,
+        "directives": {
+            name: fullname(getattr(app.context, name)) for name in append_directives
+        },
+    }
     print(json.dumps(d, indent=2, ensure_ascii=False))
 
 
