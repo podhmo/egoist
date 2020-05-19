@@ -3,27 +3,27 @@ from egoist.app import App
 from egoist.types import AnyFunction
 
 
-def define_{name}(app: App) -> None:
+def define_something(app: App) -> None:
     import sys
 
-    name = "define_{name}"
+    name = "define_something"
     seen = False
 
     print("** on decorator", file=sys.stderr)
 
-    def _register_{name}(app: App, {name}: t.Any) -> AnyFunction:
+    def _register_something(app: App, something: t.Any) -> AnyFunction:
         nonlocal seen
         if not seen:
             seen = True
 
         def _register() -> AnyFunction:
-            name = {name}.__name__
-            print("*** {{name}}, on register".format(name=name), file=sys.stderr)
+            name = something.__name__
+            print("*** {name}, on register".format(name=name), file=sys.stderr)
 
-        app.action((name, {name}.__name__), _register)
+        app.action((name, something.__name__), _register)
         return _register
 
-    app.add_directive(name, _register_{name})
+    app.add_directive(name, _register_something)
 
     def _include() -> None:
         nonlocal seen
