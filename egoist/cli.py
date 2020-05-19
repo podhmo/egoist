@@ -85,7 +85,14 @@ def main(argv: t.Optional[t.List[str]] = None) -> t.Any:
         "target",
         nargs="?",
         default="clikit",
-        choices=["clikit", "structkit", "filekit", "dirkit", "new-command"],
+        choices=[
+            "clikit",
+            "structkit",
+            "filekit",
+            "dirkit",
+            "new-command",
+            "new-directive",
+        ],
     )
     sub_parser.add_argument("--name", default=None, help="")
     sub_parser.set_defaults(subcommand=fn)

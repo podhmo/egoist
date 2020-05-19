@@ -1,4 +1,4 @@
-default: 00 01 02 03 04
+default: 00 01 02 03 04 05
 
 00:
 	cd $(shell echo $@*/) && rm -rf * && egoist init
@@ -9,4 +9,6 @@ default: 00 01 02 03 04
 03:
 	cd $(shell echo $@*/) && rm -rf * && egoist init dirkit
 04:
-	cd $(shell echo $@*/) && rm -rf * && egoist init new-command --name=foo
+	cd $(shell echo $@*/) && egoist init new-command --name=foo
+05:
+	cd $(shell echo $@*/) && egoist init new-directive --name=foo
