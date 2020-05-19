@@ -44,7 +44,9 @@ def emit(deps: t.Dict[str, t.List[str]]) -> str:
     m = Module(indent="\t")
     m.stmt(f"DEP ?= {' '.join(deps.keys())}")
     m.stmt(f"PRE ?= {' '.join(['.pre/' + k.replace('/', '__') for k in deps.keys()])}")
+    m.sep()
     m.stmt('CONT ?= PRE=$< DEP="" $(MAKE) _gen')
+    m.stmt("BULK_ACTION = .pre/bulk.action")
     m.sep()
 
     m.stmt("# goal task")
@@ -57,18 +59,24 @@ def emit(deps: t.Dict[str, t.List[str]]) -> str:
     with m.scope():
         m.stmt("@echo '**' $(PRE) '**' > /dev/stderr")
         m.stmt(
-            "python definitions.py $(shell { $(foreach p,$(PRE),cat $(p);) } | sort | uniq | tr '\\n' ' ')"
+            "( $(foreach p,$(PRE),{ test $(p) -nt $(subst __,/,$(patsubst .pre/%,%,$(p))) && cat $(p); }; ) ) | sort | uniq > $(BULK_ACTION) || exit 0"
+        )
+        m.stmt(
+            """test -n "$$(cat $(BULK_ACTION))" && python definitions.py $$(cat $(BULK_ACTION) | tr '\n' ' ') || exit 0"""
         )
     m.sep()
 
+    m.stmt("# .pre files (sentinel)")
     for name, metadata in deps.items():
         task = metadata["task"]
         args = metadata["depends"]
         pre_file = f".pre/{name.replace('/', '__')}"
-        m.stmt(f"{pre_file}: .pre {' '.join(args)}")
+        m.stmt(f"{pre_file}: {' '.join(args)}")
         with m.scope():
-            m.stmt(f'echo "generate {task} -"> $@')
+            m.stmt(f'echo "generate {task} -" > $@')
     m.sep()
+
+    m.stmt("# actual dependencies")
     for name, metadata in deps.items():
         task = metadata["task"]
         args = metadata["depends"]
