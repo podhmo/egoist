@@ -1,1 +1,6 @@
-{'cmd/wire_example/main.go': []}
+{
+  "cmd/wire_example/main.go": {
+    "task": "wire_example",
+    "depends": []
+  }
+}

@@ -1,1 +1,6 @@
-{'models/models.go': []}
+{
+  "models/models.go": {
+    "task": "models__models",
+    "depends": []
+  }
+}

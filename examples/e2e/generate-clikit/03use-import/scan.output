@@ -1,1 +1,6 @@
-{'cmd/hello/main.go': []}
+{
+  "cmd/hello/main.go": {
+    "task": "cmd__hello",
+    "depends": []
+  }
+}

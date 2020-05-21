@@ -6,11 +6,11 @@ digraph G {
     g3 [label="y_go", shape=oval];
     g4 [label="output/y.go", shape=oval];
     g5 [label="_tools/gen.py", shape=oval];
-    g6 [label="input/x.csv", shape=oval];
-    g7 [label="_tools/x-yaml.j2", shape=oval];
+    g6 [label="_tools/x-yaml.j2", shape=oval];
+    g7 [label="input/x.csv", shape=oval];
     g8 [label="_tools/x-go.j2", shape=oval];
-    g9 [label="input/root.yaml", shape=oval];
-    g10 [label="_tools/y-go.j2", shape=oval];
+    g9 [label="_tools/y-go.j2", shape=oval];
+    g10 [label="input/root.yaml", shape=oval];
 
     // edges
     g5 -> g0;

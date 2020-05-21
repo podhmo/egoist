@@ -1,1 +1,10 @@
-{'cmd/hello/main.go': [], 'cmd/byebye/main.go': []}
+{
+  "cmd/hello/main.go": {
+    "task": "hello",
+    "depends": []
+  },
+  "cmd/byebye/main.go": {
+    "task": "byebye",
+    "depends": []
+  }
+}
