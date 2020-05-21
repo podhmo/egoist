@@ -6,7 +6,6 @@ import typing_inspect as ti
 import dataclasses
 from metashape.declarative import MISSING
 from metashape import typeinfo
-from metashape.analyze.walker import Walker as MetashapeWalker  # xxx
 from metashape.analyze.config import Config as MetashapeConfig  # xxx
 from metashape.runtime import get_walker as _get_metashape_walker  # xxx
 from metashape.types import Kind as NodeKind
@@ -17,17 +16,17 @@ from egoist.go.resolver import Resolver
 from egoist.internal.prestringutil import Module
 from . import metadata as metadata_
 
+if t.TYPE_CHECKING:
+    from metashape.analyze.walker import Walker as MetashapeWalker  # xxx
+
 
 def walk(
-    ctx: Context,
-    classes: t.List[t.Type[t.Any]],
+    w: MetashapeWalker,
     *,
+    metadata_handler: metadata_.MetadataHandlerFunction,
     _nonetype: t.Type[t.Any] = type(None),
     kinds: t.Optional[t.List[t.Optional[NodeKind]]] = None,
 ) -> t.Iterator[Item]:
-    metadata_handler = ctx.metadata_handler
-    w = ctx.get_metashape_walker(classes)
-
     kinds = kinds or ["object", None, "enum"]
     for cls in w.walk(kinds=kinds):
         origin = getattr(cls, "__origin__", None)
