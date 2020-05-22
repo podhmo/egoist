@@ -11,19 +11,19 @@ if t.TYPE_CHECKING:
 def describe(app: App) -> None:
     import json
     import inspect
-    from egoist.langhelpers import fullname
+    from egoist.langhelpers import get_fullname_of_type, get_fullname_of_callable
 
     app.commit(dry_run=False)
 
     defs = {}
     for kit, fns in app.registry.generators.items():
         for fn in fns:
-            name = f"{fn.__module__}.{fn.__name__}".replace("__main__.", "")
+            name = get_fullname_of_callable(fn)
             summary = (inspect.getdoc(fn) or "").strip().split("\n", 1)[0]
             defs[name] = {"doc": summary, "generator": kit}
 
     factories = {
-        name: [fullname(x) for x in xs]  # type: ignore
+        name: [get_fullname_of_type(x) for x in xs]  # type: ignore
         for name, xs in app.registry.factories.items()
     }
 
@@ -37,7 +37,8 @@ def describe(app: App) -> None:
         "definitions": defs,
         "components": factories,
         "directives": {
-            name: fullname(getattr(app.context, name)) for name in append_directives
+            name: get_fullname_of_type(getattr(app.context, name))
+            for name in append_directives
         },
     }
     print(json.dumps(d, indent=2, ensure_ascii=False))

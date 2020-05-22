@@ -5,6 +5,7 @@ import pathlib
 from egoist.app import App
 from egoist import types
 from egoist import runtime
+from egoist.langhelpers import get_fullname_of_callable
 
 NAME = __name__
 
@@ -24,7 +25,7 @@ class Tracker:
         name_or_path: t.Union[str, pathlib.Path],
         *,
         task: t.Optional[types.Command] = None,
-        depends_on: t.Optional[t.Collection[t.Union[str, pathlib.Path]]]
+        depends_on: t.Optional[t.Collection[t.Union[str, pathlib.Path]]],
     ) -> None:
         name = str(name_or_path)
         dependency = self.deps_map.get(name)
@@ -38,13 +39,19 @@ class Tracker:
             dependency["depends"].update(depends_on)
 
     def get_dependencies(
-        self, *, root: t.Union[str, pathlib.Path], relative: bool = False
+        self,
+        *,
+        root: t.Union[str, pathlib.Path],
+        relative: bool = False,
+        get_name: t.Callable[
+            [t.Optional[t.Callable[..., t.Any]]], str
+        ] = get_fullname_of_callable,
     ) -> t.Dict[str, t.Dict[str, t.Union[str, t.List[str]]]]:
         root_path = pathlib.Path(root).absolute()
         if not relative:
             return {
                 str((root_path / name)): {
-                    "task": getattr(dep.get("task") or object, "__name__", ""),
+                    "task": get_name(dep.get("task")),
                     "depends": [str(x) for x in dep["depends"]],
                 }
                 for name, dep in self.deps_map.items()
@@ -53,7 +60,7 @@ class Tracker:
         cwd_path = pathlib.Path().absolute()
         return {
             str((root_path / name).relative_to(cwd_path)): {
-                "task": getattr(dep.get("task") or object, "__name__", ""),
+                "task": get_name(dep.get("task")),
                 "depends": [
                     str(pathlib.Path(x).relative_to(cwd_path)) for x in dep["depends"]
                 ],
