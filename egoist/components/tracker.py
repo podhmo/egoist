@@ -52,7 +52,7 @@ class Tracker:
             return {
                 str((root_path / name)): {
                     "task": get_name(dep.get("task")),
-                    "depends": [str(x) for x in dep["depends"]],
+                    "depends": sorted([str(x) for x in dep["depends"]]),
                 }
                 for name, dep in self.deps_map.items()
             }
@@ -61,9 +61,9 @@ class Tracker:
         return {
             str((root_path / name).relative_to(cwd_path)): {
                 "task": get_name(dep.get("task")),
-                "depends": [
-                    str(pathlib.Path(x).relative_to(cwd_path)) for x in dep["depends"]
-                ],
+                "depends": sorted(
+                    [str(pathlib.Path(x).relative_to(cwd_path)) for x in dep["depends"]]
+                ),
             }
             for name, dep in self.deps_map.items()
         }
