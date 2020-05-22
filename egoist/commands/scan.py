@@ -32,7 +32,6 @@ def scan(
     generate(app, tasks=tasks, rootdir=rootdir)
 
     root_path = get_root_path(app.settings, root=rootdir)
-    deps = get_tracker().get_dependencies(root=root_path, relative=relative)
 
     with contextlib.ExitStack() as s:
         out_port: t.Optional[t.IO[str]] = None
@@ -41,7 +40,10 @@ def scan(
 
         if rm:
             from collections import defaultdict
+
             d = defaultdict(list)
+            deps = get_tracker().get_dependencies(root=root_path, relative=relative)
+
             for fname, data in deps.items():
                 d[data["task"]].append(fname)
             for task, fnames in d.items():
@@ -49,6 +51,7 @@ def scan(
                 for fname in fnames:
                     print(f"rm {fname}", file=out_port)
         else:
+            deps = get_tracker().get_dependencies(root=root_path, relative=relative)
             print(json.dumps(deps, indent=2, ensure_ascii=False), file=out_port)
 
 

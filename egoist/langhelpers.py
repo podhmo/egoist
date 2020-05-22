@@ -28,6 +28,13 @@ def get_fullname_of_callable(fn: t.Optional[t.Callable[..., t.Any]]) -> str:
     return f"{fn.__module__}.{fn.__name__}".replace("__main__.", "")
 
 
+def get_position_of_callable(fn: t.Optional[t.Callable[..., t.Any]]) -> str:
+    if fn is None:
+        return "-"
+    code = fn.__code__
+    return f"{code.co_filename}L{code.co_firstlineno} -- {code.co_name}"
+
+
 def get_fullname_of_type(typ: t.Type[t.Any]) -> str:
     typ = get_origin_type(typ)
     return f"{typ.__module__}.{typ.__name__}"
