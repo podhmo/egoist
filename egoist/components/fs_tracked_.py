@@ -37,7 +37,7 @@ class _TrackedFS(MiniFS[Content]):
         depends_on: t.Optional[t.Collection[str]] = None
     ) -> t.Iterator[runtime.Env]:
         fpath = str(fpath)
-        get_tracker().track(fpath, task=target.__name__, depends_on=depends_on)
+        get_tracker().track(fpath, task=target, depends_on=depends_on)
 
         with self.open(fpath, mode, opener=opener) as m:
             c = runtime.get_current_context()
@@ -56,7 +56,6 @@ class _TrackedFS(MiniFS[Content]):
         depends_on: t.Optional[t.Collection[str]] = None
     ) -> t.Iterator[runtime.Env]:
         fpath = str(fpath)
-        # get_tracker().track(fpath, depends_on=depends_on)
 
         c = runtime.get_current_context()
         env = runtime.Env(_content="", fn=target, fpath=fpath, fs=self)

@@ -3,6 +3,7 @@ import typing as t
 import typing_extensions as tx
 import pathlib
 from egoist.app import App
+from egoist import types
 from egoist import runtime
 
 NAME = __name__
@@ -11,7 +12,7 @@ NAME = __name__
 class Dependency(tx.TypedDict):
     name: str
     depends: t.Set[t.Union[str, pathlib.Path]]
-    task: str
+    task: t.Optional[types.Command]
 
 
 class Tracker:
@@ -22,7 +23,7 @@ class Tracker:
         self,
         name_or_path: t.Union[str, pathlib.Path],
         *,
-        task: str = "",
+        task: t.Optional[types.Command] = None,
         depends_on: t.Optional[t.Collection[t.Union[str, pathlib.Path]]]
     ) -> None:
         name = str(name_or_path)
@@ -43,7 +44,7 @@ class Tracker:
         if not relative:
             return {
                 str((root_path / name)): {
-                    "task": dep.get("task", ""),
+                    "task": getattr(dep.get("task") or object, "__name__", ""),
                     "depends": [str(x) for x in dep["depends"]],
                 }
                 for name, dep in self.deps_map.items()
@@ -52,7 +53,7 @@ class Tracker:
         cwd_path = pathlib.Path().absolute()
         return {
             str((root_path / name).relative_to(cwd_path)): {
-                "task": dep.get("task", ""),
+                "task": getattr(dep.get("task") or object, "__name__", ""),
                 "depends": [
                     str(pathlib.Path(x).relative_to(cwd_path)) for x in dep["depends"]
                 ],

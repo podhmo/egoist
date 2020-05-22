@@ -29,7 +29,7 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
                         env.fnspec.argspec.kwonlydefaults or {}
                     ).items()
                 }
-                get_tracker().track(fpath, depends_on=kwargs.values())
+                get_tracker().track(fpath, task=fn, depends_on=kwargs.values())
                 fn(**kwargs)
 
 
