@@ -16,10 +16,12 @@ def scan(
     rootdir: t.Optional[str] = None,
     out: t.Optional[str] = None,
     relative: bool = True,
+    rm: bool = False,
 ) -> None:
     import contextlib
     import os
     import json
+    import sys
     from egoist.components.tracker import get_tracker
     from .generate import generate
 
@@ -37,13 +39,24 @@ def scan(
         if out is not None:
             out_port = s.enter_context(open(out, "w"))
 
-        print(json.dumps(deps, indent=2, ensure_ascii=False), file=out_port)
+        if rm:
+            from collections import defaultdict
+            d = defaultdict(list)
+            for fname, data in deps.items():
+                d[data["task"]].append(fname)
+            for task, fnames in d.items():
+                print(f"# {task}", file=sys.stderr)
+                for fname in fnames:
+                    print(f"rm {fname}", file=out_port)
+        else:
+            print(json.dumps(deps, indent=2, ensure_ascii=False), file=out_port)
 
 
 def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
     sub_parser.add_argument("--rootdir", required=False, help="-")
     sub_parser.add_argument("tasks", nargs="*", choices=app.registry._task_list)
     sub_parser.add_argument("--out")
+    sub_parser.add_argument("--rm", action="store_true")
     sub_parser.set_defaults(subcommand=partial(fn, app))
 
 
