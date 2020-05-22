@@ -54,7 +54,7 @@ class Tracker:
                     "task": get_name(dep.get("task")),
                     "depends": [str(x) for x in dep["depends"]],
                 }
-                for name, dep in self.deps_map.items()
+                for name, dep in sorted(self.deps_map.items())
             }
 
         cwd_path = pathlib.Path().absolute()
@@ -65,7 +65,7 @@ class Tracker:
                     str(pathlib.Path(x).relative_to(cwd_path)) for x in dep["depends"]
                 ],
             }
-            for name, dep in self.deps_map.items()
+            for name, dep in sorted(self.deps_map.items())
         }
 
 
