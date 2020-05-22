@@ -20,7 +20,10 @@ class SubApp:
         return _register
 
     def includeme(self, app: App):
+        seen = app.imported
         for path in self.requires:
+            if path in seen:
+                continue
             app.include(path)
 
         for name, args, kwargs, task in self.registered:

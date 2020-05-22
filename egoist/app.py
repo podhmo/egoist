@@ -62,6 +62,10 @@ class Context(_Context):
         return Registry(settings=t.cast(SettingsDict, self.settings))
 
     @reify
+    def imported(self) -> t.Set[t.Union[str, t.Callable[..., t.Any]]]:
+        return set()  # cache for SubApp's includeme
+
+    @reify
     def cli_parser(self) -> ArgumentParser:
         import argparse
 
@@ -83,6 +87,10 @@ class App(_Configurator):
     @property
     def registry(self) -> Registry:
         return self.context.registry  # type: ignore
+
+    @property
+    def imported(self) -> t.Set[t.Union[str, t.Callable[..., t.Any]]]:
+        return self.context.imported
 
     @property
     def cli_parser(self) -> ArgumentParser:
