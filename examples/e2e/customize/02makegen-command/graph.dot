@@ -5,12 +5,12 @@ digraph G {
     g2 [label="output/x.go", shape=oval];
     g3 [label="y_go", shape=oval];
     g4 [label="output/y.go", shape=oval];
-    g5 [label="_tools/gen.py", shape=oval];
-    g6 [label="_tools/x-yaml.j2", shape=oval];
-    g7 [label="input/x.csv", shape=oval];
+    g5 [label="input/x.csv", shape=oval];
+    g6 [label="_tools/gen.py", shape=oval];
+    g7 [label="_tools/x-yaml.j2", shape=oval];
     g8 [label="_tools/x-go.j2", shape=oval];
-    g9 [label="_tools/y-go.j2", shape=oval];
-    g10 [label="input/root.yaml", shape=oval];
+    g9 [label="input/root.yaml", shape=oval];
+    g10 [label="_tools/y-go.j2", shape=oval];
 
     // edges
     g5 -> g0;
@@ -19,8 +19,8 @@ digraph G {
     g8 -> g0;
     g0 -> g1;
     g0 -> g2;
-    g5 -> g3;
     g9 -> g3;
+    g6 -> g3;
     g10 -> g3;
     g3 -> g4;
 }
