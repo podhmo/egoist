@@ -6,7 +6,6 @@ app = create_app(settings)
 
 
 app.include("commands.makegen")
-app.include("commands.graphgen")
 app.include("egoist.directives:define_dir")
 app.include("egoist.directives:define_file")
 
