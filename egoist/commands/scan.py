@@ -51,29 +51,10 @@ def scan(
         deps = get_tracker().get_dependencies(root=root_path, relative=relative)
         if rm:
             _dump_as_rm_scripts(deps, output=out_port)
-            return
         elif graph:
-            _dump_as_graph(deps, output=out_port)
+            _dump_as_graph(deps, output=out_port, browse=browse)
         else:
             _dump_as_json(deps, output=out_port)
-            return
-
-    if graph and browse:
-        attrname = "name"
-        if hasattr(out_port, attrname):
-            import shutil
-            import sys
-
-            filename = getattr(out_port, attrname)
-            print("write {}...".format(filename), file=sys.stderr)
-
-            if shutil.which("dot"):
-                import subprocess
-
-                subprocess.run(["dot", "-Tsvg", "-O", filename], check=True)
-                # for mac
-                if shutil.which("open"):
-                    subprocess.run(["open", "{}.svg".format(filename)])
 
 
 def _dump_as_rm_scripts(
@@ -99,9 +80,11 @@ def _dump_as_json(deps: DependencyMap, *, output: t.Optional[t.IO[str]] = None) 
 
 
 def _dump_as_graph(
-    deps_map: DependencyMap, *, output: t.Optional[t.IO[str]] = None,
+    deps_map: DependencyMap,
+    *,
+    output: t.Optional[t.IO[str]] = None,
+    browse: bool = False,
 ) -> None:
-    import sys
     from egoist.internal.graph import Builder
     from egoist.internal.graph import draw
 
@@ -111,6 +94,27 @@ def _dump_as_graph(
         b.add_node(name, depends=[deps["task"]])  # type: ignore
     g = b.build()
     print(draw.visualize(g, unique=True), file=output)
+
+    if browse:
+        import atexit
+
+        @atexit.register
+        def callback() -> None:
+            attrname = "name"
+            if hasattr(output, attrname):
+                import shutil
+                import sys
+
+                filename = getattr(output, attrname)
+                print("write {}...".format(filename), file=sys.stderr)
+
+                if shutil.which("dot"):
+                    import subprocess
+
+                    subprocess.run(["dot", "-Tsvg", "-O", filename], check=True)
+                    # for mac
+                    if shutil.which("open"):
+                        subprocess.run(["open", "{}.svg".format(filename)])
 
 
 def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
