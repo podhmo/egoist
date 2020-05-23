@@ -295,4 +295,5 @@ more details is [here](../examples/e2e/generate-clikit/04use-di).
 ## todo
 
 - [structkit](../examples/e2e/generate-structkit)
-
+- [filekit, dirkit](../examples/e2e/generate-filekit)
+- [subapp - multiple module](../examples/e2e/subapp)
