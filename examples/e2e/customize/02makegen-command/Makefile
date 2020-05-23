@@ -3,7 +3,7 @@ makegen:
 	python definitions.py makegen | tee _gen.mk
 
 graphgen:
-	python definitions.py graphgen | tee graph.dot
+	python definitions.py scan --graph | tee graph.dot
 
 do: makegen graphgen
 
