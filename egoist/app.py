@@ -14,7 +14,7 @@ if t.TYPE_CHECKING:
     import pathlib
     from argparse import ArgumentParser
 
-
+AnyFunction = t.Callable[..., t.Any]
 logger = logging.getLogger(__name__)
 
 
@@ -169,6 +169,57 @@ def create_app(settings: SettingsDict) -> App:
     app.include("egoist.commands.generate")
     app.include("egoist.commands.scan")
     return app
+
+
+class SubApp:
+    def __init__(self) -> None:
+        self.registered: t.List[
+            t.Tuple[
+                str, t.Tuple[t.Any, ...], t.Dict[str, t.Any], t.Callable[..., t.Any]
+            ]
+        ] = []
+        self.requires: t.Set[t.Union[str, t.Callable[..., t.Any]]] = set()
+
+    def include(self, path: str) -> None:
+        self.requires.add(path)
+
+    def includeme(self, app: App) -> None:
+        seen = app.imported
+        for path in self.requires:
+            if path in seen:
+                continue
+            app.include(path)
+
+        for name, args, kwargs, task in self.registered:
+            get_directive = getattr(app, name)
+            directive = get_directive(*args, *kwargs)
+            directive(task)
+
+    # TODO: omit (temporary implementation for supporting directives)
+    def __getattr__(self, name: str) -> t.Callable[..., AnyFunction]:
+        def _register(*args: t.Any, **kwargs: t.Any) -> AnyFunction:
+            if args and callable(args[-1]):
+                task: AnyFunction = args[-1]
+                args = args[:-1]
+                self.registered.append((name, args, kwargs, task))
+                return task
+            from functools import partial
+
+            return partial(_register, *args, **kwargs)
+
+        return _register
+
+
+def create_subapp(*, _depth: int = 1) -> SubApp:
+    import sys
+
+    subapp = SubApp()
+
+    # black magic: register includeme automatically
+    f = sys._getframe(_depth)
+    if "includeme" not in f.f_globals:
+        f.f_globals["includeme"] = subapp.includeme
+    return subapp
 
 
 def parse_args(
