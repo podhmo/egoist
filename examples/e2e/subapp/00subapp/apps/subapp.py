@@ -1,6 +1,7 @@
 from __future__ import annotations
 import typing as t
 
+
 AnyFunction = t.Callable[..., t.Any]
 if t.TYPE_CHECKING:
     from egoist.app import App
@@ -30,3 +31,15 @@ class SubApp:
             get_directive = getattr(app, name)
             directive = get_directive(*args, *kwargs)
             directive(task)
+
+
+def create_subapp(*, _depth: int = 1) -> SubApp:
+    import sys
+
+    subapp = SubApp()
+
+    # black magic: register includeme automatically
+    f = sys._getframe(_depth)
+    if "includeme" not in f.f_globals:
+        f.f_globals["includeme"] = subapp.includeme
+    return subapp
