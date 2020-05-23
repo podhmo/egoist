@@ -1,10 +1,15 @@
 package todo
 
-import "time"
+import (
+	"encoding/json"
+	"os"
+	"time"
+)
 
 var (
-	Data = []Todo{}
-	Now  = time.Now
+	Data     = []Todo{}
+	Now      = time.Now
+	Filename = "todo.json"
 )
 
 type Todo struct {
@@ -21,4 +26,27 @@ func Add(content string) {
 
 func List() []Todo {
 	return Data
+}
+
+func Load() error {
+	f, err := os.Open(Filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return Save()
+		}
+		return err
+	}
+	defer f.Close()
+	decoder := json.NewDecoder(f)
+	return decoder.Decode(&Data)
+}
+
+func Save() error {
+	f, err := os.Create(Filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	encoder := json.NewEncoder(f)
+	return encoder.Encode(Data)
 }
