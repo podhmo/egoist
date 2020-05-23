@@ -1,0 +1,38 @@
+{
+  "output/hello/foo.json": {
+    "task": "apps.hello:output__hello",
+    "depends": [
+      "apps/hello/input/hello.tmpl"
+    ]
+  },
+  "output/hello/bar.json": {
+    "task": "apps.hello:output__hello",
+    "depends": [
+      "apps/hello/input/hello.tmpl"
+    ]
+  },
+  "output/hello/boo.json": {
+    "task": "apps.hello:output__hello",
+    "depends": [
+      "apps/hello/input/hello.tmpl"
+    ]
+  },
+  "output/byebye/foo.json": {
+    "task": "apps.byebye:output",
+    "depends": [
+      "apps/byebye/input/byebye.tmpl"
+    ]
+  },
+  "output/byebye/bar.json": {
+    "task": "apps.byebye:output",
+    "depends": [
+      "apps/byebye/input/byebye.tmpl"
+    ]
+  },
+  "output/byebye/boo.json": {
+    "task": "apps.byebye:output",
+    "depends": [
+      "apps/byebye/input/byebye.tmpl"
+    ]
+  }
+}

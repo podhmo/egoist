@@ -25,7 +25,7 @@ class reify(t.Generic[T]):
 def get_fullname_of_callable(fn: t.Optional[t.Callable[..., t.Any]]) -> str:
     if fn is None:
         return ""
-    return f"{fn.__module__}.{fn.__name__}".replace("__main__.", "")
+    return f"{fn.__module__}:{fn.__name__}".replace("__main__:", "")
 
 
 def get_position_of_callable(fn: t.Optional[t.Callable[..., t.Any]]) -> str:

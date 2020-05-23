@@ -14,7 +14,7 @@ if t.TYPE_CHECKING:
     import pathlib
     from argparse import ArgumentParser
 
-
+AnyFunction = t.Callable[..., t.Any]
 logger = logging.getLogger(__name__)
 
 
@@ -62,6 +62,10 @@ class Context(_Context):
         return Registry(settings=t.cast(SettingsDict, self.settings))
 
     @reify
+    def _aggressive_import_cache(self) -> t.Set[t.Union[str, t.Callable[..., t.Any]]]:
+        return set()  # for subapp
+
+    @reify
     def cli_parser(self) -> ArgumentParser:
         import argparse
 
@@ -85,8 +89,25 @@ class App(_Configurator):
         return self.context.registry  # type: ignore
 
     @property
+    def _aggressive_import_cache(self) -> t.Set[t.Union[str, t.Callable[..., None]]]:
+        return self.context._aggressive_import_cache  # type: ignore
+
+    @property
     def cli_parser(self) -> ArgumentParser:
         return self.context.cli_parser  # type: ignore
+
+    def include(
+        self,
+        fn_or_string: t.Union[t.Callable[..., t.Any], str],
+        *,
+        attrname: t.Optional[str] = None,
+    ) -> t.Any:
+        # more aggressive cache
+        imported = self._aggressive_import_cache
+        if fn_or_string in imported:
+            return
+        imported.add(fn_or_string)
+        return super().include(fn_or_string, attrname=attrname)
 
     # default directives
     def register_factory(self, name: str, factory: types.ComponentFactory) -> None:
@@ -144,6 +165,67 @@ def create_app(settings: SettingsDict) -> App:
     app.include("egoist.commands.generate")
     app.include("egoist.commands.scan")
     return app
+
+
+class SubApp:
+    def __init__(self) -> None:
+        self.registered: t.List[
+            t.Tuple[
+                str,
+                t.List[t.Tuple[t.Tuple[t.Any, ...], t.Dict[str, t.Any]]],
+                t.Callable[..., t.Any],
+            ]
+        ] = []
+        self.requires: t.Set[t.Union[str, t.Callable[..., t.Any]]] = set()
+
+    def include(self, path: str) -> None:
+        self.requires.add(path)
+
+    def includeme(self, app: App) -> None:
+        seen = app.imported
+        for path in self.requires:
+            if path in seen:
+                continue
+            app.include(path)
+
+        for name, buf, _ in self.registered:
+            directive = getattr(app, name)
+            for args, kwargs in buf:
+                directive = directive(*args, **kwargs)
+
+    # TODO: omit (temporary implementation for supporting directives)
+    def __getattr__(self, name: str) -> t.Callable[..., AnyFunction]:
+        def _register(
+            *args: t.Any,
+            _buf: t.Optional[
+                t.List[t.Tuple[t.Tuple[t.Any, ...], t.Dict[str, t.Any]]]
+            ] = None,
+            **kwargs: t.Any,
+        ) -> AnyFunction:
+            if _buf is None:
+                _buf = []
+            _buf.append((args, kwargs))
+            if args and callable(args[-1]):
+                task: AnyFunction = args[-1]
+                self.registered.append((name, _buf, task))
+                return task
+            from functools import partial
+
+            return partial(_register, _buf=_buf)
+
+        return _register
+
+
+def create_subapp(*, _depth: int = 1) -> SubApp:
+    import sys
+
+    subapp = SubApp()
+
+    # black magic: register includeme automatically
+    f = sys._getframe(_depth)
+    if "includeme" not in f.f_globals:
+        f.f_globals["includeme"] = subapp.includeme
+    return subapp
 
 
 def parse_args(

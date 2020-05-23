@@ -5,3 +5,4 @@ default:
 	$(MAKE) -C di
 	$(MAKE) -C bulk-actions
 	$(MAKE) -C customize
+	$(MAKE) -C subapp
