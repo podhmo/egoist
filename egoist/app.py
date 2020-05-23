@@ -62,8 +62,8 @@ class Context(_Context):
         return Registry(settings=t.cast(SettingsDict, self.settings))
 
     @reify
-    def imported(self) -> t.Set[t.Union[str, t.Callable[..., t.Any]]]:
-        return set()  # cache for SubApp's includeme
+    def _aggressive_import_cache(self) -> t.Set[t.Union[str, t.Callable[..., t.Any]]]:
+        return set()  # for subapp
 
     @reify
     def cli_parser(self) -> ArgumentParser:
@@ -89,12 +89,29 @@ class App(_Configurator):
         return self.context.registry  # type: ignore
 
     @property
-    def imported(self) -> t.Set[t.Union[str, t.Callable[..., t.Any]]]:
+    def imported(self) -> t.Set[t.Union[str, t.Callable[..., None]]]:
         return self.context.imported
+
+    @property
+    def _aggressive_import_cache(self) -> t.Set[t.Union[str, t.Callable[..., None]]]:
+        return self.context._aggressive_import_cache  # type: ignore
 
     @property
     def cli_parser(self) -> ArgumentParser:
         return self.context.cli_parser  # type: ignore
+
+    def include(
+        self,
+        fn_or_string: t.Union[t.Callable[..., t.Any], str],
+        *,
+        attrname: t.Optional[str] = None,
+    ) -> t.Any:
+        # more aggressive cache
+        imported = self._aggressive_import_cache
+        if fn_or_string in imported:
+            return
+        imported.add(fn_or_string)
+        return super().include(fn_or_string, attrname=attrname)
 
     # default directives
     def register_factory(self, name: str, factory: types.ComponentFactory) -> None:
