@@ -5,6 +5,7 @@ from .app import App
 
 if t.TYPE_CHECKING:
     from argparse import _SubParsersAction, ArgumentParser
+    from prestring.codeobject import Symbol
 
 AnyFunction = t.Callable[..., t.Any]
 T = t.TypeVar("T")
@@ -155,7 +156,7 @@ def shared(app: App, fn: t.Callable[..., T]) -> AnyFunction:
 
     name = f"{fn.__module__}:{fn.__name__}"
 
-    def _return_fake():
+    def _return_fake() -> Symbol:
         from prestring.codeobject import Symbol
 
         return Symbol(name)
