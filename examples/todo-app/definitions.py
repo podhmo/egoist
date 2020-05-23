@@ -1,13 +1,31 @@
 from egoist.app import create_app, SettingsDict, parse_args
 
-settings: SettingsDict = {"rootdir": "cmd/", "here": __file__}
+settings: SettingsDict = {"rootdir": "", "here": __file__}
 app = create_app(settings)
 
 app.include("egoist.directives.define_cli")
+app.include("egoist.directives.define_struct_set")
+
+
+@app.define_struct_set("egoist.generators.structkit:walk")
+def todo__models() -> None:
+    from egoist.go.types import gopackage
+    from egoist.generators.structkit import runtime, structkit
+
+    @gopackage("time")
+    class Time:
+        pass
+
+    class Todo:
+        Content: str
+        CreatedAt: Time
+
+    with runtime.generate(structkit, classes=[Todo]) as m:
+        m.package("todo")
 
 
 @app.define_cli("egoist.generators.clikit:walk")
-def todo() -> None:
+def cmd__todo() -> None:
     """todo message"""
     from egoist.generators.clikit import runtime, clikit
 

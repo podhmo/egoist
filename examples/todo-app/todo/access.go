@@ -12,11 +12,6 @@ var (
 	Filename = "todo.json"
 )
 
-type Todo struct {
-	Content   string
-	CreatedAt time.Time
-}
-
 func Add(content string) {
 	Data = append(Data, Todo{
 		Content:   content,
