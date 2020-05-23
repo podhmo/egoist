@@ -17,8 +17,11 @@ def scan(
     rootdir: t.Optional[str] = None,
     out: t.Optional[str] = None,
     relative: bool = True,
+    # for --rm
     rm: bool = False,
+    # for --browse
     graph: bool = False,
+    browse: bool = False,
 ) -> None:
     import contextlib
     import os
@@ -35,16 +38,42 @@ def scan(
 
     with contextlib.ExitStack() as s:
         out_port: t.Optional[t.IO[str]] = None
+
         if out is not None:
             out_port = s.enter_context(open(out, "w"))
+        elif browse:
+            import tempfile
+
+            out_port = s.enter_context(
+                tempfile.NamedTemporaryFile(mode="w+", delete=False)
+            )
 
         deps = get_tracker().get_dependencies(root=root_path, relative=relative)
         if rm:
             _dump_as_rm_scripts(deps, output=out_port)
+            return
         elif graph:
             _dump_as_graph(deps, output=out_port)
         else:
             _dump_as_json(deps, output=out_port)
+            return
+
+    if graph and browse:
+        attrname = "name"
+        if hasattr(out_port, attrname):
+            import shutil
+            import sys
+
+            filename = getattr(out_port, attrname)
+            print("write {}...".format(filename), file=sys.stderr)
+
+            if shutil.which("dot"):
+                import subprocess
+
+                subprocess.run(["dot", "-Tsvg", "-O", filename], check=True)
+                # for mac
+                if shutil.which("open"):
+                    subprocess.run(["open", "{}.svg".format(filename)])
 
 
 def _dump_as_rm_scripts(
@@ -70,8 +99,9 @@ def _dump_as_json(deps: DependencyMap, *, output: t.Optional[t.IO[str]] = None) 
 
 
 def _dump_as_graph(
-    deps_map: DependencyMap, *, output: t.Optional[t.IO[str]] = None
+    deps_map: DependencyMap, *, output: t.Optional[t.IO[str]] = None,
 ) -> None:
+    import sys
     from egoist.internal.graph import Builder
     from egoist.internal.graph import draw
 
@@ -87,8 +117,11 @@ def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
     sub_parser.add_argument("--rootdir", required=False, help="-")
     sub_parser.add_argument("tasks", nargs="*", choices=app.registry._task_list)
     sub_parser.add_argument("--out")
+
     sub_parser.add_argument("--rm", action="store_true")
+
     sub_parser.add_argument("--graph", action="store_true")
+    sub_parser.add_argument("--browse", action="store_true")
     sub_parser.set_defaults(subcommand=partial(fn, app))
 
 
