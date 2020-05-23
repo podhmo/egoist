@@ -1,6 +1,7 @@
-from .subapp import create_subapp
+from egoist.app import create_subapp
 
 app = create_subapp()
+app.include("egoist.directives.define_cli")
 
 
 @app.define_cli("egoist.generators.clikit:walk")

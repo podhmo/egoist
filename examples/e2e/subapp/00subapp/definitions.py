@@ -3,7 +3,6 @@ from egoist.app import create_app, SettingsDict, parse_args
 settings: SettingsDict = {"rootdir": "cmd/", "here": __file__}
 app = create_app(settings)
 
-app.include("egoist.directives.define_cli")
 app.include("apps.hello")
 app.include("apps.byebye")
 
