@@ -16,7 +16,12 @@ class Dependency(tx.TypedDict):
     task: t.Optional[types.Command]
 
 
+DependencyMap = t.Dict[str, t.Dict[str, t.Union[str, t.List[str]]]]
+
+
 class Tracker:
+    """dependency tracker"""
+
     def __init__(self) -> None:
         self.deps_map: t.Dict[str, Dependency] = {}
 
@@ -46,7 +51,7 @@ class Tracker:
         get_name: t.Callable[
             [t.Optional[t.Callable[..., t.Any]]], str
         ] = get_fullname_of_callable,
-    ) -> t.Dict[str, t.Dict[str, t.Union[str, t.List[str]]]]:
+    ) -> DependencyMap:
         root_path = pathlib.Path(root).absolute()
         if not relative:
             return {

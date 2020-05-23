@@ -7,6 +7,7 @@ from egoist.types import AnyFunction
 
 if t.TYPE_CHECKING:
     from argparse import ArgumentParser
+    from egoist.components.tracker import DependencyMap
 
 
 def scan(
@@ -17,11 +18,10 @@ def scan(
     out: t.Optional[str] = None,
     relative: bool = True,
     rm: bool = False,
+    graph: bool = False,
 ) -> None:
     import contextlib
     import os
-    import json
-    import sys
     from egoist.components.tracker import get_tracker
     from .generate import generate
 
@@ -38,21 +38,49 @@ def scan(
         if out is not None:
             out_port = s.enter_context(open(out, "w"))
 
+        deps = get_tracker().get_dependencies(root=root_path, relative=relative)
         if rm:
-            from collections import defaultdict
-
-            d = defaultdict(list)
-            deps = get_tracker().get_dependencies(root=root_path, relative=relative)
-
-            for fname, data in deps.items():
-                d[data["task"]].append(fname)
-            for task, fnames in d.items():
-                print(f"# {task}", file=sys.stderr)
-                for fname in fnames:
-                    print(f"rm {fname}", file=out_port)
+            _dump_as_rm_scripts(deps, output=out_port)
+        elif graph:
+            _dump_as_graph(deps, output=out_port)
         else:
-            deps = get_tracker().get_dependencies(root=root_path, relative=relative)
-            print(json.dumps(deps, indent=2, ensure_ascii=False), file=out_port)
+            _dump_as_json(deps, output=out_port)
+
+
+def _dump_as_rm_scripts(
+    deps: DependencyMap, *, output: t.Optional[t.IO[str]] = None
+) -> None:
+    import sys
+    from collections import defaultdict
+
+    d = defaultdict(list)
+
+    for fname, data in deps.items():
+        d[data["task"]].append(fname)
+    for task, fnames in d.items():
+        print(f"# {task}", file=sys.stderr)
+        for fname in fnames:
+            print(f"rm {fname}", file=output)
+
+
+def _dump_as_json(deps: DependencyMap, *, output: t.Optional[t.IO[str]] = None) -> None:
+    import json
+
+    print(json.dumps(deps, indent=2, ensure_ascii=False), file=output)
+
+
+def _dump_as_graph(
+    deps_map: DependencyMap, *, output: t.Optional[t.IO[str]] = None
+) -> None:
+    from egoist.internal.graph import Builder
+    from egoist.internal.graph import draw
+
+    b = Builder()
+    for name, deps in deps_map.items():
+        b.add_node(deps["task"], depends=deps["depends"])
+        b.add_node(name, depends=[deps["task"]])
+    g = b.build()
+    print(draw.visualize(g, unique=True), file=output)
 
 
 def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
@@ -60,6 +88,7 @@ def setup(app: App, sub_parser: ArgumentParser, fn: AnyFunction) -> None:
     sub_parser.add_argument("tasks", nargs="*", choices=app.registry._task_list)
     sub_parser.add_argument("--out")
     sub_parser.add_argument("--rm", action="store_true")
+    sub_parser.add_argument("--graph", action="store_true")
     sub_parser.set_defaults(subcommand=partial(fn, app))
 
 
