@@ -1,47 +1,31 @@
 package todo
 
 import (
-	"encoding/json"
-	"os"
+	"m/store"
 	"time"
 )
 
-var (
-	Data     = []Todo{}
-	Now      = time.Now
-	Filename = "todo.json"
-)
+type TodoStore struct {
+	Filename string
+	Data     []Todo
+	Now      func() time.Time
+}
 
-func Add(content string) {
-	Data = append(Data, Todo{
+func (s *TodoStore) Add(content string) {
+	s.Data = append(s.Data, Todo{
 		Content:   content,
-		CreatedAt: Now(),
+		CreatedAt: s.Now(),
 	})
 }
 
-func List() []Todo {
-	return Data
+func (s *TodoStore) List() []Todo {
+	return s.Data
 }
 
-func Load() error {
-	f, err := os.Open(Filename)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return Save()
-		}
-		return err
-	}
-	defer f.Close()
-	decoder := json.NewDecoder(f)
-	return decoder.Decode(&Data)
+func (s *TodoStore) Load() error {
+	return store.Load(s.Filename, &s.Data)
 }
 
-func Save() error {
-	f, err := os.Create(Filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	encoder := json.NewEncoder(f)
-	return encoder.Encode(Data)
+func (s *TodoStore) Save() error {
+	return store.Save(s.Filename, &s.Data)
 }

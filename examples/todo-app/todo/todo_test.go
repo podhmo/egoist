@@ -11,21 +11,24 @@ func TestIt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	Now = func() time.Time { return now }
-
-	if !reflect.DeepEqual(List(), []Todo{}) {
-		t.Fatalf("want nil, but %+#v", List())
+	s := TodoStore{
+		Now: func() time.Time { return now },
 	}
 
-	Add("hello")
-	Add("byebye")
+	var empty []Todo
+	if !reflect.DeepEqual(s.List(), empty) {
+		t.Fatalf("want nil, but %+#v", s.List())
+	}
+
+	s.Add("hello")
+	s.Add("byebye")
 
 	want := []Todo{
-		{Content: "hello", CreatedAt: Now()},
-		{Content: "byebye", CreatedAt: Now()},
+		{Content: "hello", CreatedAt: s.Now()},
+		{Content: "byebye", CreatedAt: s.Now()},
 	}
-	if !reflect.DeepEqual(List(), want) {
-		t.Fatalf("want\n\t%+#v,\nbut\n\t%+#v", want, List())
+	if !reflect.DeepEqual(s.List(), want) {
+		t.Fatalf("want\n\t%+#v,\nbut\n\t%+#v", want, s.List())
 	}
 
 }

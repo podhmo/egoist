@@ -22,35 +22,44 @@ def cmd__todo() -> None:
     from egoist.generators.clikit import runtime, clikit
 
     with runtime.generate(clikit) as m:
-        todo_pkg = m.import_("m/todo")
         fmt_pkg = m.import_("fmt")
+        time_pkg = m.import_("time")
+        todo_pkg = m.import_("m/todo")
 
         err = m.symbol("err")
         x = m.symbol("x")
         args = runtime.get_cli_rest_args()
 
-        # if err := todo.Load(); err != nil {
+        # s := new(todo.TodoStore)
+        s = m.let("s", m.symbol("new")(todo_pkg.TodoStore))
+        # s.Filename = "todo.json"
+        m.stmt(f'{s}.Filename = "todo.json"')
+        # s.Now = time.Now
+        m.stmt(f'{s}.Now = {time_pkg}.Now')
+        m.sep()
+
+        # if err := s.Load(); err != nil {
         # 	return err
         # }
-        with m.if_(f"{err} := {todo_pkg.Load()}; {err} != nil"):
+        with m.if_(f"{err} := {s.Load()}; {err} != nil"):
             m.return_(err)
 
         # for _, x := range opt.Args {
         # 	todo.Add(x)
         # }
         with m.for_(f"_, {x} := range {args}"):
-            m.stmt(todo_pkg.Add(x))
+            m.stmt(s.Add(x))
 
         # for _, x := range todo.List() {
         # 	fmt.Println(x)
         # }
-        with m.for_(f"_, {x} := range {todo_pkg.List()}"):
+        with m.for_(f"_, {x} := range {s.List()}"):
             m.stmt(fmt_pkg.Println(x))
 
         # if err := todo.Save(); err != nil {
         # 	return err
         # }
-        with m.if_(f"{err} := {todo_pkg.Save()}; {err} != nil"):
+        with m.if_(f"{err} := {s.Save()}; {err} != nil"):
             m.return_(err)
 
 

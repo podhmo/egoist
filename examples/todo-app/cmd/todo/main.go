@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"log"
+	"time"
 	"m/todo"
 )
 
@@ -39,16 +40,20 @@ func main() {
 }
 
 func run(opt *Option) error {
-	if err := todo.Load(); err != nil  {
+	s := new(todo.TodoStore)
+	s.Filename = "todo.json"
+	s.Now = time.Now
+
+	if err := s.Load(); err != nil  {
 		return err
 	}
 	for _, x := range opt.Args  {
-		todo.Add(x)
+		s.Add(x)
 	}
-	for _, x := range todo.List()  {
+	for _, x := range s.List()  {
 		fmt.Println(x)
 	}
-	if err := todo.Save(); err != nil  {
+	if err := s.Save(); err != nil  {
 		return err
 	}
 	return nil
