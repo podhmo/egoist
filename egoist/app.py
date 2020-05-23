@@ -175,7 +175,9 @@ class SubApp:
     def __init__(self) -> None:
         self.registered: t.List[
             t.Tuple[
-                str, t.Tuple[t.Any, ...], t.Dict[str, t.Any], t.Callable[..., t.Any]
+                str,
+                t.List[t.Tuple[t.Tuple[t.Any, ...], t.Dict[str, t.Any]]],
+                t.Callable[..., t.Any],
             ]
         ] = []
         self.requires: t.Set[t.Union[str, t.Callable[..., t.Any]]] = set()
@@ -190,22 +192,30 @@ class SubApp:
                 continue
             app.include(path)
 
-        for name, args, kwargs, task in self.registered:
-            get_directive = getattr(app, name)
-            directive = get_directive(*args, *kwargs)
-            directive(task)
+        for name, buf, _ in self.registered:
+            directive = getattr(app, name)
+            for args, kwargs in buf:
+                directive = directive(*args, **kwargs)
 
     # TODO: omit (temporary implementation for supporting directives)
     def __getattr__(self, name: str) -> t.Callable[..., AnyFunction]:
-        def _register(*args: t.Any, **kwargs: t.Any) -> AnyFunction:
+        def _register(
+            *args: t.Any,
+            _buf: t.Optional[
+                t.List[t.Tuple[t.Tuple[t.Any, ...], t.Dict[str, t.Any]]]
+            ] = None,
+            **kwargs: t.Any,
+        ) -> AnyFunction:
+            if _buf is None:
+                _buf = []
+            _buf.append((args, kwargs))
             if args and callable(args[-1]):
                 task: AnyFunction = args[-1]
-                args = args[:-1]
-                self.registered.append((name, args, kwargs, task))
+                self.registered.append((name, _buf, task))
                 return task
             from functools import partial
 
-            return partial(_register, *args, **kwargs)
+            return partial(_register, _buf=_buf)
 
         return _register
 

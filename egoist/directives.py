@@ -15,7 +15,7 @@ DirectiveT = t.TypeVar("DirectiveT", bound="Directive")
 class Directive:
     def __init__(
         self,
-        define_fn: AnyFunction,
+        define_fn: t.Callable[..., AnyFunction],
         *,
         name: str,
         requires: t.List[str],
@@ -35,8 +35,8 @@ class Directive:
         def _register(target_fn: AnyFunction) -> AnyFunction:
             if not self.seen:
                 self.seen = True
-            self.__call__(app, target_fn, *args, **kwargs)
-            return target_fn
+
+            return self.__call__(app, target_fn, *args, **kwargs)
 
         return _register
 
