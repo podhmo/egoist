@@ -1,7 +1,7 @@
 from __future__ import annotations
 import typing as t
 from functools import partial, update_wrapper
-from .app import App, _noop
+from .app import App
 
 if t.TYPE_CHECKING:
     from argparse import _SubParsersAction, ArgumentParser
@@ -18,17 +18,17 @@ class Directive:
         *,
         name: str,
         requires: t.List[str],
-        as_decorator: bool,  # fixme: this is too implicit
+        parameterized: bool,  # fixme: this is too implicit
     ) -> None:
         self.name = name
         self.__call__ = define_fn
         self.requires = requires
-        self.as_decorator = as_decorator
+        self.parameterized = parameterized
 
         self.seen: bool = False
 
     def register(self, app: App, *args: t.Any, **kwargs: t.Any) -> t.Any:
-        if not self.as_decorator:
+        if not self.parameterized:
             return self.__call__(app, *args, **kwargs)
 
         def _register(target_fn: AnyFunction) -> AnyFunction:
@@ -67,11 +67,11 @@ def directive(
     name: str,
     requires: t.List[str],
     factory: t.Type[DirectiveT] = Directive,  # type: ignore
-    as_decorator: bool = True,
+    parameterized: bool = True,
 ) -> t.Callable[..., DirectiveT]:
     def _directive(directive_fn: t.Callable[..., t.Any]) -> DirectiveT:
         ob = factory(
-            directive_fn, name=name, requires=requires, as_decorator=as_decorator
+            directive_fn, name=name, requires=requires, parameterized=parameterized
         )
         update_wrapper(ob, directive_fn)
         return ob
@@ -125,7 +125,7 @@ def define_dir(
 _global_subparsers: t.Optional[_SubParsersAction] = None
 
 
-@directive(name="add_subcommand", requires=[], as_decorator=False)
+@directive(name="add_subcommand", requires=[], parameterized=False)
 def add_subcommand(
     app: App,
     setup_parser: t.Callable[[App, ArgumentParser, AnyFunction], None],
@@ -149,7 +149,7 @@ def add_subcommand(
     return fn
 
 
-@directive(name="shared", requires=[], as_decorator=False)
+@directive(name="shared", requires=[], parameterized=False)
 def shared(app: App, fn: t.Callable[..., T]) -> AnyFunction:
     from functools import partial
     from prestring.codeobject import Symbol
