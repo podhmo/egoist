@@ -1,1 +1,14 @@
-{'output/fizzbuzz.txt': ['templates/fizzbuzz.j2'], 'output/inputs.html': ['templates/inputs.j2']}
+{
+  "output/fizzbuzz.txt": {
+    "task": "output",
+    "depends": [
+      "templates/fizzbuzz.j2"
+    ]
+  },
+  "output/inputs.html": {
+    "task": "output",
+    "depends": [
+      "templates/inputs.j2"
+    ]
+  }
+}
