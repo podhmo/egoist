@@ -89,10 +89,6 @@ class App(_Configurator):
         return self.context.registry  # type: ignore
 
     @property
-    def imported(self) -> t.Set[t.Union[str, t.Callable[..., None]]]:
-        return self.context.imported
-
-    @property
     def _aggressive_import_cache(self) -> t.Set[t.Union[str, t.Callable[..., None]]]:
         return self.context._aggressive_import_cache  # type: ignore
 
