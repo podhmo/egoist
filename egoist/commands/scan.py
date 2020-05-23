@@ -77,8 +77,8 @@ def _dump_as_graph(
 
     b = Builder()
     for name, deps in deps_map.items():
-        b.add_node(deps["task"], depends=deps["depends"])
-        b.add_node(name, depends=[deps["task"]])
+        b.add_node(deps["task"], depends=deps["depends"])  # type: ignore
+        b.add_node(name, depends=[deps["task"]])  # type: ignore
     g = b.build()
     print(draw.visualize(g, unique=True), file=output)
 
