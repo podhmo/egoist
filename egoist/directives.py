@@ -1,38 +1,51 @@
+from __future__ import annotations
 import typing as t
 from functools import partial, update_wrapper
 from .app import App, _noop
 
+if t.TYPE_CHECKING:
+    from argparse import _SubParsersAction, ArgumentParser
+
 AnyFunction = t.Callable[..., t.Any]
 T = t.TypeVar("T")
+DirectiveT = t.TypeVar("DirectiveT", bound="Directive")
 
 
 class Directive:
     def __init__(
-        self, define_fn: AnyFunction, *, name: str, requires: t.List[str]
+        self,
+        define_fn: AnyFunction,
+        *,
+        name: str,
+        requires: t.List[str],
+        as_decorator: bool,  # fixme: this is too implicit
     ) -> None:
-        self.define_fn = define_fn
-        self.seen: bool = False
         self.name = name
+        self.__call__ = define_fn
         self.requires = requires
+        self.as_decorator = as_decorator
 
-    @property
-    def __call__(self) -> AnyFunction:
-        return self.define_fn
+        self.seen: bool = False
 
-    def register(self, app: App, *args, **kwargs) -> AnyFunction:
+    def register(self, app: App, *args: t.Any, **kwargs: t.Any) -> t.Any:
+        if not self.as_decorator:
+            return self.__call__(app, *args, **kwargs)
+
         def _register(target_fn: AnyFunction) -> AnyFunction:
             if not self.seen:
                 self.seen = True
-            self.define_fn(app, target_fn, *args, **kwargs)
+            self.__call__(app, target_fn, *args, **kwargs)
             return target_fn
 
         return _register
 
     def includeme(self, app: App) -> None:
         """callback for app.include()"""
+        from miniconfig import PHASE1_CONFIG
+
         # for information used by describe()
         directive = partial(self.register)
-        update_wrapper(directive, self.define_fn)
+        update_wrapper(directive, self.__call__)
         app.add_directive(self.name, directive)
 
         def _include() -> None:
@@ -45,7 +58,7 @@ class Directive:
                     continue
                 app.include(path)
 
-        app.action(self.name, _include)
+        app.action(self.name, _include, order=PHASE1_CONFIG)
 
 
 def directive(
@@ -53,43 +66,17 @@ def directive(
     *,
     name: str,
     requires: t.List[str],
-):
-    def _directive(directive_fn: t.Callable[..., t.Any]):
-        ob = Directive(directive_fn, name=name, requires=requires)
+    factory: t.Type[DirectiveT] = Directive,  # type: ignore
+    as_decorator: bool = True,
+) -> t.Callable[..., DirectiveT]:
+    def _directive(directive_fn: t.Callable[..., t.Any]) -> DirectiveT:
+        ob = factory(
+            directive_fn, name=name, requires=requires, as_decorator=as_decorator
+        )
         update_wrapper(ob, directive_fn)
         return ob
 
     return _directive
-
-
-_has_subparser = False
-
-
-def add_subcommand(app: App) -> None:
-    """register subcommands"""
-    global _has_subparser
-    if _has_subparser:
-        return
-    _has_subparser = True
-
-    import argparse
-
-    parser = app.cli_parser
-    subparsers = parser.add_subparsers(title="subcommands", dest="subcommand")
-    subparsers.required = True
-
-    def _add_subcommand(
-        app: App,
-        setup_parser: t.Callable[[App, argparse.ArgumentParser, AnyFunction], None],
-        *,
-        fn: AnyFunction,
-    ) -> None:
-        sub_parser = subparsers.add_parser(
-            fn.__name__, help=fn.__doc__, formatter_class=parser.formatter_class
-        )
-        setup_parser(app, sub_parser, fn)
-
-    app.add_directive("add_subcommand", _add_subcommand)
 
 
 @directive(name="define_cli", requires=["egoist.generators.clikit"])
@@ -135,25 +122,45 @@ def define_dir(
     return fn
 
 
-def shared(app: App) -> None:
-    name = "shared"
+_global_subparsers: t.Optional[_SubParsersAction] = None
 
-    def _register_shared(app: App, fn: t.Callable[..., T]) -> AnyFunction:
-        from functools import partial
-        from prestring.codeobject import Symbol
 
-        name = f"{fn.__module__}:{fn.__name__}"
-        app.register_factory(name, fn)
-        app.register_dryurn_factory(name, partial(Symbol, name))
+@directive(name="add_subcommand", requires=[], as_decorator=False)
+def add_subcommand(
+    app: App,
+    setup_parser: t.Callable[[App, ArgumentParser, AnyFunction], None],
+    *,
+    fn: AnyFunction,
+) -> AnyFunction:
+    """register subcommands"""
+    global _global_subparsers
+    subparsers = _global_subparsers
+    if subparsers is None:
+        subparsers = app.cli_parser.add_subparsers(
+            title="subcommands", dest="subcommand"
+        )
+        subparsers.required = True
+        _global_subparsers = subparsers
 
-        def cached(*args: t.Any, **kwargs: t.Any) -> T:
-            from egoist.runtime import get_component
+    sub_parser = subparsers.add_parser(
+        fn.__name__, help=fn.__doc__, formatter_class=app.cli_parser.formatter_class
+    )
+    setup_parser(app, sub_parser, fn)
+    return fn
 
-            return t.cast(T, get_component(name, *args, **kwargs))
 
-        return cached
+@directive(name="shared", requires=[], as_decorator=False)
+def shared(app: App, fn: t.Callable[..., T]) -> AnyFunction:
+    from functools import partial
+    from prestring.codeobject import Symbol
 
-    app.add_directive(name, _register_shared)
+    name = f"{fn.__module__}:{fn.__name__}"
+    app.register_factory(name, fn)
+    app.register_dryurn_factory(name, partial(Symbol, name))
 
-    # for conflict check
-    app.action(name, _noop)
+    def cached(*args: t.Any, **kwargs: t.Any) -> T:
+        from egoist.runtime import get_component
+
+        return t.cast(T, get_component(name, *args, **kwargs))
+
+    return cached
