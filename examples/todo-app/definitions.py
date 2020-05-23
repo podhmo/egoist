@@ -8,7 +8,7 @@ app.include("egoist.directives.define_struct_set")
 
 
 @app.define_struct_set("egoist.generators.structkit:walk")
-def todo__models() -> None:
+def todo__models_gen() -> None:
     from egoist.generators.structkit import runtime, structkit
     import objects
 
