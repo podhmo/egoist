@@ -3,7 +3,7 @@ default:
 	$(MAKE) generate
 
 generate:
-	python definitions.py scan --out=scan.output
+	python definitions.py generate - scan --out=scan.output
 .PHONY: generate
 
 clean:
