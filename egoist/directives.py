@@ -151,16 +151,22 @@ def add_subcommand(
 
 @directive(name="shared", requires=[], parameterized=False)
 def shared(app: App, fn: t.Callable[..., T]) -> AnyFunction:
-    from functools import partial
-    from prestring.codeobject import Symbol
+    from functools import wraps
 
     name = f"{fn.__module__}:{fn.__name__}"
-    app.register_factory(name, fn)
-    app.register_dryurn_factory(name, partial(Symbol, name))
 
-    def cached(*args: t.Any, **kwargs: t.Any) -> T:
+    def _return_fake():
+        from prestring.codeobject import Symbol
+
+        return Symbol(name)
+
+    @wraps(fn)
+    def _cached(*args: t.Any, **kwargs: t.Any) -> T:
         from egoist.runtime import get_component
 
         return t.cast(T, get_component(name, *args, **kwargs))
 
-    return cached
+    app.register_factory(name, fn)
+    app.register_dryurn_factory(name, _return_fake)
+
+    return _cached
