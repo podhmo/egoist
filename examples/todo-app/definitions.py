@@ -9,18 +9,10 @@ app.include("egoist.directives.define_struct_set")
 
 @app.define_struct_set("egoist.generators.structkit:walk")
 def todo__models() -> None:
-    from egoist.go.types import gopackage
     from egoist.generators.structkit import runtime, structkit
+    import objects
 
-    @gopackage("time")
-    class Time:
-        pass
-
-    class Todo:
-        Content: str
-        CreatedAt: Time
-
-    with runtime.generate(structkit, classes=[Todo]) as m:
+    with runtime.generate(structkit, classes=[objects.Todo]) as m:
         m.package("todo")
 
 
