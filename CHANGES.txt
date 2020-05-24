@@ -1,3 +1,9 @@
+0.0.4
+
+- register subcommand via directives
+- subapp for module separation
+- some refactoring
+
 0.0.3
 
 - add filekit, dirkit
