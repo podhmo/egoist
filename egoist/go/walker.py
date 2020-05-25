@@ -49,7 +49,7 @@ def walk(
                 )  # fixme name
                 continue
             else:
-                raise RuntimeError("unexpected type {cls!r}")
+                raise RuntimeError(f"unexpected type {cls!r}")
 
         fields: t.List[Row] = []
         for name, info, _metadata in w.for_type(cls).walk(ignore_private=False):
@@ -137,7 +137,7 @@ class Context:
         )
         pseudo_fields = [
             (
-                sub_type.__name__,
+                resolve_name(sub_type),
                 typeinfo.typeinfo(t.Optional[sub_type]),
                 metadata_.metadata(required=False),
             )

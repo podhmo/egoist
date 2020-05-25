@@ -5,6 +5,7 @@ import inspect
 from prestring.go import goname
 from prestring.naming import untitleize
 import metashape.typeinfo as typeinfo
+from metashape.name import resolve as resolve_name
 from egoist.go.types import _unwrap_pointer_type
 from egoist.go import walker
 from . import runtime
@@ -130,7 +131,7 @@ def emit_enums(
         type(getattr(first_of_args, "__name__", first_of_args))
     )
 
-    const_names = [getattr(x, "__name__", x) for x in ti.get_args(literal_type)]
+    const_names = [resolve_name(x) for x in ti.get_args(literal_type)]
     const_members = {name: f"{go_type}{goname(name)}" for name in const_names}
     this = m.symbol("v")
     as_literal = resolver.resolve_default
