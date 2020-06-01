@@ -6,6 +6,7 @@ paths:
   /users/login:
     post:
       summary: '-'
+      description: '-'
       tags:
       - User and Authentication
       requestBody:
@@ -28,10 +29,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
     get:
-      summary: |-
-        Get current user
-
-        Gets the currently logged-in user
+      summary: Get current user
+      description: Gets the currently logged-in user
       tags:
       - User and Authentication
       responses:
@@ -47,10 +46,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
     put:
-      summary: |-
-        Update current user
-
-        Updated user information for current user
+      summary: Update current user
+      description: Updated user information for current user
       tags:
       - User and Authentication
       requestBody:

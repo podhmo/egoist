@@ -32,8 +32,11 @@ class Resolver:
             }
         }
 
-    def resolve_doc(self, spec: Fnspec) -> str:
-        return spec.doc or "-"
+    def resolve_summary(self, spec: Fnspec) -> str:
+        return (spec.doc or "-").split("\n\n", 1)[0]
+
+    def resolve_description(self, spec: Fnspec) -> str:
+        return (spec.doc or "-").split("\n\n", 1)[-1]
 
 
 # todo: rename
@@ -101,9 +104,15 @@ def emit(
 
         spec = fnspec(fn)
 
-        d["summary"] = metadata.get("summary") or resolver.resolve_doc(spec)
+        if "summary" in metadata:
+            d["summary"] = metadata["summary"]
+        else:
+            d["summary"] = resolver.resolve_summary(spec)
         if "description" in metadata:
             d["description"] = metadata["description"]
+        else:
+            d["description"] = resolver.resolve_description(spec)
+
         if "tags" in metadata:
             d["tags"] = metadata["tags"]
 
