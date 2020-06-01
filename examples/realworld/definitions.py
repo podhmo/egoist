@@ -6,7 +6,7 @@ app = create_app(settings)
 app.include("egoist.directives.define_file")
 
 
-@app.define_file("egoist.generators.filekit:walk", suffix=".json")
+@app.define_file("egoist.generators.filekit:walk", suffix=".yaml")
 def openapi() -> None:
     from egoist.generators.filekit import runtime
     from app import app
@@ -15,7 +15,7 @@ def openapi() -> None:
 
     with runtime.create_file() as wf:
         d = emit(list(app.routes), title="egoist", version="0.0.0")
-        loading.dump(d, wf, format="json")
+        loading.dump(d, wf, format="yaml")
 
 
 if __name__ == "__main__":

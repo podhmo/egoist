@@ -56,6 +56,12 @@ class App:
         metadata: Metadata = metadata or {}
         return partial(self._register_with, method="get", path=path, metadata=metadata)
 
+    def put(
+        self, path: str, metadata: t.Optional[Metadata] = None,
+    ) -> t.Callable[[t.Callable[..., t.Any]], t.Callable[..., t.Any]]:
+        metadata: Metadata = metadata or {}
+        return partial(self._register_with, method="put", path=path, metadata=metadata)
+
     @property
     def routes(self) -> t.Iterator[t.Tuple[t.Callable[..., t.Any], Metadata]]:
         for fns in self._marker.pool.values():

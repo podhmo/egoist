@@ -1,0 +1,113 @@
+openapi: 3.0.2
+info:
+  title: egoist
+  version: 0.0.0
+paths:
+  /users/login:
+    post:
+      summary: '-'
+      tags:
+      - User and Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: |-
+        Get current user
+
+        Gets the currently logged-in user
+      tags:
+      - User and Authentication
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              $ref: '#/components/schemas/UserResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      summary: |-
+        Update current user
+
+        Updated user information for current user
+      tags:
+      - User and Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              $ref: '#/components/schemas/UserResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    UpdateUserRequest:
+      properties:
+        user:
+          type: object
+      required:
+      - user
+    UserResponse:
+      properties:
+        user:
+          type: object
+      required:
+      - user
+    LoginUserRequest:
+      properties:
+        user:
+          type: object
+      required:
+      - user
+      description: Credentials to use
+    Message:
+      properties:
+        error:
+          oneOf:
+          - type: string
+          - type: object
+        text:
+          type: string
+    HTTPValidationError:
+      $ref: '#/components/schemas/ValidationError'
+    ValidationError:
+      properties:
+        messages:
+          additionalProperties:
+            $ref: '#/components/schemas/Message'
+        summary:
+          type: string
+      required:
+      - summary
+      title: ValidationError
