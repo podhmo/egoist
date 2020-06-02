@@ -1,46 +1,14 @@
 from __future__ import annotations
 import typing as t
 from datetime import datetime
-from openapi.runtime import App
+from openapi.runtime import API
+import objects
 
+if t.TYPE_CHECKING:
+    from egoist.app import App
 # todo: security
-app = App()
 
 
-# class Article:
-#     author: Profile
-#     body: str
-#     # createdAt: datetime
-#     description: str
-#     favorited: bool
-#     favoritesCount: int
-#     slug: str
-#     tagList: t.List[str]
-#     title: str
-
-
-class LoginUser:
-    email: str
-    password: str  # format=password
-
-
-class User:
-    email: str
-    token: str
-    username: str
-    bio: str
-    image: str
-
-
-class UpdateUser:
-    email: str
-    token: str
-    username: str
-    bio: str
-    image: str
-
-
-@app.post("/users/login", metadata={"tags": ["User and Authentication"]})
 def login(body: LoginUserRequest) -> t.List[UserResponse]:
     # "401": {
     #   "description": "Unauthorized"
@@ -57,14 +25,36 @@ def login(body: LoginUserRequest) -> t.List[UserResponse]:
 class LoginUserRequest:
     """Credentials to use"""
 
-    user: LoginUser
+    user: objects.LoginUser
 
 
 class UserResponse:
-    user: User
+    user: objects.User
 
 
-@app.get("/users/login", metadata={"tags": ["User and Authentication"]})
+def CreateUser(body: NewUserRequest) -> UserResponse:
+    """Register a new user
+
+    Register a new user"""
+    # "201": {
+    #   "description": "OK",
+    #   "schema": {
+    #     "$ref": "#/definitions/UserResponse"
+    #   }
+    # },
+    # "422": {
+    #   "description": "Unexpected error",
+    #   "schema": {
+    #     "$ref": "#/definitions/GenericErrorModel"
+    #   }
+    # }
+    pass
+
+
+class NewUserRequest:
+    user: objects.NewUser
+
+
 def get_current_user() -> UserResponse:
     """Get current user
 
@@ -81,7 +71,6 @@ def get_current_user() -> UserResponse:
     pass
 
 
-@app.put("/users/login", metadata={"tags": ["User and Authentication"]})
 def update_current_user(body: UpdateUserRequest) -> UserResponse:
     """Update current user
 
@@ -99,4 +88,16 @@ def update_current_user(body: UpdateUserRequest) -> UserResponse:
 
 
 class UpdateUserRequest:
-    user: UpdateUser
+    user: objects.UpdateUser
+
+
+def includeme(app: App) -> None:
+    api = API()
+    api.post("/users/login", metadata={"tags": ["User and Authentication"]})(login)
+
+    api.post("/users", metadata={"tags": ["User and Authentication"]})(CreateUser)
+    api.get("/users", metadata={"tags": ["User and Authentication"]})(get_current_user)
+    api.put("/users", metadata={"tags": ["User and Authentication"]})(
+        update_current_user
+    )
+    app.context.api = api  # xxx:

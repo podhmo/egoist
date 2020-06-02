@@ -28,6 +28,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /users:
+    post:
+      summary: Register a new user
+      description: Register a new user
+      tags:
+      - User and Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUserRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              $ref: '#/components/schemas/UserResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
     get:
       summary: Get current user
       description: Gets the currently logged-in user
@@ -70,6 +93,12 @@ paths:
 components:
   schemas:
     UpdateUserRequest:
+      properties:
+        user:
+          type: object
+      required:
+      - user
+    NewUserRequest:
       properties:
         user:
           type: object

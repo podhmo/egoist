@@ -31,7 +31,7 @@ class Metadata(tx.TypedDict):
     # callbacks: List[routing.APIRoute] = None
 
 
-class App:
+class API:
     def __init__(self) -> None:
         self._zero_metadata: Metadata = {}
         self._marker = Marker("api_route", default=self._zero_metadata)
