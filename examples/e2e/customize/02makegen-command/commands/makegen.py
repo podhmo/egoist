@@ -35,29 +35,30 @@ def makegen(
         out_port: t.Optional[t.IO[str]] = None
         if out is not None:
             out_port = s.enter_context(open(out, "w"))
-        print(emit(deps), file=out_port)
+        print(emit(deps, filename=getattr(out_port, "name", None)), file=out_port)
 
 
-def emit(deps: t.Dict[str, t.List[str]]) -> str:
+def emit(deps: t.Dict[str, t.List[str]], *, filename: t.Optional[str] = None) -> str:
     from prestring.text import Module
 
     deps = {
-        name: {"task": x["task"], "depends": sorted(x["depends"])}
+        name: {"task": x["task"].rsplit(".", 1)[-1], "depends": sorted(x["depends"])}
         for name, x in deps.items()
     }
+    suffix = "" if filename is None else f" -f {filename}"
 
     m = Module(indent="\t")
     m.stmt(f"DEP ?= {' '.join(deps.keys())}")
     m.stmt(f"PRE ?= {' '.join(['.pre/' + k.replace('/', '__') for k in deps.keys()])}")
     m.sep()
-    m.stmt('CONT ?= PRE=$< DEP="" $(MAKE) _gen')
+    m.stmt(f'CONT ?= PRE=$< DEP="" $(MAKE) _gen{suffix}')
     m.stmt("BULK_ACTION = .pre/bulk.action")
     m.sep()
 
     m.stmt("# goal task")
     m.stmt("default:")
     with m.scope():
-        m.stmt('@CONT="exit 0" $(MAKE) _gen')
+        m.stmt(f'@CONT="exit 0" $(MAKE) _gen{suffix}')
     m.sep()
 
     m.stmt("_gen: .pre $(DEP)")
@@ -73,7 +74,7 @@ def emit(deps: t.Dict[str, t.List[str]]) -> str:
 
     m.stmt("# .pre files (sentinel)")
     for name, metadata in deps.items():
-        task = metadata["task"]
+        task = metadata["task"].split(".", 1)[-1]
         args = metadata["depends"]
         pre_file = f".pre/{name.replace('/', '__')}"
         m.stmt(f"{pre_file}: {' '.join(args)}")
@@ -83,7 +84,7 @@ def emit(deps: t.Dict[str, t.List[str]]) -> str:
 
     m.stmt("# actual dependencies")
     for name, metadata in deps.items():
-        task = metadata["task"]
+        task = metadata["task"].split(".", 1)[-1]
         args = metadata["depends"]
         pre_file = f".pre/{name.replace('/', '__')}"
         m.stmt(f"{name}: {pre_file}")
