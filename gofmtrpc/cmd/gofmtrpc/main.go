@@ -21,7 +21,7 @@ func main() {
 	opt := &Option{}
 	cmd := flag.NewFlagSet("gofmtrpc", flag.ContinueOnError)
 	cmd.Usage = func() {
-		fmt.Fprintln(cmd.Output(), `gofmtrpc - gofmtrpc message`)
+		fmt.Fprintln(cmd.Output(), `gofmtrpc - gofmtrpc with JSONRPC`)
 		fmt.Fprintln(cmd.Output(), "")
 		fmt.Fprintln(cmd.Output(), "Usage:")
 		cmd.PrintDefaults()

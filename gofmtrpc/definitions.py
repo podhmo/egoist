@@ -1,5 +1,4 @@
 from __future__ import annotations
-import typing as t
 from egoist.app import create_app, SettingsDict, parse_args
 from egoist.go.types import GoError
 
@@ -12,7 +11,7 @@ app.include("egoist.directives.define_cli")
 
 @app.define_cli("egoist.generators.clikit:walk")
 def gofmtrpc(*, addr: str = ":9999") -> GoError:
-    """gofmtrpc message"""
+    """gofmtrpc with JSONRPC"""
     from egoist.generators.clikit import runtime, clikit
 
     with runtime.generate(clikit) as m:
