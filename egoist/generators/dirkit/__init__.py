@@ -24,7 +24,7 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
             fpath = get_path_from_function_name(getattr(fn, "_rename", None) or name)
             with fs.open_dir_with_tracking(fpath, target=fn) as env:
                 kwargs = {
-                    name: env.fnspec.here.parent / default
+                    name: str(env.fnspec.here.parent / default)
                     for name, default in (
                         env.fnspec.argspec.kwonlydefaults or {}
                     ).items()

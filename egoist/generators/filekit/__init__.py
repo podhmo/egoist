@@ -24,7 +24,7 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
                 fpath, "w", target=fn, opener=StringIO
             ) as env:
                 kwargs = {
-                    name: env.fnspec.here.parent / default
+                    name: str(env.fnspec.here.parent / default)
                     for name, default in (
                         env.fnspec.argspec.kwonlydefaults or {}
                     ).items()
