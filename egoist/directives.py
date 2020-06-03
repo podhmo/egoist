@@ -157,7 +157,7 @@ def shared(app: App) -> None:
 
     def _register_shared(app: App, fn: t.Callable[..., T]) -> AnyFunction:
         from functools import partial
-        from prestring.codeobject import Symbol
+        from egoist.internal.fake import Symbol
 
         name = f"{fn.__module__}:{fn.__name__}"
         app.register_factory(name, fn)
