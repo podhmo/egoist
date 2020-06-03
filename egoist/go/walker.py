@@ -78,6 +78,10 @@ def walk(
 Row = t.Tuple[str, t.Any, metadata_.Metadata]
 
 
+def _option_type(x: t.Type[t.Any]) -> t.Type[t.Any]:
+    return t.Optional[x]  # type: ignore
+
+
 @dataclasses.dataclass(frozen=False, eq=False)
 class Context:
     m: Module
@@ -152,7 +156,7 @@ class Context:
         )
         self.pseudo_item_map[item.type_] = pseudo_item
         # hack: temporary
-        self.pseudo_item_map[t.Optional[item.type_]] = dataclasses.replace(
+        self.pseudo_item_map[_option_type(item.type_)] = dataclasses.replace(
             pseudo_item, name=f"*{pseudo_item.name}", type_=t.Optional[item.type_]
         )
         return pseudo_item
