@@ -11,10 +11,11 @@ import (
 )
 
 var RPC = struct {
-	GofmtService struct{ Format string }
+	GofmtService struct{ Format, FormatFile string }
 }{
-	GofmtService: struct{ Format string }{
-		Format: "format",
+	GofmtService: struct{ Format, FormatFile string }{
+		Format:     "format",
+		FormatFile: "formatfile",
 	},
 }
 
@@ -28,6 +29,28 @@ func (GofmtService) SMD() smd.ServiceInfo {
 					{
 						Name:        "code",
 						Optional:    false,
+						Description: ``,
+						Type:        smd.String,
+					},
+				},
+				Returns: smd.JSONSchema{
+					Description: ``,
+					Optional:    false,
+					Type:        smd.String,
+				},
+			},
+			"FormatFile": {
+				Description: ``,
+				Parameters: []smd.JSONSchema{
+					{
+						Name:        "input",
+						Optional:    false,
+						Description: ``,
+						Type:        smd.String,
+					},
+					{
+						Name:        "output",
+						Optional:    true,
 						Description: ``,
 						Type:        smd.String,
 					},
@@ -66,6 +89,32 @@ func (s GofmtService) Invoke(ctx context.Context, method string, params json.Raw
 		}
 
 		resp.Set(s.Format(args.Code))
+
+	case RPC.GofmtService.FormatFile:
+		var args = struct {
+			Input  string  `json:"input"`
+			Output *string `json:"output"`
+		}{}
+
+		if zenrpc.IsArray(params) {
+			if params, err = zenrpc.ConvertToObject([]string{"input", "output"}, params); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		if len(params) > 0 {
+			if err := json.Unmarshal(params, &args); err != nil {
+				return zenrpc.NewResponseError(nil, zenrpc.InvalidParams, "", err.Error())
+			}
+		}
+
+		//zenrpc:output=""
+		if args.Output == nil {
+			var v string = ""
+			args.Output = &v
+		}
+
+		resp.Set(s.FormatFile(args.Input, *args.Output))
 
 	default:
 		resp = zenrpc.NewResponseError(nil, zenrpc.MethodNotFound, "", nil)

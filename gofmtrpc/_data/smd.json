@@ -14,6 +14,23 @@
             "returns": {
                 "type": "string"
             }
+        },
+        "FormatFile": {
+            "description": "",
+            "parameters": [
+                {
+                    "name": "input",
+                    "type": "string"
+                },
+                {
+                    "name": "output",
+                    "optional": true,
+                    "type": "string"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
         }
     },
     "target": "/",
