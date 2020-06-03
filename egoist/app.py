@@ -132,9 +132,9 @@ class App(_Configurator):
         self.context.committed = True  # type: ignore
 
         logger.debug("commit")
-        super().commit()
         self.registry.configure(dry_run=dry_run)
         runtime.set_context(runtime.RuntimeContext(self.registry, dry_run=dry_run))
+        super().commit()
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
         from egoist.internal.logutil import logging_setup
