@@ -1,0 +1,38 @@
+{
+    "SMDVersion": "2.0",
+    "contentType": "application/json",
+    "envelope": "JSON-RPC-2.0",
+    "services": {
+        "Format": {
+            "description": "",
+            "parameters": [
+                {
+                    "name": "code",
+                    "type": "string"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
+        },
+        "FormatFile": {
+            "description": "",
+            "parameters": [
+                {
+                    "name": "input",
+                    "type": "string"
+                },
+                {
+                    "name": "output",
+                    "optional": true,
+                    "type": "string"
+                }
+            ],
+            "returns": {
+                "type": "string"
+            }
+        }
+    },
+    "target": "/",
+    "transport": "POST"
+}
