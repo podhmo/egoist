@@ -28,11 +28,9 @@ def scan(
     from egoist.components.tracker import get_tracker
     from .generate import generate
 
-    app.commit(dry_run=True)
-
     if not bool(os.environ.get("VERBOSE", "")):
         logging.getLogger("prestring.output").setLevel(logging.WARNING)
-    generate(app, tasks=tasks, rootdir=rootdir)
+    generate(app, tasks=tasks, rootdir=rootdir, dry_run=True)
 
     root_path = get_root_path(app.settings, root=rootdir)
 
