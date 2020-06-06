@@ -40,13 +40,13 @@ def generate(
         action_list.append(partial(walk, sources, root=root_path))
 
         # for app.include_when()
-        include_when_mapping = app.include_when_mapping
+        delayed_include_mapping = app.delayed_include_mapping
         for fn in sources.values():
-            if fn in include_when_mapping:
-                for _app, path in include_when_mapping[fn]:
+            if fn in delayed_include_mapping:
+                for _app, path in delayed_include_mapping[fn]:
                     _app.include(path)
                     included_after_commit_list.append(path)
-        app.include_when_mapping.clear()  # xxx: clear
+        app.delayed_include_mapping.clear()  # xxx: clear
 
     if len(included_after_commit_list) > 0:
         app.shallow_commit()
