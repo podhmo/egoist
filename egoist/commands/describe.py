@@ -15,13 +15,15 @@ def describe(app: App) -> None:
 
     app.commit(dry_run=False)
 
-    definitions = {}
+    definitions: t.Dict[str, t.Dict[str, t.Union[str, t.List[str]]]] = {}
     delayed_include_mapping = app.delayed_include_mapping
     for kit, fns in app.registry.generators.items():
         for fn in fns:
             name = get_fullname_of_callable(fn)
             summary = (inspect.getdoc(fn) or "").strip().split("\n", 1)[0]
+
             definitions[name] = {"doc": summary, "generator": kit}
+
             if fn in delayed_include_mapping:
                 definitions[name]["include_when"] = [
                     get_fullname_of_callable(dep)
@@ -41,6 +43,7 @@ def describe(app: App) -> None:
     )
     append_directives = current_directives.difference(empty_context.__dict__.keys())
     append_directives = append_directives.difference(["run"])
+
     d = {
         "definitions": definitions,
         "components": factories,

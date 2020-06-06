@@ -21,7 +21,7 @@ def generate(
     app.context.queue.clear()  # xxx: clear
 
     action_list: t.List[t.Callable[..., t.Any]] = []
-    included_after_commit_list: t.List[str] = []
+    included_after_commit_list: t.List[t.Union[str, t.Callable[..., t.Any]]] = []
 
     for kit, fns in app.registry.generators.items():
         walk_or_module = app.maybe_dotted(kit)
