@@ -21,28 +21,6 @@ class ConnectionChecker(tx.Protocol):
         ...
 
 
-class SentinelHandler(tx.Protocol):
-    def inject_sentinel(self, argv: t.List[str], *, sentinel: str) -> t.List[str]:
-        ...
-
-    def create_connection_checker(self, *, sentinel: str) -> ConnectionChecker:
-        ...
-
-
-class FileSentinelHandler:  # SentinelHandler
-    def __init__(self, option_name: str = "--sentinel") -> None:
-        self.option_name = option_name
-
-    def inject_sentinel(self, argv: t.List[str], *, sentinel: str,) -> t.List[str]:
-        if sentinel in argv:
-            logger.debug("sentinel %s is included in %s", sentinel, argv)
-            return argv
-        return [*argv, self.option_name, sentinel]
-
-    def create_connection_checker(self, *, sentinel: str) -> ConnectionChecker:
-        return FileConnectionChecker(sentinel=sentinel)
-
-
 class FileConnectionChecker:  # ConnectionChecker
     def __init__(self, *, sentinel: str):
         self.sentinel = sentinel
@@ -63,16 +41,15 @@ def spawn_with_connection(
     argv: t.List[str],
     *,
     sentinel: str,
-    handler: t.Optional[SentinelHandler] = None,
-    sentinel_option: str = "--sentinel",
     retries: t.List[float] = [0.1, 0.2, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4],
     check: bool = True,
     environ: t.Optional[t.Dict[str, str]] = None,
+    create_connection_checker: t.Callable[
+        [str], ConnectionChecker
+    ] = FileConnectionChecker,
 ) -> t.Tuple[subprocess.Popen[str], ConnectionChecker]:
-    handler = handler or FileSentinelHandler(sentinel_option)
-
     if environ is None or sentinel not in list(environ.values()):
-        argv = handler.inject_sentinel(argv, sentinel=sentinel)
+        assert sentinel in argv
 
     if environ is not None:
         environ.update(os.environ)
@@ -80,7 +57,7 @@ def spawn_with_connection(
     logger.info("spawn server process, %s", " ".join(argv))
     p = subprocess.Popen(argv, text=True, env=environ)
 
-    checker = handler.create_connection_checker(sentinel=sentinel)
+    checker = create_connection_checker(sentinel=sentinel)
 
     if not check:
         return p, checker
