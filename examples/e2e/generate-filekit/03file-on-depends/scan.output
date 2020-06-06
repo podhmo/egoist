@@ -1,1 +1,8 @@
-{'output/season.json': ['input/season.csv']}
+{
+  "output/season.json": {
+    "task": "season",
+    "depends": [
+      "input/season.csv"
+    ]
+  }
+}

@@ -1,1 +1,10 @@
-{'output/xxx/hello.txt': [], 'output/xxx/byebye.txt': []}
+{
+  "output/xxx/hello.txt": {
+    "task": "hello",
+    "depends": []
+  },
+  "output/xxx/byebye.txt": {
+    "task": "byebye",
+    "depends": []
+  }
+}
