@@ -22,7 +22,7 @@ class ConnectionChecker(tx.Protocol):
 
 
 class FileConnectionChecker:  # ConnectionChecker
-    def __init__(self, *, sentinel: str):
+    def __init__(self, sentinel: str):
         self.sentinel = sentinel
 
     def ping(self) -> bool:
@@ -57,7 +57,7 @@ def spawn_with_connection(
     logger.info("spawn server process, %s", " ".join(argv))
     p = subprocess.Popen(argv, text=True, env=environ)
 
-    checker = create_connection_checker(sentinel=sentinel)
+    checker = create_connection_checker(sentinel)
 
     if not check:
         return p, checker
