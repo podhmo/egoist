@@ -17,7 +17,6 @@ def add_server_process(app: App) -> None:
         name: str,
         urlfmt: str = "http://{host}:{port}",
         host: str = "127.0.0.1",
-        sentinel: t.Optional[str] = None,
         port: t.Optional[t.Union[int, str]] = None,
         params: t.Optional[t.Dict[str, LazyParam]] = None,
         env: t.Optional[t.Dict[str, LazyParam]] = None,
@@ -44,8 +43,14 @@ def add_server_process(app: App) -> None:
                 environ = {k: fn(app) for k, fn in (env or {}).items()}
                 if port is None:
                     port = kwargs.get("port") or find_free_port(app)
+                elif "port" not in kwargs:
+                    kwargs["port"] = port
+
                 if "host" in kwargs:
                     host = kwargs["host"]
+                elif "host" not in kwargs:
+                    kwargs["host"] = host
+
                 sentinel = (  # xxx
                     kwargs.get("sentinel")
                     or environ.get("SENTINEL")
