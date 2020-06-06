@@ -1,1 +1,20 @@
-{'output/foo.json': ['input/hello.tmpl'], 'output/bar.json': ['input/hello.tmpl'], 'output/boo.json': ['input/hello.tmpl']}
+{
+  "output/foo.json": {
+    "task": "output",
+    "depends": [
+      "input/hello.tmpl"
+    ]
+  },
+  "output/bar.json": {
+    "task": "output",
+    "depends": [
+      "input/hello.tmpl"
+    ]
+  },
+  "output/boo.json": {
+    "task": "output",
+    "depends": [
+      "input/hello.tmpl"
+    ]
+  }
+}

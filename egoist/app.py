@@ -4,6 +4,7 @@ import typing_extensions as tx
 
 import logging
 import dataclasses
+from functools import partial
 from collections import defaultdict
 from miniconfig import Configurator as _Configurator
 from miniconfig import Context as _Context
@@ -66,6 +67,15 @@ class Context(_Context):
         return set()  # for subapp
 
     @reify
+    def _delayed_include_mapping(
+        self,
+    ) -> t.Dict[
+        t.Callable[..., None],
+        t.List[t.Tuple[App, t.Union[t.Callable[..., t.Any], str]]],
+    ]:
+        return defaultdict(list)
+
+    @reify
     def cli_parser(self) -> ArgumentParser:
         import argparse
 
@@ -93,6 +103,16 @@ class App(_Configurator):
         return self.context._aggressive_import_cache  # type: ignore
 
     @property
+    def delayed_include_mapping(
+        self,
+    ) -> t.Dict[
+        t.Callable[..., None],
+        t.List[t.Tuple[App, t.Union[t.Callable[..., t.Any], str]]],
+    ]:
+        # TODO: fix memory leak
+        return self.context._delayed_include_mapping  # type: ignore
+
+    @property
     def cli_parser(self) -> ArgumentParser:
         return self.context.cli_parser  # type: ignore
 
@@ -108,6 +128,18 @@ class App(_Configurator):
             return
         imported.add(fn_or_string)
         return super().include(fn_or_string, attrname=attrname)
+
+    def include_when(
+        self,
+        fn_or_string: t.Union[t.Callable[..., t.Any], str],
+        *,
+        attrname: t.Optional[str] = None,
+    ) -> t.Callable[[t.Callable[..., t.Any]], t.Callable[..., t.Any]]:
+        def _register(command: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
+            self.delayed_include_mapping[command].append((self, fn_or_string))
+            return command
+
+        return _register
 
     # default directives
     def register_factory(self, name: str, factory: types.ComponentFactory) -> None:
@@ -134,6 +166,9 @@ class App(_Configurator):
         logger.debug("commit")
         self.registry.configure(dry_run=dry_run)
         runtime.set_context(runtime.RuntimeContext(self.registry, dry_run=dry_run))
+        super().commit()
+
+    def shallow_commit(self) -> None:
         super().commit()
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
@@ -168,7 +203,8 @@ def create_app(settings: SettingsDict) -> App:
 
 
 class SubApp:
-    def __init__(self) -> None:
+    def __init__(self, *, name: str) -> None:
+        self.name = name
         self.registered: t.List[
             t.Tuple[
                 str,
@@ -177,16 +213,54 @@ class SubApp:
             ]
         ] = []
         self.requires: t.Set[t.Union[str, t.Callable[..., t.Any]]] = set()
+        self.callbacks: t.List[t.Callable[[App], t.Any]] = []
 
     def include(self, path: str) -> None:
         self.requires.add(path)
 
-    def includeme(self, app: App) -> None:
+    def _append_include_when(
+        self,
+        app: App,
+        *,
+        command: t.Callable[..., t.Any],
+        fn_or_string: t.Union[t.Callable[..., t.Any], str],
+    ) -> None:
+        app.delayed_include_mapping[command].append((app, fn_or_string))
+
+    def include_when(
+        self,
+        fn_or_string: t.Union[t.Callable[..., t.Any], str],
+        *,
+        attrname: t.Optional[str] = None,
+    ) -> t.Callable[[t.Callable[..., t.Any]], t.Callable[..., t.Any]]:
+        def _register(command: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
+            self.callbacks.append(
+                partial(
+                    self._append_include_when,
+                    command=command,
+                    fn_or_string=fn_or_string,
+                )
+            )
+            return command
+
+        return _register
+
+    def includeme(self, _app: App) -> None:
+        import sys
+
+        name = self.name
+        module = sys.modules[name]
+        app = _app.__class__(_app._settings, module=module, context=_app.context)
+
         seen = app.imported
         for path in self.requires:
             if path in seen:
                 continue
             app.include(path)
+
+        if len(self.callbacks) > 0:
+            for cb in self.callbacks:
+                cb(app)
 
         for name, buf, _ in self.registered:
             directive = getattr(app, name)
@@ -209,8 +283,6 @@ class SubApp:
                 task: AnyFunction = args[-1]
                 self.registered.append((name, _buf, task))
                 return task
-            from functools import partial
-
             return partial(_register, _buf=_buf)
 
         return _register
@@ -219,10 +291,9 @@ class SubApp:
 def create_subapp(*, _depth: int = 1) -> SubApp:
     import sys
 
-    subapp = SubApp()
-
     # black magic: register includeme automatically
     f = sys._getframe(_depth)
+    subapp = SubApp(name=f.f_globals["__name__"])
     if "includeme" not in f.f_globals:
         f.f_globals["includeme"] = subapp.includeme
     return subapp

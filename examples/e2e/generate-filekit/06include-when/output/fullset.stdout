@@ -1,0 +1,4 @@
+python definitions.py generate  --rootdir "output/fullset"
+INCLUDE yyy
+INCLUDE xxx
+INCLUDE zzz

@@ -1,0 +1,3 @@
+python definitions.py generate hello --rootdir output/hello-only
+INCLUDE yyy
+INCLUDE xxx

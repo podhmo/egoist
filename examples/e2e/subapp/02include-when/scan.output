@@ -1,0 +1,10 @@
+{
+  "output/hello.txt": {
+    "task": "foo:hello",
+    "depends": []
+  },
+  "output/byebye.txt": {
+    "task": "foo:byebye",
+    "depends": []
+  }
+}

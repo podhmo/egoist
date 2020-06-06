@@ -1,0 +1,3 @@
+python definitions.py generate byebye --rootdir output/byebye-only
+INCLUDE zzz
+INCLUDE xxx

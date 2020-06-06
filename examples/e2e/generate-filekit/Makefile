@@ -1,4 +1,4 @@
-default: 00 01 02 03 04 05
+default: 00 01 02 03 04 05 06
 
 00:
 	$(MAKE) -C $(shell echo $@*/)
@@ -11,6 +11,8 @@ default: 00 01 02 03 04 05
 04:
 	$(MAKE) -C $(shell echo $@*/)
 05:
+	$(MAKE) -C $(shell echo $@*/)
+06:
 	$(MAKE) -C $(shell echo $@*/)
 
 # jinja2
