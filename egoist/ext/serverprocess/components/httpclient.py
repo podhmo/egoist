@@ -12,7 +12,7 @@ NAME = __name__
 def get_http_client() -> Session:
     from egoist.runtime import get_component_factory
 
-    return get_component_factory(NAME)()
+    return get_component_factory(NAME)()  # type: ignore
 
 
 def _create_http_client() -> Session:

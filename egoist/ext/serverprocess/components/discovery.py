@@ -23,7 +23,7 @@ class Discovery:
         else:
             self.mapping[name].append(url)
 
-    def validate(self):
+    def validate(self) -> None:
         if not self.no_conflict:
             return
 
@@ -41,7 +41,7 @@ class Discovery:
 
 
 def get_discovery() -> Discovery:
-    return runtime.get_component(NAME)
+    return runtime.get_component(NAME)  # type: ignore
 
 
 def includeme(app: App) -> None:

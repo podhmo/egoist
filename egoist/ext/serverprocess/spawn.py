@@ -1,3 +1,4 @@
+from __future__ import annotations
 import typing as t
 import typing_extensions as tx
 import time
@@ -65,12 +66,12 @@ def spawn_with_connection(
     sentinel_option: str = "--sentinel",
     retries: t.List[float] = [0.1, 0.2, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4],
     check: bool = True,
-) -> t.Tuple[subprocess.Popen, ConnectionChecker]:
+) -> t.Tuple[subprocess.Popen[str], ConnectionChecker]:
     handler = handler or FileSentinelHandler(sentinel_option)
     argv = handler.inject_sentinel(argv, sentinel=sentinel)
 
     logger.info("spawn server process, %s", " ".join(argv))
-    p = subprocess.Popen(argv)
+    p = subprocess.Popen(argv, text=True)
 
     checker = handler.create_connection_checker(sentinel=sentinel)
 
@@ -91,7 +92,7 @@ def spawn_with_connection(
             time.sleep(wait_time)  # todo: backoff
 
         if end_time is None:
-            raise TimeoutError(f"{time.time() - start_time} sec passed, {p.args}")
+            raise TimeoutError(f"{time.time() - start_time} sec passed, {p.args!r}")
         return p, checker
     except Exception as exc:
         logger.warning("hmm %r, kill process", exc)

@@ -1,11 +1,15 @@
+from __future__ import annotations
 import typing as t
 import logging
 from egoist.app import App
 
+AnyFunction = t.Callable[..., t.Any]
+if t.TYPE_CHECKING:
+    from .lazyparams import LazyParam
 logger = logging.getLogger(__name__)
 
 
-def add_server_process(app: App):
+def add_server_process(app: App) -> None:
     def _define(
         app: App,
         fmt: str,
@@ -14,13 +18,13 @@ def add_server_process(app: App):
         urlfmt: str = "http://{host}:{port}",
         host: str = "127.0.0.1",
         sentinel: t.Optional[str] = None,
-        port: t.Optional[int] = None,
-        params: t.Optional[t.Dict[str, t.Callable[[], object]]] = None,
-    ):
+        port: t.Optional[t.Union[int, str]] = None,
+        params: t.Optional[t.Dict[str, LazyParam]] = None,
+    ) -> None:
         app.include("egoist.ext.serverprocess.components.discovery")
         app.include("egoist.ext.serverprocess.components.httpclient")
 
-        def _register():
+        def _register() -> None:
             nonlocal host
             nonlocal port
 
@@ -30,7 +34,9 @@ def add_server_process(app: App):
             from .lazyparams import find_free_port, create_sentinel_file
 
             if app.registry.dry_run:
-                kwargs = {k: "xxx" for k, fn in (params or {}).items()}
+                kwargs: t.Dict[str, t.Any] = {
+                    k: "xxx" for k, fn in (params or {}).items()
+                }
                 port = "xxx"
                 sentinel = "xxx"
             else:
@@ -54,7 +60,7 @@ def add_server_process(app: App):
 
             p, _ = spawn_with_connection(argv, sentinel=sentinel)
 
-            def _shutdown():  # xxx:
+            def _shutdown() -> None:  # xxx:
                 logger.info("terminate %s", name)
                 with p:
                     p.terminate()

@@ -1,4 +1,6 @@
+from __future__ import annotations
 import typing as t
+import typing_extensions as tx
 import logging
 from egoist.app import App
 
@@ -10,7 +12,20 @@ logger = logging.getLogger(__name__)
 # `app.add_server_process("xxxrpc --port {port}", params={"port": find_free_port})`
 
 
-def find_free_port(app: App, *, host: str = "0.0.0.0") -> int:
+class LazyParam(tx.Protocol):
+    def __call__(self, app: App) -> str:
+        ...
+
+
+def find_free_port(app: App) -> str:
+    return str(_find_free_port(host="0.0.0.0"))
+
+
+def create_sentinel_file(app: App) -> str:
+    return _create_sentinel_file(suffix=".sentinel")
+
+
+def _find_free_port(host: str = "0.0.0.0") -> int:
     import socket
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -20,7 +35,7 @@ def find_free_port(app: App, *, host: str = "0.0.0.0") -> int:
     return port
 
 
-def create_sentinel_file(app: App, *, suffix: str = ".sentinel") -> str:
+def _create_sentinel_file(suffix: t.Optional[str] = None) -> str:
     import tempfile
 
     fd, sentinel = tempfile.mkstemp(suffix=suffix)
