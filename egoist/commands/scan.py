@@ -36,7 +36,7 @@ def scan(
         if dry_run is not None:
             app.registry.configure(dry_run=True)
 
-            def _finish():
+            def _finish() -> None:
                 if dry_run is not None:
                     app.registry.configure(dry_run=dry_run)
 
