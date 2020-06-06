@@ -17,9 +17,9 @@ def add_server_process(app: App) -> None:
         name: str,
         urlfmt: str = "http://{host}:{port}",
         host: str = "127.0.0.1",
-        sentinel: t.Optional[str] = None,
         port: t.Optional[t.Union[int, str]] = None,
         params: t.Optional[t.Dict[str, LazyParam]] = None,
+        env: t.Optional[t.Dict[str, LazyParam]] = None,
     ) -> None:
         app.include("egoist.ext.serverprocess.components.discovery")
         app.include("egoist.ext.serverprocess.components.httpclient")
@@ -34,19 +34,28 @@ def add_server_process(app: App) -> None:
             from .lazyparams import find_free_port, create_sentinel_file
 
             if app.registry.dry_run:
-                kwargs: t.Dict[str, t.Any] = {
-                    k: "xxx" for k, fn in (params or {}).items()
-                }
+                kwargs: t.Dict[str, t.Any] = {k: "xxx" for k in (params or {}).keys()}
+                environ = {k: "xxx" for k in (env or {}).keys()}
                 port = "xxx"
                 sentinel = "xxx"
             else:
                 kwargs = {k: fn(app) for k, fn in (params or {}).items()}
+                environ = {k: fn(app) for k, fn in (env or {}).items()}
                 if port is None:
                     port = kwargs.get("port") or find_free_port(app)
+                elif "port" not in kwargs:
+                    kwargs["port"] = port
+
                 if "host" in kwargs:
                     host = kwargs["host"]
-                if "sentinel" in kwargs:
-                    sentinel = kwargs.get("sentinel") or create_sentinel_file(app)
+                elif "host" not in kwargs:
+                    kwargs["host"] = host
+
+                sentinel = (  # xxx
+                    kwargs.get("sentinel")
+                    or environ.get("SENTINEL")
+                    or create_sentinel_file(app)
+                )
 
             argv = shlex.split(fmt.format(**kwargs))
             url = urlfmt.format(host=host, port=port)
@@ -58,7 +67,7 @@ def add_server_process(app: App) -> None:
 
             from .spawn import spawn_with_connection
 
-            p, _ = spawn_with_connection(argv, sentinel=sentinel)
+            p, _ = spawn_with_connection(argv, sentinel=sentinel, environ=environ)
 
             def _shutdown() -> None:  # xxx:
                 logger.info("terminate %s", name)
