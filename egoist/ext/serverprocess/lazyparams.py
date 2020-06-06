@@ -25,6 +25,10 @@ def create_sentinel_file(app: App) -> str:
     return _create_sentinel_file(suffix=".sentinel")
 
 
+def constant(value: str) -> LazyParam:
+    return lambda app: value
+
+
 def _find_free_port(host: str = "0.0.0.0") -> int:
     import socket
 
