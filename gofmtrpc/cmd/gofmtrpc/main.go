@@ -13,6 +13,7 @@ import (
 // Option ...
 type Option struct {
 	Addr string // for `-addr`
+	Sentinel string // for `-sentinel`
 	Args []string // cmd.Args
 }
 
@@ -27,6 +28,7 @@ func main() {
 		cmd.PrintDefaults()
 	}
 	cmd.StringVar(&opt.Addr, "addr", ":9999", "-")
+	cmd.StringVar(&opt.Sentinel, "sentinel", "", "-")
 
 	if err := cmd.Parse(os.Args[1:]); err != nil {
 		if err != flag.ErrHelp {
@@ -41,5 +43,5 @@ func main() {
 }
 
 func run(opt *Option) error {
-	return gofmtrpc.Run(opt.Addr)
+	return gofmtrpc.Run(opt.Addr, opt.Sentinel)
 }
