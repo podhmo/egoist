@@ -43,9 +43,10 @@ def generate(
         include_when_mapping = app.include_when_mapping
         for fn in sources.values():
             if fn in include_when_mapping:
-                for path in include_when_mapping[fn]:
-                    app.include(path)
+                for _app, path in include_when_mapping[fn]:
+                    _app.include(path)
                     included_after_commit_list.append(path)
+        app.include_when_mapping.clear()  # xxx: clear
 
     if len(included_after_commit_list) > 0:
         app.shallow_commit()
