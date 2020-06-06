@@ -66,6 +66,12 @@ class Context(_Context):
         return set()  # for subapp
 
     @reify
+    def _include_when_mapping(
+        self,
+    ) -> t.Dict[t.Callable[..., None], t.List[t.Union[t.Callable[..., t.Any], str]]]:
+        return defaultdict(list)
+
+    @reify
     def cli_parser(self) -> ArgumentParser:
         import argparse
 
@@ -93,6 +99,12 @@ class App(_Configurator):
         return self.context._aggressive_import_cache  # type: ignore
 
     @property
+    def include_when_mapping(
+        self,
+    ) -> t.Dict[t.Callable[..., None], t.List[t.Union[t.Callable[..., t.Any], str]]]:
+        return self.context._include_when_mapping  # type: ignore
+
+    @property
     def cli_parser(self) -> ArgumentParser:
         return self.context.cli_parser  # type: ignore
 
@@ -108,6 +120,18 @@ class App(_Configurator):
             return
         imported.add(fn_or_string)
         return super().include(fn_or_string, attrname=attrname)
+
+    def include_when(
+        self,
+        fn_or_string: t.Union[t.Callable[..., t.Any], str],
+        *,
+        attrname: t.Optional[str] = None,
+    ) -> t.Callable[[t.Callable[..., t.Any]], t.Callable[..., t.Any]]:
+        def _register(command: t.Callable[..., t.Any]) -> t.Callable[..., t.Any]:
+            self.include_when_mapping[command].append(fn_or_string)
+            return command
+
+        return _register
 
     # default directives
     def register_factory(self, name: str, factory: types.ComponentFactory) -> None:
@@ -134,6 +158,9 @@ class App(_Configurator):
         logger.debug("commit")
         self.registry.configure(dry_run=dry_run)
         runtime.set_context(runtime.RuntimeContext(self.registry, dry_run=dry_run))
+        super().commit()
+
+    def shallow_commit(self) -> None:
         super().commit()
 
     def run(self, argv: t.Optional[t.List[str]] = None) -> t.Any:
