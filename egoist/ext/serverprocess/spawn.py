@@ -69,7 +69,7 @@ def spawn_with_connection(
     handler = handler or FileSentinelHandler(sentinel_option)
     argv = handler.inject_sentinel(argv, sentinel=sentinel)
 
-    logger.info("spawn process %r", " ".join(argv))
+    logger.info("spawn server process, %s", " ".join(argv))
     p = subprocess.Popen(argv)
 
     checker = handler.create_connection_checker(sentinel=sentinel)

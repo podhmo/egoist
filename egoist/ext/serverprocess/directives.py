@@ -29,20 +29,25 @@ def add_server_process(app: App):
             from .components.discovery import get_discovery
             from .lazyparams import find_free_port, create_sentinel_file
 
-            kwargs = {k: fn(app) for k, fn in (params or {}).items()}
-            if port is None:
-                port = kwargs.get("port") or find_free_port(app)
-            if "host" in kwargs:
-                host = kwargs["host"]
-            if "sentinel" in kwargs:
-                sentinel = kwargs.get("sentinel") or create_sentinel_file(app)
+            if app.registry.dry_run:
+                kwargs = {k: "xxx" for k, fn in (params or {}).items()}
+                port = "xxx"
+                sentinel = "xxx"
+            else:
+                kwargs = {k: fn(app) for k, fn in (params or {}).items()}
+                if port is None:
+                    port = kwargs.get("port") or find_free_port(app)
+                if "host" in kwargs:
+                    host = kwargs["host"]
+                if "sentinel" in kwargs:
+                    sentinel = kwargs.get("sentinel") or create_sentinel_file(app)
 
             argv = shlex.split(fmt.format(**kwargs))
             url = urlfmt.format(host=host, port=port)
-
             get_discovery().register(name, url=url)
+
             if app.registry.dry_run:
-                logger.info("dry run, %s skipped", name)
+                logger.info("dry run, skip starting server process, %s", name)
                 return
 
             from .spawn import spawn_with_connection
