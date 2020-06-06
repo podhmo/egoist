@@ -44,7 +44,7 @@ class Registry:
 
     dry_run: t.Optional[bool] = None
 
-    @reify
+    @property
     def factories(self) -> t.Dict[str, t.List[types.ComponentFactory]]:
         if self.dry_run is None:
             raise RuntimeError("this registry is not configured")

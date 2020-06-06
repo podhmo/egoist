@@ -30,11 +30,21 @@ def scan(
 
     if not bool(os.environ.get("VERBOSE", "")):
         logging.getLogger("prestring.output").setLevel(logging.WARNING)
-    generate(app, tasks=tasks, rootdir=rootdir, dry_run=True)
 
-    root_path = get_root_path(app.settings, root=rootdir)
-
+    dry_run = app.registry.dry_run
     with contextlib.ExitStack() as s:
+        if dry_run is not None:
+            app.registry.configure(dry_run=True)
+
+            def _finish() -> None:
+                if dry_run is not None:
+                    app.registry.configure(dry_run=dry_run)
+
+            s.callback(_finish)
+
+        generate(app, tasks=tasks, rootdir=rootdir, dry_run=True)
+        root_path = get_root_path(app.settings, root=rootdir)
+
         out_port: t.Optional[t.IO[str]] = None
 
         if out is not None:

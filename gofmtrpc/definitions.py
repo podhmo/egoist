@@ -10,13 +10,13 @@ app.include("egoist.directives.define_cli")
 
 
 @app.define_cli("egoist.generators.clikit:walk")
-def gofmtrpc(*, addr: str = ":9999") -> GoError:
+def gofmtrpc(*, addr: str = ":9999", sentinel: str = "") -> GoError:
     """gofmtrpc with JSONRPC"""
     from egoist.generators.clikit import runtime, clikit
 
     with runtime.generate(clikit) as m:
         gofmtrpc_pkg = m.import_("github.com/podhmo/egoist/gofmtrpc")
-        m.return_(gofmtrpc_pkg.Run(addr))
+        m.return_(gofmtrpc_pkg.Run(addr, sentinel))
 
 
 if __name__ == "__main__":
