@@ -31,7 +31,7 @@ def hello() -> None:
 
 
 @app.define_file("egoist.generators.filekit:walk", suffix=".txt")
-@app.include_when(".xxx")
+@app.include_when("foo.xxx")
 @app.include_when(zzz)
 def byebye() -> None:
     from egoist.generators.filekit import runtime
