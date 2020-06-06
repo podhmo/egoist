@@ -7,11 +7,6 @@ app.include("egoist.directives.define_file")
 app.include("egoist.directives.shared")
 
 
-def xxx(app: App):
-    print("INCLUDE", "xxx")
-    app.registry.settings["xxx"] = "xxx"
-
-
 def yyy(app: App):
     print("INCLUDE", "yyy")
     app.registry.settings["yyy"] = "yyy"
@@ -23,7 +18,7 @@ def zzz(app: App):
 
 
 @app.define_file("egoist.generators.filekit:walk", suffix=".txt")
-@app.include_when(xxx)
+@app.include_when("xxx")
 @app.include_when(yyy)
 def hello() -> None:
     from egoist.generators.filekit import runtime
@@ -36,7 +31,7 @@ def hello() -> None:
 
 
 @app.define_file("egoist.generators.filekit:walk", suffix=".txt")
-@app.include_when(xxx)
+@app.include_when("xxx")
 @app.include_when(zzz)
 def byebye() -> None:
     from egoist.generators.filekit import runtime
