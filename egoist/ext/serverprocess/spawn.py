@@ -48,7 +48,7 @@ def spawn_with_connection(
         [str], ConnectionChecker
     ] = FileConnectionChecker,
 ) -> t.Tuple[subprocess.Popen[str], ConnectionChecker]:
-    if environ is None or sentinel not in list(environ.values()):
+    if check and (environ is None or sentinel not in list(environ.values())):
         assert sentinel in argv
 
     if environ is not None:
