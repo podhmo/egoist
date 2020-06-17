@@ -20,6 +20,7 @@ def add_server_process(app: App) -> None:
         port: t.Optional[t.Union[int, str]] = None,
         params: t.Optional[t.Dict[str, LazyParam]] = None,
         env: t.Optional[t.Dict[str, LazyParam]] = None,
+        nowait: bool = False,
     ) -> None:
         app.include("egoist.ext.serverprocess.components.discovery")
         app.include("egoist.ext.serverprocess.components.httpclient")
@@ -51,10 +52,14 @@ def add_server_process(app: App) -> None:
                 elif "host" not in kwargs:
                     kwargs["host"] = host
 
-                sentinel = (  # xxx
-                    kwargs.get("sentinel")
-                    or environ.get("SENTINEL")
-                    or create_sentinel_file(app)
+                sentinel = (
+                    None
+                    if nowait
+                    else (  # xxx
+                        kwargs.get("sentinel")
+                        or environ.get("SENTINEL")
+                        or create_sentinel_file(app)
+                    )
                 )
 
             argv = shlex.split(fmt.format(**kwargs))
@@ -67,7 +72,9 @@ def add_server_process(app: App) -> None:
 
             from .spawn import spawn_with_connection
 
-            p, _ = spawn_with_connection(argv, sentinel=sentinel, environ=environ)
+            p, _ = spawn_with_connection(
+                argv, sentinel=sentinel, environ=environ, check=not nowait
+            )
 
             def _shutdown() -> None:  # xxx:
                 logger.info("terminate %s", name)
