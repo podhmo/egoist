@@ -53,13 +53,10 @@ def add_server_process(app: App) -> None:
                     kwargs["host"] = host
 
                 sentinel = (
-                    None
-                    if nowait
-                    else (  # xxx
-                        kwargs.get("sentinel")
-                        or environ.get("SENTINEL")
-                        or create_sentinel_file(app)
-                    )
+                    # xxx
+                    kwargs.get("sentinel")
+                    or environ.get("SENTINEL")
+                    or ("" if nowait else create_sentinel_file(app))
                 )
 
             argv = shlex.split(fmt.format(**kwargs))
