@@ -1,7 +1,11 @@
+import sys
 from setuptools import setup, find_packages
 
 
 install_requires = ["miniconfig>=0.6.0", "metashape>=0.0.2", "prestring>=0.9.0"]
+if sys.version_info < (3, 8):
+    install_requires.append("typing-inspect")
+
 tests_requires = ["pytest", "pytest-cov"]
 extras_require = {
     "testing": tests_requires,

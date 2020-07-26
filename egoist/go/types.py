@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing as t
-import typing_inspect as ti
+from egoist.langhelpers import typing_get_args
 from functools import lru_cache
 
 if t.TYPE_CHECKING:
@@ -88,7 +88,7 @@ def _unwrap_pointer_type(
         return typ, level
 
     if typ.__origin__ == GoPointer:
-        return _unwrap_pointer_type(ti.get_args(typ)[0], level=level + 1)
+        return _unwrap_pointer_type(typing_get_args(typ)[0], level=level + 1)
     return typ, level
 
 
