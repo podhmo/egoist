@@ -13,13 +13,11 @@ def emit(
         return
 
     from egoist.go.types import get_gopackage
-    from egoist.go import walker
+    from egoist.go.walker import get_walker
     from egoist.generators.structkit import _emit
 
     m = env.m
-    w = walker.get_walker(
-        classes, m=m, metadata_handler=runtime._default_metadata_handler
-    )
+    w = get_walker(classes, m=m, metadata_handler=runtime._default_metadata_handler)
 
     yield m
     m.import_("")
