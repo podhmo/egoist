@@ -1,7 +1,7 @@
 from __future__ import annotations
 import typing as t
 import typing_extensions as tx
-import typing_inspect as ti
+from egoist.langhelpers import typing_get_args
 from collections import defaultdict
 from prestring.go.codeobject import Module, Symbol
 from egoist.internal.graph import (

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import typing as t
-import typing_inspect as ti
+from egoist.langhelpers import typing_get_args
 import inspect
 from prestring.go import goname
 from prestring.naming import untitleize
