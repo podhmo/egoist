@@ -31,7 +31,7 @@ def walk(
     for cls in w.walk(kinds=kinds):
         origin = getattr(cls, "__origin__", None)
         if origin is not None:
-            args = list(ti.get_args(cls))
+            args = list(typing_get_args(cls))
             if origin == t.Union and _nonetype not in args:  # union
                 yield Item(
                     name=guess_name(cls), type_=cls, fields=[], args=args, origin=origin

@@ -125,12 +125,12 @@ def emit_enums(
     # literal_type or union_type
     go_type = name or f"{resolver.resolve_gotype(literal_type)}"
 
-    first_of_args = ti.get_args(literal_type)[0]
+    first_of_args = typing_get_args(literal_type)[0]
     base_go_type = resolver.resolve_gotype(
         type(getattr(first_of_args, "__name__", first_of_args))
     )
 
-    const_names = [getattr(x, "__name__", x) for x in ti.get_args(literal_type)]
+    const_names = [getattr(x, "__name__", x) for x in typing_get_args(literal_type)]
     const_members = {name: f"{go_type}{goname(name)}" for name in const_names}
     this = m.symbol("v")
     as_literal = resolver.resolve_default

@@ -28,7 +28,7 @@ class Resolver:
         """e.g. str -> 'string' """
         if hasattr(typ, "__origin__"):
             origin = typ.__origin__
-            args = ti.get_args(typ)
+            args = typing_get_args(typ)
             if origin == dict:
                 k = self.resolve_gotype(args[0])
                 v = self.resolve_gotype(args[1])

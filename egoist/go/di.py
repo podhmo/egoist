@@ -48,7 +48,7 @@ def parse(fn: t.Callable[..., t.Any]) -> AddNodeParamsDict:
     if not hasattr(return_type, "__origin__"):
         component_type = return_type
     elif return_type.__origin__ == tuple:
-        component_type, *_ = ti.get_args(return_type)
+        component_type, *_ = typing_get_args(return_type)
         component_type, return_level = _unwrap_pointer_type(component_type)
     elif return_type.__origin__ == GoPointer:
         component_type, return_level = _unwrap_pointer_type(return_type)
@@ -112,7 +112,7 @@ def inject(
         return_type = metadata.get("return_type", "")
 
         # handling provider callable
-        return_types = list(ti.get_args(return_type) or [return_type])
+        return_types = list(typing_get_args(return_type) or [return_type])
         var_names = [
             f"v{i}",
             *[getattr(typ, "name", typ.__name__) for typ in return_types[1:]],
