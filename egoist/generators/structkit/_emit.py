@@ -18,9 +18,10 @@ def has_reference(info: typeinfo.TypeInfo) -> bool:
     return info.user_defined_type is not None
 
 
-def emit_struct(ctx: walker.Context, item: walker.Item) -> runtime.Definition:
-    m = ctx.m
-    resolver = ctx.resolver
+def emit_struct(w: walker.Walker, item: walker.Item) -> runtime.Definition:
+    m = w.m
+    ctx = w.ctx
+    resolver = w.resolver
 
     typename = str(resolver.resolve_gotype(item.type_))
 
@@ -67,9 +68,10 @@ def emit_struct(ctx: walker.Context, item: walker.Item) -> runtime.Definition:
     return runtime.Definition(name=typename, code_module=None)
 
 
-def emit_union(ctx: walker.Context, item: walker.Item) -> runtime.Definition:
-    m = ctx.m
-    resolver = ctx.resolver
+def emit_union(w: walker.Walker, item: walker.Item) -> runtime.Definition:
+    m = w.m
+    ctx = w.ctx
+    resolver = w.resolver
 
     typename = goname(item.name)
     kind_typename = typename + "Kind"
@@ -91,7 +93,7 @@ def emit_union(ctx: walker.Context, item: walker.Item) -> runtime.Definition:
 
     # UnmarshalJSON
     pseudo_item = ctx.create_pseudo_item(item, discriminator_name=kind_typename)
-    unmarshalJSON_definition = emit_unmarshalJSON(ctx, pseudo_item)
+    unmarshalJSON_definition = emit_unmarshalJSON(w, pseudo_item)
     m.sep()
 
     # one-of validation
@@ -111,16 +113,16 @@ def emit_union(ctx: walker.Context, item: walker.Item) -> runtime.Definition:
     sm.stmt("}")
 
     # enums
-    emit_enums(ctx, item.type_, name=kind_typename)
+    emit_enums(w, item.type_, name=kind_typename)
 
     return runtime.Definition(name=typename, code_module=None)
 
 
 def emit_enums(
-    ctx: walker.Context, literal_type: t.Type[t.Any], *, name: t.Optional[str] = None,
+    w: walker.Walker, literal_type: t.Type[t.Any], *, name: t.Optional[str] = None,
 ) -> runtime.Definition:
-    m = ctx.m
-    resolver = ctx.resolver
+    m = w.m
+    resolver = w.resolver
 
     # literal_type or union_type
     go_type = name or f"{resolver.resolve_gotype(literal_type)}"
@@ -177,9 +179,10 @@ def emit_enums(
     return runtime.Definition(name=go_type, code_module=None)
 
 
-def emit_unmarshalJSON(ctx: walker.Context, item: walker.Item) -> runtime.Definition:
-    m = ctx.m
-    resolver = ctx.resolver
+def emit_unmarshalJSON(w: walker.Walker, item: walker.Item) -> runtime.Definition:
+    m = w.m
+    ctx = w.ctx
+    resolver = w.resolver
 
     this = m.symbol(f"{item.name[0].lower()}")
     this_type = f"{resolver.resolve_gotype(item.type_)}"
