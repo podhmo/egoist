@@ -7,9 +7,9 @@ T = t.TypeVar("T")
 # get_args
 typing_get_args = getattr(t, "get_args", None)
 if typing_get_args is None:
-    from egoist.langhelpers import typing_get_args
+    import typing_inspect
 
-    typing_get_args = typing_get_args
+    typing_get_args = typing_inspect.get_args
 
 
 # stolen from pyramid
