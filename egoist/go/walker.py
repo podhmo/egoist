@@ -1,14 +1,13 @@
 from __future__ import annotations
 import typing as t
 import typing_extensions as tx
-from egoist.langhelpers import typing_get_args
-
 import dataclasses
 from metashape.declarative import MISSING
 from metashape import typeinfo
 from metashape.analyze.config import Config as MetashapeConfig  # xxx
 from metashape.runtime import get_walker as _get_metashape_walker  # xxx
 from metashape.types import Kind as NodeKind
+from egoist.langhelpers import typing_get_args
 from egoist.typing import resolve_name, guess_name
 from egoist.langhelpers import reify
 from egoist.go.types import _unwrap_pointer_type, _get_flatten_args
@@ -18,6 +17,38 @@ from . import metadata as metadata_
 
 if t.TYPE_CHECKING:
     from metashape.analyze.walker import Walker as MetashapeWalker  # xxx
+
+
+def get_walker(
+    classes: t.List[t.Type[t.Any]],
+    *,
+    m: t.Optional[Module] = None,
+    metadata_handler: t.Optional[metadata_.MetadataHandlerFunction] = None,
+) -> Walker:
+    m = m or Module()
+    metadata_handler = metadata_handler or metadata_.add_jsontag_metadata_handler
+    return Walker(classes, m=m, metadata_handler=metadata_handler)
+
+
+class Walker:
+    def __init__(
+        self,
+        classes: t.List[t.Type[t.Any]],
+        *,
+        m: Module,
+        metadata_handler: metadata_.MetadataHandlerFunction,
+    ) -> None:
+        from egoist.go.resolver import get_resolver
+
+        self.m = m
+        self.resolver = get_resolver(m)
+        self.ctx = Context(
+            m=m, resolver=self.resolver, _metadata_handler=metadata_handler,
+        )
+        self._walker = self.ctx.get_metashape_walker(classes)
+
+    def walk(self) -> t.Iterator[Item]:
+        return walk(self._walker, metadata_handler=self.ctx.metadata_handler)
 
 
 def walk(
