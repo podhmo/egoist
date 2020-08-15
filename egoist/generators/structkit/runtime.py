@@ -29,6 +29,7 @@ def generate(
 ) -> t.ContextManager[Module]:
     c = get_current_context()
     env = c.stack[-1]
+    env._visit_generate_function(visit)
     return visit(env, classes, c.dry_run)
 
 

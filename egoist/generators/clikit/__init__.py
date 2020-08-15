@@ -7,7 +7,7 @@ import logging
 import pathlib
 from egoist import types
 from egoist.app import App
-from egoist.langhelpers import get_path_from_function_name
+from egoist.langhelpers import get_path_from_function_name, get_fullname_of_callable
 
 
 if t.TYPE_CHECKING:
@@ -45,6 +45,12 @@ def walk(
                     for name, _, _ in env.fnspec.parameters
                 }
                 fn(**kwargs)
+
+                if env.generated is None:
+                    logger.warn(
+                        "%s(), runtime.generate() is not called, please use it",
+                        get_fullname_of_callable(fn),
+                    )
 
 
 @contextlib.contextmanager
