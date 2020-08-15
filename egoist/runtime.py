@@ -54,6 +54,7 @@ class Env:
     fn: types.Command
     fs: _TrackedFS = dataclasses.field(repr=False, hash=False)  # xxx
     _content: t.Union[Module, t.IO[str], str] = dataclasses.field(repr=False)
+    generated: t.Optional[t.Any] = dataclasses.field(default=None, hash=False)
 
     @property
     def m(self) -> Module:
@@ -77,6 +78,9 @@ class Env:
             if default is not None:
                 getattr(attr, name).default = default
         return attr
+
+    def _visit_generate_function(self, generated: t.Any) -> None:
+        self.generated = generated
 
 
 _context = None
