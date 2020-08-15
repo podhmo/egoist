@@ -6,7 +6,7 @@ import pathlib
 import contextlib
 from egoist.app import App
 from egoist import types
-from egoist.langhelpers import get_path_from_function_name
+from egoist.langhelpers import get_path_from_function_name, get_fullname_of_callable
 
 
 if t.TYPE_CHECKING:
@@ -24,8 +24,14 @@ def walk(fns: t.Dict[str, types.Command], *, root: t.Union[str, pathlib.Path]) -
         for name, fn in fns.items():
             logger.debug("walk %s", name)
             fpath = f"{get_path_from_function_name(name)}.go"
-            with fs.open_file_with_tracking(fpath, "w", target=fn):
+            with fs.open_file_with_tracking(fpath, "w", target=fn) as env:
                 fn()
+
+                if env.generated is None:
+                    logger.warn(
+                        "%s(), runtime.generate() is not called, please use it",
+                        get_fullname_of_callable(fn),
+                    )
 
 
 @contextlib.contextmanager
