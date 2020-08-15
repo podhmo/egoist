@@ -1,3 +1,3 @@
-from egoist.cli import main
+from egoist.cli.main import main
 
 main()

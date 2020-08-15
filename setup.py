@@ -2,7 +2,11 @@ import sys
 from setuptools import setup, find_packages
 
 
-install_requires = ["miniconfig>=0.6.0", "metashape>=0.0.2", "prestring>=0.9.0"]
+install_requires = [
+    "miniconfig>=0.6.0",
+    "metashape>=0.0.2",
+    "prestring>=0.9.0",
+]
 if sys.version_info < (3, 8):
     install_requires.append("typing-inspect")
 
@@ -30,6 +34,7 @@ setup(
     package_data={"egoist": ["py.typed", "data/*", "data/**/*", "data/**/**/*"]},
     entry_points="""
       [console_scripts]
-      egoist = egoist.cli:main
+      egoist = egoist.cli.main:main
+      egoist-cli = egoist.cli.egoist_cli:main
 """,
 )
