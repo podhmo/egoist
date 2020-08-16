@@ -1,5 +1,6 @@
 from __future__ import annotations
 import typing as t
+import typing_extensions as tx
 from magicalimport import import_module
 from egoist.app import create_app, SettingsDict
 from egoist.scan import scan_module
@@ -10,7 +11,7 @@ def run(
     *,
     rootdir: str = "cmd/",
     here: t.Optional[str] = None,
-    action: t.Literal["generate", "scan"] = "generate",
+    action: tx.Literal["generate", "scan"] = "generate",
 ) -> None:
     m = import_module(filepath)
     here = here or m.__file__
