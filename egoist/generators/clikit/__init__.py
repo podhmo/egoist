@@ -7,7 +7,7 @@ import logging
 import pathlib
 from egoist import types
 from egoist.app import App
-from egoist.langhelpers import get_path_from_function_name, get_fullname_of_callable
+from egoist.langhelpers import get_path_from_function_name
 
 
 if t.TYPE_CHECKING:
@@ -52,8 +52,7 @@ def walk(
 
 def _on_generate_function_is_not_called(fn: t.Callable[..., t.Any]) -> None:
     logger.warn(
-        "%s(), runtime.generate() is not called, please use it",
-        get_fullname_of_callable(fn),
+        "%s(), runtime.generate() is not called, please use it", fn.__name__,
     )
 
     from . import runtime
@@ -83,6 +82,9 @@ def clikit(
     m = env.m
     fn = env.fn
     spec = env.fnspec
+
+    if len(spec.arguments) > 0:
+        logger.info("%s(), positional arguments are ignored", fn.__name__)
 
     resolver = resolver or get_resolver(m)
     opt = m.symbol(option_prefix)
