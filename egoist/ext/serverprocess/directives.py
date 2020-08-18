@@ -44,8 +44,14 @@ def add_server_process(app: App) -> None:
             else:
                 kwargs = {k: fn(app) for k, fn in (params or {}).items()}
                 environ = {k: fn(app) for k, fn in (env or {}).items()}
+
                 if port is None:
-                    port = kwargs.get("port") or find_free_port(app)
+                    port = (
+                        kwargs.get("port")
+                        or environ.get("port")
+                        or environ.get("PORT")
+                        or find_free_port(app)
+                    )
                 elif "port" not in kwargs:
                     kwargs["port"] = port
 
