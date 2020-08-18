@@ -43,7 +43,7 @@ def spawn_with_connection(
     sentinel: str,
     retries: t.List[float] = [0.1, 0.2, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4],
     check: bool = True,
-    cwd: t.Optional[str, pathlib.Path] = None,
+    cwd: t.Union[str, pathlib.Path, None] = None,
     environ: t.Optional[t.Dict[str, str]] = None,
     create_connection_checker: t.Callable[
         [str], ConnectionChecker

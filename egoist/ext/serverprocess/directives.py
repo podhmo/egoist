@@ -21,7 +21,7 @@ def add_server_process(app: App) -> None:
         port: t.Optional[t.Union[int, str]] = None,
         params: t.Optional[t.Dict[str, LazyParam]] = None,
         env: t.Optional[t.Dict[str, LazyParam]] = None,
-        cwd: t.Optional[str, pathlib.Path] = None,
+        cwd: t.Union[str, pathlib.Path, None] = None,
         nowait: bool = False,
     ) -> None:
         app.include("egoist.ext.serverprocess.components.discovery")
