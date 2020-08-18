@@ -1,6 +1,7 @@
 from __future__ import annotations
 import typing as t
 import logging
+import pathlib
 from egoist.app import App
 
 AnyFunction = t.Callable[..., t.Any]
@@ -20,6 +21,7 @@ def add_server_process(app: App) -> None:
         port: t.Optional[t.Union[int, str]] = None,
         params: t.Optional[t.Dict[str, LazyParam]] = None,
         env: t.Optional[t.Dict[str, LazyParam]] = None,
+        cwd: t.Union[str, pathlib.Path, None] = None,
         nowait: bool = False,
     ) -> None:
         app.include("egoist.ext.serverprocess.components.discovery")
@@ -42,8 +44,14 @@ def add_server_process(app: App) -> None:
             else:
                 kwargs = {k: fn(app) for k, fn in (params or {}).items()}
                 environ = {k: fn(app) for k, fn in (env or {}).items()}
+
                 if port is None:
-                    port = kwargs.get("port") or find_free_port(app)
+                    port = (
+                        kwargs.get("port")
+                        or environ.get("port")
+                        or environ.get("PORT")
+                        or find_free_port(app)
+                    )
                 elif "port" not in kwargs:
                     kwargs["port"] = port
 
@@ -70,7 +78,7 @@ def add_server_process(app: App) -> None:
             from .spawn import spawn_with_connection
 
             p, _ = spawn_with_connection(
-                argv, sentinel=sentinel, environ=environ, check=not nowait
+                argv, sentinel=sentinel, environ=environ, cwd=cwd, check=not nowait
             )
 
             def _shutdown() -> None:  # xxx:
