@@ -173,7 +173,7 @@ class Context:
         pseudo_fields = [
             (
                 sub_type.__name__,
-                typeinfo.typeinfo(t.Optional[sub_type]),
+                typeinfo.typeinfo(t.Optional[sub_type]),  # type:ignore
                 metadata_.metadata(required=False),
             )
             for sub_type in item.args

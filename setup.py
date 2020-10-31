@@ -2,7 +2,7 @@ import sys
 from setuptools import setup, find_packages
 
 
-install_requires = ["miniconfig>=0.6.0", "metashape>=0.0.2", "prestring>=0.9.0"]
+install_requires = ["miniconfig>=0.6.0", "metashape>=0.0.4", "prestring>=0.9.0"]
 if sys.version_info < (3, 8):
     install_requires.append("typing-inspect")
 
