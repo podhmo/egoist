@@ -1,12 +1,25 @@
 from __future__ import annotations
 import typing as t
 from egoist.langhelpers import typing_get_args
-from functools import lru_cache
+from ._types_evil import _get_flatten_args  # for mypy
 
 if t.TYPE_CHECKING:
     from prestring.go.codeobject import Module, Symbol
 
 T = t.TypeVar("T")
+
+__all__ = [
+    "_get_flatten_args",
+    "priority",
+    "GoPointer",
+    "GoError",
+    "GoCleanup",
+    "get_gopackage",
+    "set_gopackage",
+    "gopackage",
+    "rename",
+    "_unwrap_pointer_type",
+]
 
 
 class priority:
@@ -90,16 +103,3 @@ def _unwrap_pointer_type(
     if typ.__origin__ == GoPointer:
         return _unwrap_pointer_type(typing_get_args(typ)[0], level=level + 1)
     return typ, level
-
-
-@lru_cache(maxsize=256)
-def _get_flatten_args(typ: t.Type[t.Any]) -> t.Tuple[t.Type[t.Any]]:
-    if not hasattr(typ, "__args__"):
-        if typ.__module__ != "builtins":
-            return (typ,)
-        return ()  # type: ignore
-
-    r: t.Set[t.Type[t.Any]] = set()
-    for subtype in typ.__args__:
-        r.update(_get_flatten_args(subtype))
-    return tuple(sorted(r, key=id))  # type: ignore
