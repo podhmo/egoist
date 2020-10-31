@@ -161,7 +161,9 @@ def inject(
         if extra_vars:
             for sym, typ in sorted(
                 zip(extra_vars, return_types[1:]),
-                key=lambda pair: getattr(pair[1], "priority", priority.NORMAL),
+                key=lambda pair: getattr(  # type:ignore
+                    pair[1], "priority", priority.NORMAL
+                ),
                 reverse=True,
             ):
                 if hasattr(typ, "emit"):
