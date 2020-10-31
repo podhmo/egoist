@@ -8,10 +8,11 @@ app.include("egoist.directives.define_file")
 
 
 @app.define_file("egoist.generators.filekit:walk", suffix=".formatted.go")
-@app.include_when("egoist.ext.gofmtrpc")
+@app.include_when("egoist.exprimental.gofmtrpc")
 def person(*, filename: str = "person.go") -> None:
     from egoist.generators.filekit import runtime
-    from egoist.ext.gofmtrpc import gofmt
+    from egoist.exprimental.gofmtrpc import gofmt
+
     with runtime.create_file() as wf:
         with open(filename) as rf:
             code = rf.read()

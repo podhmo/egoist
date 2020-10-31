@@ -24,8 +24,8 @@ def add_server_process(app: App) -> None:
         cwd: t.Union[str, pathlib.Path, None] = None,
         nowait: bool = False,
     ) -> None:
-        app.include("egoist.ext.serverprocess.components.discovery")
-        app.include("egoist.ext.serverprocess.components.httpclient")
+        app.include("egoist.experimental.serverprocess.components.discovery")
+        app.include("egoist.experimental.serverprocess.components.httpclient")
 
         def _register() -> None:
             nonlocal host
